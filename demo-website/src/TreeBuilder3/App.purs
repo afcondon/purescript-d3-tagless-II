@@ -124,7 +124,8 @@ data SampleDataId
   | SampleScatterPlot
   | SampleForceGraph
   | SampleGapminder
-  | SampleGupLetters
+  | SampleGupHello  -- GUP dataset A: "HELLO"
+  | SampleGupWorld  -- GUP dataset B: "WORLD"
 
 derive instance eqSampleDataId :: Eq SampleDataId
 derive instance ordSampleDataId :: Ord SampleDataId
@@ -185,7 +186,7 @@ compatibleDatasetsForType t
   | t == countryType = [ SampleGapminder ]
   | t == nodeType = [ SampleForceGraph ]
   | t == pointType = [ SampleScatterPlot ]
-  | t == letterType = [ SampleGupLetters ]
+  | t == letterType = [ SampleGupHello, SampleGupWorld ]
   | otherwise = []
 
 -- | Check if a type is compatible with the current AST
@@ -484,7 +485,7 @@ render state =
             ]
             []
 
-        -- Floating panel: AST Presets (top-center, horizontal)
+        -- Floating panel: AST Presets (top-center, horizontal) - stays as HTML
         , HH.div
             [ HP.classes
                 [ HH.ClassName "floating-panel"
@@ -497,39 +498,7 @@ render state =
                 ( map (renderAstPresetCard state) allAstPresets )
             ]
 
-        -- Floating panel: Type Cards (left side)
-        , HH.div
-            [ HP.classes
-                [ HH.ClassName "floating-panel"
-                , HH.ClassName "floating-panel--left-middle"
-                , HH.ClassName "floating-panel--small"
-                , HH.ClassName "tree-builder3-type-panel"
-                ]
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                [ HH.text "Datum Types" ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "type-cards-list" ] ]
-                ( map (renderTypeCardHtml state) (makeTypeCardsForHtml state) )
-            ]
-
-        -- Floating panel: Dataset Cards (right side)
-        , HH.div
-            [ HP.classes
-                [ HH.ClassName "floating-panel"
-                , HH.ClassName "floating-panel--right-middle"
-                , HH.ClassName "floating-panel--small"
-                , HH.ClassName "tree-builder3-data-panel"
-                ]
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                [ HH.text "Datasets" ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "data-cards-list" ] ]
-                ( map (renderDataCardHtml state) (makeDataCardsForHtml state) )
-            ]
+        -- Type cards and Dataset cards are rendered in SVG (see renderTreeViz)
 
         -- TryMe instructions popup overlay
         , if state.showTryMeInstructions
@@ -641,7 +610,8 @@ makeDataCardsForHtml state =
       , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
       , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
       , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
-      , { name: "GUP Letters", desc: "Enter/Update/Exit", sampleId: SampleGupLetters }
+      , { name: "HELLO", desc: "GUP Set A", sampleId: SampleGupHello }
+      , { name: "WORLD", desc: "GUP Set B", sampleId: SampleGupWorld }
       ]
   in
     map (\d ->
@@ -1168,9 +1138,6 @@ renderTreeViz state listener = do
   -- Create data card options (all datasets shown, incompatible ones at 0.3 opacity)
   let dataCards = makeDataCards selectedJoinType state.selectedSampleData
 
-  -- Position for data cards (RHS of SVG)
-  let dataCardsX = svgWidth - Theme.dataCardWidth - 50.0
-
   runD3v2M do
     container <- select "#tree-builder3-container" :: _ (D3v2Selection_ SEmpty Element Unit)
 
@@ -1348,49 +1315,158 @@ renderTreeViz state listener = do
 
     _ <- renderTree zoomGroupSel nodesTree
 
-    -- Type cards and Data cards are now rendered in HTML floating panels
-    -- Get SVG selection for arrow rendering
+    -- Get SVG selection for fixed elements (outside zoom group)
     svgSel <- liftEffect $ reselectD3v2 "svg" linksSelections
 
-    -- Draw arrows from type cards (HTML panel) to their corresponding Join nodes (SVG)
-    -- Arrows start from the specific type card that matches the join's datum type
+    -- =========================================================================
+    -- SVG Type Cards (left side, outside zoom group)
+    -- =========================================================================
     let
-      -- Fixed X position for left panel's right edge (in SVG viewBox coordinates)
-      leftPanelRightEdge = 270.0
+      typeCardsX = 30.0 -- Left margin
+      typeCardsTopY = 140.0 -- Below header
 
-      -- Panel position in SVG viewBox coordinates
-      -- The HTML panel is at CSS position: top ~116px (100px header + 16px spacing)
-      -- But SVG viewBox is 1920x1080 and scales to fit viewport
-      -- We need to estimate the scaling factor
-      -- Typical viewport might be ~1440px wide, so scale = 1920/1440 ≈ 1.33
-      -- Panel title "DATUM TYPES" adds ~30px, then cards start
-      -- Total offset: 116 + 30 = 146px in CSS, scaled to SVG ≈ 195
-      panelTopY = 180.0 -- Start of first card in SVG viewBox coords (after title)
+      -- Calculate height for a single type card
+      cardHeight :: TypeCard -> Number
+      cardHeight card = 22.0 + toNumber (Array.length card.fields) * Theme.typeCardFieldHeight + 4.0
 
-      -- Card heights in SVG viewBox units (CSS heights scaled by ~1.33)
-      -- Each card: header (~22px) + fields * (~13px) + gap (~6px) = CSS height
-      -- Scaled to SVG viewBox: multiply by ~1.33
-      -- Order: Point, Node, Link, Country, Letter, Board, Row, Cell
-      typeCardHeights =
-        [ { typ: pointType, height: 70.0 }    -- Point: 2 fields
-        , { typ: nodeType, height: 95.0 }     -- Node: 4 fields
-        , { typ: linkType, height: 82.0 }     -- Link: 3 fields
-        , { typ: countryType, height: 95.0 }  -- Country: 4 fields
-        , { typ: letterType, height: 70.0 }   -- Letter: 2 fields
-        , { typ: boardType, height: 58.0 }    -- Board: 1 field
-        , { typ: rowType, height: 58.0 }      -- Row: 1 field
-        , { typ: cellType, height: 82.0 }     -- Cell: 3 fields
-        ]
+      -- Type cards using joinData for proper data binding
+      typeCardsTree :: T.Tree TypeCard
+      typeCardsTree =
+        T.named Group "typeCardsGroup"
+          [ F.staticStr "class" "type-cards-svg" ]
+          `T.withChild`
+            ( T.joinData "typeCardItems" "g" typeCards $ \card ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate(" <> show (typeCardsX + card.indent) <> "," <> show (typeCardsTopY + card.y) <> ")"
+                  , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
+                  , F.opacity (F.text (if card.isEnabled then "1" else "0.35"))
+                  ]
+                  `T.withBehaviors`
+                    ( if card.isEnabled then
+                        [ ClickWithDatum \c -> HS.notify listener (AssignType c.datumType) ]
+                      else
+                        []
+                    )
+                  `T.withChildren`
+                    [ -- Header bar
+                      T.elem Rect
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 0.0)
+                        , F.width (F.num (Theme.typeCardWidth - card.indent))
+                        , F.height (F.num 20.0)
+                        , F.static "rx" 3.0
+                        , F.fill (F.color (if card.isAssigned then Theme.typeCardHighlight else Theme.typeCardHeader))
+                        ]
+                    , -- Type name in header
+                      T.elem Text
+                        [ F.x (F.num 8.0)
+                        , F.y (F.num 14.0)
+                        , F.fill (F.text (if card.isAssigned then "#333" else "#fff"))
+                        , F.fontSize (F.px 11.0)
+                        , F.staticStr "font-weight" "bold"
+                        , F.textContent (F.text card.name)
+                        ]
+                    , -- Fields background
+                      T.elem Rect
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 20.0)
+                        , F.width (F.num (Theme.typeCardWidth - card.indent))
+                        , F.height (F.num (cardHeight card - 20.0))
+                        , F.fill (F.color Theme.typeCardFill)
+                        , F.stroke (F.color Theme.typeCardStroke)
+                        , F.strokeWidth (F.num 1.0)
+                        ]
+                    , -- Single field text (simplified - show first field or type indicator)
+                      T.elem Text
+                        [ F.x (F.num 8.0)
+                        , F.y (F.num 34.0)
+                        , F.fill (F.color Theme.typeCardFieldText)
+                        , F.fontSize (F.px 10.0)
+                        , F.fontFamily (F.text "monospace")
+                        , F.textContent (F.text (formatFieldsText card.fields))
+                        ]
+                    ]
+            )
 
-      -- Calculate Y position for a given datum type (center of its card)
+    _ <- renderTree svgSel typeCardsTree
+
+    -- =========================================================================
+    -- SVG Data Cards (right side, outside zoom group)
+    -- =========================================================================
+    let
+      dataCardsRightMargin = 30.0
+      dataCardsTopY = 140.0 -- Same as type cards
+
+      -- Data cards using joinData for proper data binding
+      dataCardsTree :: T.Tree DataCard
+      dataCardsTree =
+        T.named Group "dataCardsGroup"
+          [ F.staticStr "class" "data-cards-svg" ]
+          `T.withChild`
+            ( T.joinData "dataCardItems" "g" dataCards $ \card ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate(" <> show (svgWidth - dataCardsRightMargin - Theme.dataCardWidth) <> "," <> show (dataCardsTopY + card.y) <> ")"
+                  , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
+                  , F.opacity (F.text (if card.isEnabled then "1" else "0.35"))
+                  ]
+                  `T.withBehaviors`
+                    ( if card.isEnabled then
+                        [ ClickWithDatum \c -> HS.notify listener (SelectSampleData c.sampleId) ]
+                      else
+                        []
+                    )
+                  `T.withChildren`
+                    [ -- Card background
+                      T.elem Rect
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 0.0)
+                        , F.width (F.num Theme.dataCardWidth)
+                        , F.height (F.num Theme.dataCardHeight)
+                        , F.static "rx" 4.0
+                        , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.dataCardFill))
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.0))
+                        ]
+                    , -- Name
+                      T.elem Text
+                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
+                        , F.y (F.num 20.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.color Theme.dataCardHeader)
+                        , F.fontSize (F.px 12.0)
+                        , F.staticStr "font-weight" "bold"
+                        , F.textContent (F.text card.name)
+                        ]
+                    , -- Description
+                      T.elem Text
+                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
+                        , F.y (F.num 36.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.text "#666")
+                        , F.fontSize (F.px 10.0)
+                        , F.textContent (F.text card.description)
+                        ]
+                    ]
+            )
+
+    _ <- renderTree svgSel dataCardsTree
+
+    -- =========================================================================
+    -- Arrows from Type Cards to Join Nodes
+    -- =========================================================================
+    let
+      -- Arrow starts from right edge of type card
+      leftPanelRightEdge = typeCardsX + Theme.typeCardWidth
+
+      -- Get Y position for a given type card (center of its card)
       getCardY :: DatumType -> Number
-      getCardY targetType = panelTopY + go 0.0 typeCardHeights
+      getCardY targetType = typeCardsTopY + go 0.0 typeCards
         where
         go accY cards = case Array.uncons cards of
-          Nothing -> accY -- Not found, return accumulated
+          Nothing -> accY
           Just { head: card, tail: rest }
-            | card.typ == targetType -> accY + card.height / 2.0 -- Return center of this card
-            | otherwise -> go (accY + card.height) rest
+            | card.datumType == targetType -> accY + cardHeight card / 2.0
+            | otherwise -> go (accY + cardHeight card + Theme.typeCardSpacing) rest
 
       -- Find all join nodes that have a non-Unit datum type assigned
       joinNodes = Array.filter isJoinWithType structuralNodes
@@ -1471,11 +1547,20 @@ renderTreeViz state listener = do
 
     _ <- renderTree svgSel arrowTree
 
-    -- Draw arrows from data card (HTML panel) to Enter/Update/Exit or template nodes
-    -- The right panel is positioned at right edge of viewport
+    -- Draw arrows from data card (SVG) to Enter/Update/Exit or template nodes
     let
-      -- Fixed X position for right panel's left edge (in SVG viewBox coordinates)
-      rightPanelLeftEdge = svgWidth - 270.0
+      -- Arrow starts from left edge of selected data card
+      rightPanelLeftEdge = svgWidth - dataCardsRightMargin - Theme.dataCardWidth
+
+      -- Get Y position for selected data card (center of that card)
+      getDataCardY :: SampleDataId -> Number
+      getDataCardY sampleId = dataCardsTopY + go 0.0 dataCards
+        where
+        go accY cards = case Array.uncons cards of
+          Nothing -> accY
+          Just { head: card, tail: rest }
+            | card.sampleId == sampleId -> accY + Theme.dataCardHeight / 2.0
+            | otherwise -> go (accY + Theme.dataCardHeight + Theme.dataCardSpacing) rest
 
       -- Find GUP phase nodes (Enter/Update/Exit) by looking at the tree
       findGUPNodes :: Array TreeNode
@@ -1509,15 +1594,16 @@ renderTreeViz state listener = do
       dataArrowData =
         case state.selectedSampleData of
           Nothing -> []
-          Just _ ->
+          Just selectedSample ->
             -- Check if we have GUP nodes or template node
             let
               gupNodes = findGUPNodes
+              selectedCardY = getDataCardY selectedSample
             in
               if Array.length gupNodes > 0 then map
                 ( \n ->
                     { cardX: rightPanelLeftEdge
-                    , cardY: n.y + offsetY -- Same Y as node for horizontal arrow
+                    , cardY: selectedCardY -- From the selected data card
                     , nodeX: n.x + offsetX + 40.0 -- Right edge of node
                     , nodeY: n.y + offsetY
                     , color: toHexString $ Theme.nodeTypeColor n.nodeType
@@ -1528,7 +1614,7 @@ renderTreeViz state listener = do
               else case findTemplateNode of
                 Just n ->
                   [ { cardX: rightPanelLeftEdge
-                    , cardY: n.y + offsetY
+                    , cardY: selectedCardY
                     , nodeX: n.x + offsetX + 40.0
                     , nodeY: n.y + offsetY
                     , color: toHexString $ Theme.dataCardStroke
@@ -1813,39 +1899,105 @@ renderInlineTree = do
     _ <- renderTree container treeTree
     pure unit
 
--- | Render inline GUP demo
+-- | Render inline GUP demo with two switchable datasets
+-- | Shows letters categorized by Enter (new), Update (existing), Exit (removed)
 renderInlineGup :: Effect Unit
 renderInlineGup = do
+  -- Render the initial state (dataset A selected)
+  renderGupWithDataset "A"
+
+-- | GUP letter data type for rendering
+type GupLetterData =
+  { letter :: String
+  , x :: Number
+  , y :: Number
+  , color :: String
+  }
+
+-- | Render GUP demo with a specific dataset selected
+-- | Dataset A = "HELLO", Dataset B = "WORLD"
+-- | HELLO and WORLD share: L, O
+-- | A→B: Enter W/R/D, Update L/O, Exit H/E
+-- | B→A: Enter H/E, Update L/O, Exit W/R/D
+renderGupWithDataset :: String -> Effect Unit
+renderGupWithDataset selected = do
   runD3v2M do
     container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
     liftEffect $ clearContainer "#viz-output-content"
 
     let
-      letters =
-        [ { x: 20.0, letter: "H", phase: "enter", color: "#4CAF50" }
-        , { x: 50.0, letter: "E", phase: "enter", color: "#4CAF50" }
-        , { x: 80.0, letter: "L", phase: "update", color: "#2196F3" }
-        , { x: 110.0, letter: "L", phase: "update", color: "#2196F3" }
-        , { x: 140.0, letter: "O", phase: "exit", color: "#F44336" }
-        ]
+      -- HELLO and WORLD share L and O
+      wordA = "HELLO"
+      wordB = "WORLD"
 
-      gupTree =
-        T.named Group "inlineGup" []
+      -- Compute which letters are enter/update/exit based on selection
+      -- When switching TO the selected dataset FROM the other
+      { enterLetters, updateLetters, exitLetters } =
+        if selected == "A" then
+          computeGupPhases wordB wordA -- B→A transition
+        else
+          computeGupPhases wordA wordB -- A→B transition
+
+      -- Build letter data for rendering - combine all into one array
+      letterData :: Array GupLetterData
+      letterData = buildGupLetterData enterLetters updateLetters exitLetters
+
+      -- Render letters using joinData with proper type annotation
+      lettersTree :: T.Tree GupLetterData
+      lettersTree =
+        T.named Group "gupLetters" []
           `T.withChild`
-            ( T.joinData "gupLetters" "text" letters $ \l ->
+            ( T.joinData "letterItems" "text" letterData $ \l ->
                 T.elem Text
                   [ F.x (F.num l.x)
-                  , F.y (F.num 100.0)
+                  , F.y (F.num l.y)
                   , F.textAnchor (F.text "middle")
                   , F.fill (F.text l.color)
-                  , F.fontSize (F.px 36.0)
+                  , F.fontSize (F.px 28.0)
                   , F.staticStr "font-weight" "bold"
                   , F.textContent (F.text l.letter)
                   ]
             )
 
-    _ <- renderTree container gupTree
+    -- Render letters
+    _ <- renderTree container lettersTree
+
+    -- Render UI elements (buttons and labels) with imperative D3
+    liftEffect $ renderGupUI selected wordA wordB
+
     pure unit
+
+-- | Render GUP UI elements (buttons and labels) using imperative D3
+renderGupUI :: String -> String -> String -> Effect Unit
+renderGupUI selected wordA wordB = renderGupUIFFI selected wordA wordB
+
+foreign import renderGupUIFFI :: String -> String -> String -> Effect Unit
+
+-- | Compute GUP phases: which letters enter, update, exit when going from→to
+computeGupPhases :: String -> String -> { enterLetters :: Array String, updateLetters :: Array String, exitLetters :: Array String }
+computeGupPhases from to =
+  let
+    fromChars = stringToChars from
+    toChars = stringToChars to
+    enterLetters = Array.filter (\c -> not (Array.elem c fromChars)) toChars
+    updateLetters = Array.filter (\c -> Array.elem c fromChars) toChars
+    exitLetters = Array.filter (\c -> not (Array.elem c toChars)) fromChars
+  in
+    { enterLetters, updateLetters, exitLetters }
+
+-- | Convert string to array of single-character strings
+stringToChars :: String -> Array String
+stringToChars s = map String.singleton (String.toCodePointArray s)
+
+-- | Build letter data with positions and colors for each phase
+buildGupLetterData :: Array String -> Array String -> Array String -> Array GupLetterData
+buildGupLetterData enter update exit =
+  let
+    enterData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 40.0, y: 80.0, color: "#4CAF50" }) enter
+    updateData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 40.0, y: 130.0, color: "#2196F3" }) update
+    exitData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 40.0, y: 180.0, color: "#F44336" }) exit
+  in
+    enterData <> updateData <> exitData
 
 toRenderNode :: State -> Boolean -> Int -> TreeNode -> RenderNode
 toRenderNode state isBadge badgeIndex node =
@@ -1885,6 +2037,17 @@ formatNameLabel maybeName maybeKey = case maybeName, maybeKey of
   Just name, Nothing -> "\"" <> name <> "\""
   Nothing, Just key -> "\"" <> key <> "\""
   Nothing, Nothing -> ""
+
+-- | Format type card fields as a single line summary
+formatFieldsText :: Array { name :: String, typ :: String } -> String
+formatFieldsText fields = case Array.length fields of
+  0 -> ""
+  1 -> case Array.head fields of
+    Just f -> f.name <> " :: " <> f.typ
+    Nothing -> ""
+  n -> case Array.head fields of
+    Just f -> f.name <> " :: " <> f.typ <> " +" <> show (n - 1) <> " more"
+    Nothing -> ""
 
 -- | Compute key hints dynamically based on tree state
 -- | Accounts for constraints like "Join can only have one template"
@@ -1934,34 +2097,43 @@ updateArrowPosition :: State -> Effect Unit
 updateArrowPosition state = do
   -- Same dimensions as renderTreeViz
   let svgWidth = 1920.0
-  let svgHeight = 1080.0
   let offsetY = 150.0
 
-  -- Fixed panel edge positions (same as in renderTreeViz)
-  let leftPanelRightEdge = 270.0
-  let rightPanelLeftEdge = svgWidth - 270.0
-  let panelTopY = 180.0
+  -- SVG card positions (same as in renderTreeViz)
+  let typeCardsX = 30.0
+  let typeCardsTopY = 140.0
+  let dataCardsRightMargin = 30.0
+  let dataCardsTopY = 140.0
 
-  -- Type card heights in SVG viewBox units (same as in renderTreeViz)
-  let typeCardHeights =
-        [ { typ: pointType, height: 70.0 }
-        , { typ: nodeType, height: 95.0 }
-        , { typ: linkType, height: 82.0 }
-        , { typ: countryType, height: 95.0 }
-        , { typ: letterType, height: 70.0 }
-        , { typ: boardType, height: 58.0 }
-        , { typ: rowType, height: 58.0 }
-        , { typ: cellType, height: 82.0 }
-        ]
+  -- Arrow endpoints at card edges
+  let leftPanelRightEdge = typeCardsX + Theme.typeCardWidth -- 150
+  let rightPanelLeftEdge = svgWidth - dataCardsRightMargin - Theme.dataCardWidth -- 1790
+
+  -- Create type cards to calculate Y positions (same logic as renderTreeViz)
+  let selectedJoinType = getSelectedJoinDatumType state
+  let typeCards = makeTypeCards state.selectedAstPreset selectedJoinType
+
+  -- Calculate height for a single type card (same as renderTreeViz)
+  let cardHeight card = 22.0 + toNumber (Array.length card.fields) * Theme.typeCardFieldHeight + 4.0
 
   -- Calculate Y position for a given datum type (center of its card)
-  let getCardY targetType = panelTopY + go 0.0 typeCardHeights
+  let getTypeCardY targetType = typeCardsTopY + go 0.0 typeCards
         where
         go accY cards = case Array.uncons cards of
           Nothing -> accY
           Just { head: card, tail: rest }
-            | card.typ == targetType -> accY + card.height / 2.0
-            | otherwise -> go (accY + card.height) rest
+            | card.datumType == targetType -> accY + cardHeight card / 2.0
+            | otherwise -> go (accY + cardHeight card + Theme.typeCardSpacing) rest
+
+  -- Calculate Y position for selected data card
+  let dataCards = makeDataCards selectedJoinType state.selectedSampleData
+  let getDataCardY sampleId = dataCardsTopY + go 0.0 dataCards
+        where
+        go accY cards = case Array.uncons cards of
+          Nothing -> accY
+          Just { head: card, tail: rest }
+            | card.sampleId == sampleId -> accY + Theme.dataCardHeight / 2.0
+            | otherwise -> go (accY + Theme.dataCardHeight + Theme.dataCardSpacing) rest
 
   -- Get structural tree and apply layout
   let structuralTree = filterStructuralTree state.userTree
@@ -2004,7 +2176,7 @@ updateArrowPosition state = do
 
     -- Card position stays fixed (Y from the specific type card)
     let cardX = leftPanelRightEdge
-    let cardY = getCardY node.datumType
+    let cardY = getTypeCardY node.datumType
 
     let midX = (cardX + nodeX) / 2.0
 
@@ -2053,13 +2225,16 @@ updateArrowPosition state = do
   -- Only show data arrows if data is selected
   case state.selectedSampleData of
     Nothing -> pure unit
-    Just _ -> do
+    Just selectedSample -> do
       -- Determine target nodes
       let targetNodes = if Array.length gupNodes > 0
             then gupNodes
             else case templateNode of
               Just n -> [n]
               Nothing -> []
+
+      -- Get Y position from selected data card
+      let selectedCardY = getDataCardY selectedSample
 
       -- Update each data arrow
       for_ (Array.mapWithIndex Tuple targetNodes) \(Tuple idx node) -> do
@@ -2071,9 +2246,9 @@ updateArrowPosition state = do
         let nodeX = nodeBaseX * k + x
         let nodeY = nodeBaseY * k + y
 
-        -- Card position stays fixed
+        -- Card position stays fixed (from selected data card)
         let cardX = rightPanelLeftEdge
-        let cardY = nodeY
+        let cardY = selectedCardY
 
         let midX = (cardX + nodeX) / 2.0
 
@@ -2189,7 +2364,8 @@ makeDataCards maybeType selectedSample =
     , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
     , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
     , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
-    , { name: "GUP Letters", desc: "Enter/Update/Exit", sampleId: SampleGupLetters }
+    , { name: "HELLO", desc: "GUP Set A", sampleId: SampleGupHello }
+    , { name: "WORLD", desc: "GUP Set B", sampleId: SampleGupWorld }
     ]
 
   mkCard :: Int -> { name :: String, desc :: String, sampleId :: SampleDataId } -> DataCard
@@ -2310,7 +2486,8 @@ sampleIdLabel = case _ of
   SampleScatterPlot -> "Scatter Plot"
   SampleForceGraph -> "Force Graph"
   SampleGapminder -> "Gapminder"
-  SampleGupLetters -> "GUP Letters"
+  SampleGupHello -> "HELLO"
+  SampleGupWorld -> "WORLD"
 
 -- =============================================================================
 -- TryMe Mode: English Description & Popup
@@ -2922,8 +3099,25 @@ nodeLinks =
 -- =============================================================================
 
 -- | Render GUP demo (enter/update/exit letters)
+-- | Shows which letters enter, update, or exit when switching TO the selected word
 renderGupViz :: SampleDataId -> Effect Unit
-renderGupViz _ = do
+renderGupViz sampleId = do
+  let
+    -- HELLO and WORLD share L and O
+    wordHello = "HELLO"
+    wordWorld = "WORLD"
+
+    -- Compute GUP phases based on which dataset is selected
+    -- When HELLO is selected, we show transitioning FROM WORLD TO HELLO
+    -- When WORLD is selected, we show transitioning FROM HELLO TO WORLD
+    { enterLetters, updateLetters, exitLetters } = case sampleId of
+      SampleGupHello -> computeGupPhases wordWorld wordHello  -- WORLD→HELLO
+      SampleGupWorld -> computeGupPhases wordHello wordWorld  -- HELLO→WORLD
+      _ -> computeGupPhases wordWorld wordHello  -- Default to HELLO
+
+    -- Build letter data for each phase
+    letterData = buildGupLettersForViz enterLetters updateLetters exitLetters
+
   runD3v2M do
     container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
     let
@@ -2937,9 +3131,9 @@ renderGupViz _ = do
           `T.withChild`
             -- Phase labels
             ( T.elem Text
-                [ F.x $ F.num 100.0
-                , F.y $ F.num 25.0
-                , F.textAnchor $ F.text "middle"
+                [ F.x $ F.num 150.0
+                , F.y $ F.num 50.0
+                , F.textAnchor $ F.text "start"
                 , F.fontSize $ F.text "10px"
                 , F.fill $ F.hex "#4AE24A"
                 , F.textContent $ F.text "← Enter"
@@ -2947,9 +3141,9 @@ renderGupViz _ = do
             )
           `T.withChild`
             ( T.elem Text
-                [ F.x $ F.num 100.0
-                , F.y $ F.num 95.0
-                , F.textAnchor $ F.text "middle"
+                [ F.x $ F.num 150.0
+                , F.y $ F.num 120.0
+                , F.textAnchor $ F.text "start"
                 , F.fontSize $ F.text "10px"
                 , F.fill $ F.hex "#4A90E2"
                 , F.textContent $ F.text "← Update"
@@ -2957,9 +3151,9 @@ renderGupViz _ = do
             )
           `T.withChild`
             ( T.elem Text
-                [ F.x $ F.num 100.0
-                , F.y $ F.num 165.0
-                , F.textAnchor $ F.text "middle"
+                [ F.x $ F.num 150.0
+                , F.y $ F.num 190.0
+                , F.textAnchor $ F.text "start"
                 , F.fontSize $ F.text "10px"
                 , F.fill $ F.hex "#E24A4A"
                 , F.textContent $ F.text "← Exit"
@@ -2969,7 +3163,7 @@ renderGupViz _ = do
             ( T.named Group "letters"
                 []
                 `T.withChild`
-                  ( T.joinData "letterGroups" "g" gupLetters $ \d ->
+                  ( T.joinData "letterGroups" "g" letterData $ \d ->
                       T.elem Group
                         [ F.transform $ F.text $ "translate(" <> show d.x <> "," <> show (phaseY d.phase) <> ")" ]
                         `T.withChild`
@@ -2995,20 +3189,13 @@ phaseY "update" = 120.0
 phaseY "exit" = 190.0
 phaseY _ = 120.0
 
--- | Sample GUP letter data
-gupLetters :: Array { letter :: String, x :: Number, phase :: String, color :: String }
-gupLetters =
-  -- New letters (enter)
-  [ { letter: "G", x: 30.0, phase: "enter", color: "#4AE24A" }
-  , { letter: "H", x: 60.0, phase: "enter", color: "#4AE24A" }
-  , { letter: "I", x: 90.0, phase: "enter", color: "#4AE24A" }
-  -- Existing letters (update)
-  , { letter: "D", x: 40.0, phase: "update", color: "#4A90E2" }
-  , { letter: "E", x: 70.0, phase: "update", color: "#4A90E2" }
-  , { letter: "F", x: 100.0, phase: "update", color: "#4A90E2" }
-  -- Removed letters (exit)
-  , { letter: "A", x: 50.0, phase: "exit", color: "#E24A4A" }
-  , { letter: "B", x: 80.0, phase: "exit", color: "#E24A4A" }
-  , { letter: "C", x: 110.0, phase: "exit", color: "#E24A4A" }
-  ]
+-- | Build letter data for GUP visualization with positions and colors
+buildGupLettersForViz :: Array String -> Array String -> Array String -> Array { letter :: String, x :: Number, phase :: String, color :: String }
+buildGupLettersForViz enter update exit =
+  let
+    enterData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 30.0, phase: "enter", color: "#4AE24A" }) enter
+    updateData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 30.0, phase: "update", color: "#4A90E2" }) update
+    exitData = Array.mapWithIndex (\i l -> { letter: l, x: 30.0 + toNumber i * 30.0, phase: "exit", color: "#E24A4A" }) exit
+  in
+    enterData <> updateData <> exitData
 
