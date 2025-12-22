@@ -382,3 +382,4 @@ elementTypeToKey = case _ of
   AST.Defs -> "defs"
   AST.LinearGradient -> "linearGradient"
   AST.Stop -> "stop"
+  AST.PatternFill -> "pattern"

@@ -123,6 +123,7 @@ showElemType Th = "table header"
 showElemType Defs = "definitions"
 showElemType LinearGradient = "linear gradient"
 showElemType Stop = "gradient stop"
+showElemType PatternFill = "fill pattern"
 
 -- | Show attribute name
 showAttrName :: AttributeName -> String

@@ -266,6 +266,7 @@ showElemType = case _ of
   Defs -> "Defs"
   LinearGradient -> "LinearGradient"
   Stop -> "Stop"
+  PatternFill -> "PatternFill"
 
 -- | Show static attribute value
 showStaticValue :: AttributeValue -> String

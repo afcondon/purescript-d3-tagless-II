@@ -248,6 +248,7 @@ showElemType = case _ of
   Defs -> "Defs"
   LinearGradient -> "LinearGradient"
   Stop -> "Stop"
+  PatternFill -> "PatternFill"
 
 -- | Show attribute value for display in comments
 showAttrValue :: AttributeValue -> String

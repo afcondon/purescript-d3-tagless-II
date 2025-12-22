@@ -24879,6 +24879,13 @@
     Stop3.value = new Stop3();
     return Stop3;
   })();
+  var PatternFill = /* @__PURE__ */ (function() {
+    function PatternFill2() {
+    }
+    ;
+    PatternFill2.value = new PatternFill2();
+    return PatternFill2;
+  })();
   var Div = /* @__PURE__ */ (function() {
     function Div2() {
     }
@@ -24975,6 +24982,10 @@
         }
         ;
         if (x33 instanceof Stop2 && y33 instanceof Stop2) {
+          return true;
+        }
+        ;
+        if (x33 instanceof PatternFill && y33 instanceof PatternFill) {
           return true;
         }
         ;
@@ -25137,6 +25148,18 @@
           return GT.value;
         }
         ;
+        if (x33 instanceof PatternFill && y33 instanceof PatternFill) {
+          return EQ.value;
+        }
+        ;
+        if (x33 instanceof PatternFill) {
+          return LT.value;
+        }
+        ;
+        if (y33 instanceof PatternFill) {
+          return GT.value;
+        }
+        ;
         if (x33 instanceof Div && y33 instanceof Div) {
           return EQ.value;
         }
@@ -25273,6 +25296,10 @@
       return SVGContext.value;
     }
     ;
+    if (v2 instanceof PatternFill) {
+      return SVGContext.value;
+    }
+    ;
     if (v2 instanceof Div) {
       return HTMLContext.value;
     }
@@ -25305,7 +25332,7 @@
       return HTMLContext.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Internal.Selection.Types (line 204, column 1 - line 204, column 47): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Internal.Selection.Types (line 205, column 1 - line 205, column 47): " + [v2.constructor.name]);
   };
 
   // output/PSD3.AST/index.js
@@ -32109,6 +32136,10 @@
       return Stop2.value;
     }
     ;
+    if (v2 === "pattern") {
+      return PatternFill.value;
+    }
+    ;
     if (v2 === "div") {
       return Div.value;
     }
@@ -32184,7 +32215,7 @@
               return v2.value0.value0.parentElements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 2020, column 34 - line 2022, column 47): " + [v2.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 2022, column 34 - line 2024, column 47): " + [v2.value0.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -32199,7 +32230,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 2014, column 3 - line 2033, column 10): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 2016, column 3 - line 2035, column 10): " + [v2.constructor.name]);
       };
     };
   };
@@ -32471,7 +32502,7 @@
         return v2.value0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1165, column 52 - line 1166, column 30): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1167, column 52 - line 1168, column 30): " + [v2.constructor.name]);
     })();
     return zipWith(Tuple.create)(v1.elements)(v1.data);
   };
@@ -32480,7 +32511,7 @@
       return v2.value0.elements;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1188, column 17 - line 1189, column 35): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1190, column 17 - line 1191, column 35): " + [v2.constructor.name]);
   };
   var getDocument = function(v2) {
     if (v2 instanceof EmptySelection) {
@@ -32590,7 +32621,7 @@
         return v2.value0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1177, column 52 - line 1178, column 28): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1179, column 52 - line 1180, column 28): " + [v2.constructor.name]);
     })();
     return zipWith(Tuple.create)(v1.elements)(v1.data);
   };
@@ -32633,6 +32664,10 @@
     ;
     if (v2 instanceof Stop2) {
       return "stop";
+    }
+    ;
+    if (v2 instanceof PatternFill) {
+      return "pattern";
     }
     ;
     if (v2 instanceof Div) {
@@ -32729,7 +32764,7 @@
                   return transitionSetAttribute_(attr47.value0)(attributeValueToString(attr47.value2(datum2)(index7)))(transition3);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1109, column 30 - line 1117, column 101): " + [attr47.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1111, column 30 - line 1119, column 101): " + [attr47.constructor.name]);
               })(attrs)();
             };
           };
@@ -32762,7 +32797,7 @@
                   return transitionSetAttribute_(attr47.value0)(attributeValueToString(attr47.value2(v2.value1)(index7)))(transition3);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1145, column 32 - line 1153, column 103): " + [attr47.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1147, column 32 - line 1155, column 103): " + [attr47.constructor.name]);
               })(attrs)();
               return transitionRemove_(transition3)();
             };
@@ -33043,7 +33078,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1843, column 66 - line 1844, column 32): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1845, column 66 - line 1846, column 32): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -33060,7 +33095,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1849, column 9 - line 1858, column 25): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1851, column 9 - line 1860, column 25): " + [v1.constructor.name]);
           };
         })(v2.data);
       };
@@ -33122,7 +33157,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1786, column 68 - line 1787, column 34): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1788, column 68 - line 1789, column 34): " + [pendingSel.constructor.name]);
         })();
         var $479 = $$null(v2.parentElements);
         if ($479) {
@@ -33150,7 +33185,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1799, column 11 - line 1819, column 51): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1801, column 11 - line 1821, column 51): " + [v1.constructor.name]);
           };
         })(v2.pendingData);
       };
@@ -33174,7 +33209,7 @@
                     return unsafeCrashWith("renderTree: appendChild returned empty selection");
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1212, column 29 - line 1214, column 102): " + [v3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1214, column 29 - line 1216, column 102): " + [v3.constructor.name]);
                 }
                 ;
                 return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
@@ -33195,7 +33230,7 @@
                   return combinedChildMap;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1226, column 21 - line 1228, column 34): " + [v1.value0.name.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1228, column 21 - line 1230, column 34): " + [v1.value0.name.constructor.name]);
               })();
               return new Tuple(element4, selectionsMap);
             };
@@ -33217,7 +33252,7 @@
             return renderNodeHelper(dictOrd)(v2)(v1);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1197, column 1 - line 1203, column 74): " + [v2.constructor.name, v1.constructor.name, v22.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1199, column 1 - line 1205, column 74): " + [v2.constructor.name, v1.constructor.name, v22.constructor.name]);
         };
       };
     };
@@ -33250,7 +33285,7 @@
                 return v22.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1302, column 12 - line 1303, column 43): " + [v22.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1304, column 12 - line 1305, column 43): " + [v22.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v22.value0.enter instanceof PendingSelection) {
@@ -33283,7 +33318,7 @@
                 return createElementWithNS(Group.value)(doc)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1328, column 19 - line 1330, column 45): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1330, column 19 - line 1332, column 45): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -33301,7 +33336,7 @@
                 return v22.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1354, column 52 - line 1355, column 34): " + [v22.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1356, column 52 - line 1357, column 34): " + [v22.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -33320,7 +33355,7 @@
                 return createElementWithNS(Group.value)(v3.document)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1370, column 19 - line 1372, column 45): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1372, column 19 - line 1374, column 45): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -33337,7 +33372,7 @@
                 return joinData22(v1.value0.joinData)(v1.value0.key)(v2)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1382, column 5 - line 1384, column 67): " + [v1.value0.keyFn.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1384, column 5 - line 1386, column 67): " + [v1.value0.keyFn.constructor.name]);
             })();
             liftEffect2((function() {
               var enterCount = (function() {
@@ -33380,7 +33415,7 @@
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1416, column 7 - line 1424, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1418, column 7 - line 1426, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.behaviors.exit instanceof Nothing) {
@@ -33388,7 +33423,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1414, column 3 - line 1428, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1416, column 3 - line 1430, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.behaviors.enter instanceof Just) {
@@ -33415,7 +33450,7 @@
                         return v22.value0.enter.value0.pendingData;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1457, column 41 - line 1458, column 54): " + [v22.value0.enter.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1459, column 41 - line 1460, column 54): " + [v22.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
                     return liftEffect2(traverseWithIndex_2(function(index7) {
@@ -33437,7 +33472,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1452, column 7 - line 1468, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1454, column 7 - line 1470, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
@@ -33446,7 +33481,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v22.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1439, column 27 - line 1473, column 68): " + [v1.value0.behaviors.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1441, column 27 - line 1475, column 68): " + [v1.value0.behaviors.enter.constructor.name]);
             })();
             var enterElements = map28(fst)(enterElementsAndMaps);
             var enterChildMaps = map28(snd)(enterElementsAndMaps);
@@ -33467,14 +33502,14 @@
                   return renderTemplatesForBoundSelection1(v1.value0.template)(v22.value0.update)();
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1482, column 7 - line 1498, column 71): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1484, column 7 - line 1500, column 71): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.behaviors.update instanceof Nothing) {
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v22.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1479, column 21 - line 1501, column 67): " + [v1.value0.behaviors.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1481, column 21 - line 1503, column 67): " + [v1.value0.behaviors.update.constructor.name]);
             })();
             var allElements = append12(enterElements)(updateElements);
             var combinedChildMap = foldl2(union3)(empty5)(enterChildMaps);
@@ -33487,7 +33522,7 @@
                 return v22.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1515, column 12 - line 1516, column 43): " + [v22.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1517, column 12 - line 1518, column 43): " + [v22.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v22.value0.enter instanceof PendingSelection) {
@@ -33520,7 +33555,7 @@
                 return createElementWithNS(Group.value)(doc)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1540, column 19 - line 1542, column 45): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1542, column 19 - line 1544, column 45): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -33543,7 +33578,7 @@
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1593, column 7 - line 1601, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1595, column 7 - line 1603, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.behaviors.exit instanceof Nothing) {
@@ -33551,7 +33586,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1591, column 3 - line 1604, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1593, column 3 - line 1606, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.behaviors.enter instanceof Just) {
@@ -33578,7 +33613,7 @@
                         return v22.value0.enter.value0.pendingData;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1637, column 41 - line 1638, column 54): " + [v22.value0.enter.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1639, column 41 - line 1640, column 54): " + [v22.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
                     return liftEffect2(traverseWithIndex_2(function(index7) {
@@ -33600,7 +33635,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1632, column 7 - line 1648, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1634, column 7 - line 1650, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
@@ -33609,7 +33644,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v22.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1621, column 27 - line 1651, column 92): " + [v1.value0.behaviors.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1623, column 27 - line 1653, column 92): " + [v1.value0.behaviors.enter.constructor.name]);
             })();
             var updateElements = (function() {
               if (v1.value0.behaviors.update instanceof Just) {
@@ -33628,14 +33663,14 @@
                   return renderTemplatesForBoundSelection1(v1.value0.template)(v22.value0.update)();
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1657, column 7 - line 1670, column 86): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1659, column 7 - line 1672, column 86): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.behaviors.update instanceof Nothing) {
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v22.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1654, column 21 - line 1671, column 91): " + [v1.value0.behaviors.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1656, column 21 - line 1673, column 91): " + [v1.value0.behaviors.update.constructor.name]);
             })();
             var enterElements = map28(fst)(enterElementsAndMaps);
             var allElements = append12(enterElements)(updateElements);
@@ -33650,7 +33685,7 @@
                 return v22.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1690, column 12 - line 1691, column 43): " + [v22.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1692, column 12 - line 1693, column 43): " + [v22.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -33669,13 +33704,13 @@
                 return createElementWithNS(Group.value)(doc)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1705, column 19 - line 1707, column 45): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1707, column 19 - line 1709, column 45): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1241, column 1 - line 1246, column 74): " + [v2.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1243, column 1 - line 1248, column 74): " + [v2.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -33689,7 +33724,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1728, column 68 - line 1729, column 34): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1730, column 68 - line 1731, column 34): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex2(function(idx) {
               return function(outerDatum) {
@@ -33722,7 +33757,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1734, column 9 - line 1766, column 57): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1736, column 9 - line 1768, column 57): " + [v1.constructor.name]);
               };
             })(v2.pendingData);
           };
@@ -34572,6 +34607,61 @@
   var renderTree4 = /* @__PURE__ */ renderTree3(/* @__PURE__ */ ordPartitionNode(/* @__PURE__ */ ordRecord2(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons2(nodeTypeIsSymbol)(ordString))()(labelIsSymbol)(ordString))));
   var when3 = /* @__PURE__ */ when(applicativeD3v2M);
   var pure9 = /* @__PURE__ */ pure(applicativeD3v2M);
+  var sunburstStroke = function(v2) {
+    if (v2 === "fast") {
+      return {
+        color: "#C2185B",
+        width: 2,
+        dashArray: "3,2"
+      };
+    }
+    ;
+    if (v2 === "slow") {
+      return {
+        color: "#0097A7",
+        width: 3,
+        dashArray: ""
+      };
+    }
+    ;
+    if (v2 === "euclidean") {
+      return {
+        color: "#F57F17",
+        width: 2,
+        dashArray: "1,3"
+      };
+    }
+    ;
+    if (v2 === "degrade") {
+      return {
+        color: "#5D4037",
+        width: 1.5,
+        dashArray: "4,2"
+      };
+    }
+    ;
+    if (v2 === "repeat") {
+      return {
+        color: "#512DA8",
+        width: 2.5,
+        dashArray: ""
+      };
+    }
+    ;
+    if (v2 === "elongate") {
+      return {
+        color: "#00796B",
+        width: 2,
+        dashArray: "6,2"
+      };
+    }
+    ;
+    return {
+      color: "#fff",
+      width: 1,
+      dashArray: ""
+    };
+  };
   var sunburstColor = function(v2) {
     if (v2 === "sound") {
       return "#4CAF50";
@@ -34619,6 +34709,33 @@
     ;
     return "#607D8B";
   };
+  var sunburstFill = function(v2) {
+    if (v2 === "fast") {
+      return "url(#fastPattern)";
+    }
+    ;
+    if (v2 === "slow") {
+      return "url(#slowPattern)";
+    }
+    ;
+    if (v2 === "euclidean") {
+      return "url(#euclidPattern)";
+    }
+    ;
+    if (v2 === "degrade") {
+      return "url(#degradePattern)";
+    }
+    ;
+    if (v2 === "repeat") {
+      return "url(#repeatPattern)";
+    }
+    ;
+    if (v2 === "elongate") {
+      return "url(#elongatePattern)";
+    }
+    ;
+    return sunburstColor(v2);
+  };
   var sunburstArcPath = function(x0_) {
     return function(y0_) {
       return function(x1_) {
@@ -34633,8 +34750,8 @@
             var y00 = sin(startAngle) * innerRadius;
             var endAngle = x1_ * 2 * pi - pi / 2;
             var largeArc = (function() {
-              var $129 = endAngle - startAngle > pi;
-              if ($129) {
+              var $133 = endAngle - startAngle > pi;
+              if ($133) {
                 return 1;
               }
               ;
@@ -34654,8 +34771,8 @@
     return function(w) {
       return function(h7) {
         var minDim = (function() {
-          var $130 = w < h7;
-          if ($130) {
+          var $134 = w < h7;
+          if ($134) {
             return w;
           }
           ;
@@ -34678,17 +34795,17 @@
         var children3 = tail2(t2);
         var projectedChildren = map30(projectRadial(w)(h7))(children3);
         return mkTree((function() {
-          var $131 = {};
-          for (var $132 in val) {
-            if ({}.hasOwnProperty.call(val, $132)) {
-              $131[$132] = val[$132];
+          var $135 = {};
+          for (var $136 in val) {
+            if ({}.hasOwnProperty.call(val, $136)) {
+              $135[$136] = val[$136];
             }
             ;
           }
           ;
-          $131.x = projected.x;
-          $131.y = projected.y;
-          return $131;
+          $135.x = projected.x;
+          $135.y = projected.y;
+          return $135;
         })())(projectedChildren);
       };
     };
@@ -35042,8 +35159,8 @@
     };
     var val = head6(tree$prime);
     var children3 = tail2(tree$prime);
-    var $171 = val.nodeType === "forest";
-    if ($171) {
+    var $175 = val.nodeType === "forest";
+    if ($175) {
       return fromFoldable6(bind7(children3)(function(child) {
         return makeLinksList(child);
       }));
@@ -35270,8 +35387,8 @@
     };
   };
   var flattenPartition = function(v2) {
-    var $191 = length(v2.value0.children) === 0;
-    if ($191) {
+    var $195 = length(v2.value0.children) === 0;
+    if ($195) {
       return [v2];
     }
     ;
@@ -35333,7 +35450,7 @@
           return runD3v2M(discard23(clear5(selector))(function() {
             return bind22(select6(selector))(function(container) {
               return discard23(liftEffect3(log2("Container selected for sunburst")))(function() {
-                var svgTree = withChild(withBehaviors(named(SVG.value)("pattern-sunburst-svg")([width9(num2(1400)), height9(num2(1200)), viewBox(0)(0)(1400)(1200), attr2("class")(text6("pattern-forest-viz pattern-forest-sunburst"))]))([new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#pattern-sunburst-zoom-group"))]))(named(Group.value)("zoom-group")([attr2("id")(text6("pattern-sunburst-zoom-group")), attr2("class")(text6("zoom-group"))]));
+                var svgTree = withChildren(withBehaviors(named(SVG.value)("pattern-sunburst-svg")([width9(num2(1400)), height9(num2(1200)), viewBox(0)(0)(1400)(1200), attr2("class")(text6("pattern-forest-viz pattern-forest-sunburst"))]))([new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#pattern-sunburst-zoom-group"))]))([withChildren(named(Defs.value)("patterns")([]))([withChildren(named(PatternFill.value)("fastPattern")([attr2("id")(text6("fastPattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(6)), height9(num2(6)), attr2("patternTransform")(text6("rotate(45)"))]))([elem3(Rect.value)([width9(num2(3)), height9(num2(6)), fill2(text6("#E91E63"))]), elem3(Rect.value)([x3(num2(3)), width9(num2(3)), height9(num2(6)), fill2(text6("#F48FB1"))])]), withChildren(named(PatternFill.value)("slowPattern")([attr2("id")(text6("slowPattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(8)), height9(num2(8))]))([elem3(Rect.value)([width9(num2(8)), height9(num2(4)), fill2(text6("#00BCD4"))]), elem3(Rect.value)([y3(num2(4)), width9(num2(8)), height9(num2(4)), fill2(text6("#4DD0E1"))])]), withChildren(named(PatternFill.value)("euclidPattern")([attr2("id")(text6("euclidPattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(10)), height9(num2(10))]))([elem3(Rect.value)([width9(num2(10)), height9(num2(10)), fill2(text6("#FFEB3B"))]), elem3(Circle.value)([cx2(num2(5)), cy2(num2(5)), r2(num2(2.5)), fill2(text6("#FFF176"))])]), withChildren(named(PatternFill.value)("degradePattern")([attr2("id")(text6("degradePattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(8)), height9(num2(8))]))([elem3(Rect.value)([width9(num2(8)), height9(num2(8)), fill2(text6("#795548"))]), elem3(Rect.value)([width9(num2(4)), height9(num2(4)), fill2(text6("#A1887F"))]), elem3(Rect.value)([x3(num2(4)), y3(num2(4)), width9(num2(4)), height9(num2(4)), fill2(text6("#A1887F"))])]), withChildren(named(PatternFill.value)("repeatPattern")([attr2("id")(text6("repeatPattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(6)), height9(num2(6))]))([elem3(Rect.value)([width9(num2(3)), height9(num2(6)), fill2(text6("#673AB7"))]), elem3(Rect.value)([x3(num2(3)), width9(num2(3)), height9(num2(6)), fill2(text6("#9575CD"))])]), withChildren(named(PatternFill.value)("elongatePattern")([attr2("id")(text6("elongatePattern")), attr2("patternUnits")(text6("userSpaceOnUse")), width9(num2(12)), height9(num2(4))]))([elem3(Rect.value)([width9(num2(12)), height9(num2(4)), fill2(text6("#009688"))]), elem3(Rect.value)([width9(num2(4)), height9(num2(4)), fill2(text6("#4DB6AC"))]), elem3(Rect.value)([x3(num2(8)), width9(num2(4)), height9(num2(4)), fill2(text6("#4DB6AC"))])])]), named(Group.value)("zoom-group")([attr2("id")(text6("pattern-sunburst-zoom-group")), attr2("class")(text6("zoom-group"))])]);
                 return bind22(renderTree32(container)(svgTree))(function(svgSel) {
                   return bind22(liftEffect3(reselectD3v2("zoom-group")(svgSel)))(function(zoomGroupSel) {
                     return discard23(for_2(sunburstData)(function(v2) {
@@ -35345,7 +35462,8 @@
                         return 0.25;
                       })();
                       var arcsTree = withChild(named(Group.value)("sunburst-" + show15(v2.idx))([attr2("transform")(text6("translate(" + (show8(v2.centerX) + ("," + (show8(v2.centerY) + ")")))))]))(joinData("arcs-" + show15(v2.idx))("path")(v2.nodes)(function(v1) {
-                        return elem3(Path.value)([path2(text6(sunburstArcPath(v1.value0.x0)(v1.value0.y0)(v1.value0.x1)(v1.value0.y1)(v2.radius))), fill2(text6(sunburstColor(v1.value0.data_.nodeType))), attr1("fill-opacity")(num2(arcOpacity)), stroke2(text6("#fff")), strokeWidth2(num2(1)), attr2("class")(text6("arc arc-" + v1.value0.data_.nodeType))]);
+                        var strokeStyle = sunburstStroke(v1.value0.data_.nodeType);
+                        return elem3(Path.value)([path2(text6(sunburstArcPath(v1.value0.x0)(v1.value0.y0)(v1.value0.x1)(v1.value0.y1)(v2.radius))), fill2(text6(sunburstFill(v1.value0.data_.nodeType))), attr1("fill-opacity")(num2(arcOpacity)), stroke2(text6(strokeStyle.color)), strokeWidth2(num2(strokeStyle.width)), attr2("stroke-dasharray")(text6(strokeStyle.dashArray)), attr2("class")(text6("arc arc-" + v1.value0.data_.nodeType))]);
                       }));
                       return bind22(renderTree4(zoomGroupSel)(arcsTree))(function() {
                         var innerRadius = v2.radius * 0.35;
@@ -35383,8 +35501,8 @@
                               var labelY = sin(midAngle) * midRadius;
                               var labelX = cos(midAngle) * midRadius;
                               var finalRotate = (function() {
-                                var $213 = rotateAngle > 90 && rotateAngle < 270;
-                                if ($213) {
+                                var $217 = rotateAngle > 90 && rotateAngle < 270;
+                                if ($217) {
                                   return rotateAngle + 180;
                                 }
                                 ;
@@ -65484,6 +65602,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "stop";
     }
     ;
+    if (v2 instanceof PatternFill) {
+      return "pattern";
+    }
+    ;
     throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 71, column 1 - line 71, column 37): " + [v2.constructor.name]);
   };
   var generateStyleDefinitions = /* @__PURE__ */ (function() {
@@ -65511,7 +65633,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return name16 + "=i";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 100, column 25 - line 105, column 30): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 101, column 25 - line 106, column 30): " + [v2.constructor.name]);
     };
   };
   var formatAttribute = function(v2) {
@@ -65527,7 +65649,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return formatAttrSource(v2.value0)(v2.value1);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 93, column 19 - line 96, column 70): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 94, column 19 - line 97, column 70): " + [v2.constructor.name]);
   };
   var formatAttributeList = function(attrs) {
     if (attrs.length === 0) {
@@ -65616,7 +65738,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return showElement(tree2.value0.elemType);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 119, column 21 - line 121, column 47): " + [tree2.value0.name.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 120, column 21 - line 122, column 47): " + [tree2.value0.name.constructor.name]);
         })();
         var attrSuffix = (function() {
           var $62 = length(tree2.value0.attrs) > 0;
@@ -65637,7 +65759,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 130, column 5 - line 132, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 131, column 5 - line 133, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind220(traverseWithParent(nodeId)(tree2.value0.children))(function() {
               return pure211(nodeId);
@@ -65658,7 +65780,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 144, column 5 - line 146, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 145, column 5 - line 147, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind220(addNode("template(datum) \u2192")("templateNode"))(function(templateLabel) {
               return discard213(addEdge(joinId)(templateLabel))(function() {
@@ -65675,7 +65797,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 153, column 5 - line 158, column 18): " + [v2.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 154, column 5 - line 159, column 18): " + [v2.constructor.name]);
                 })())(function() {
                   return pure211(joinId);
                 });
@@ -65697,7 +65819,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 168, column 5 - line 170, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 169, column 5 - line 171, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind220(addNode("decompose(datum) \u2192")("decomposeNode"))(function(decomposeId) {
               return discard213(addEdge(joinId)(decomposeId))(function() {
@@ -65723,10 +65845,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           });
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 185, column 9 - line 190, column 22): " + [v1.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 186, column 9 - line 191, column 22): " + [v1.constructor.name]);
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 181, column 5 - line 190, column 22): " + [v2.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 182, column 5 - line 191, column 22): " + [v2.constructor.name]);
                     })())(function() {
                       return pure211(joinId);
                     });
@@ -65772,7 +65894,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 205, column 5 - line 207, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 206, column 5 - line 208, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind220(addNode("template(datum) \u2192")("templateNode"))(function(templateLabel) {
               return discard213(addEdge(joinId)(templateLabel))(function() {
@@ -65789,7 +65911,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 214, column 5 - line 219, column 18): " + [v2.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 215, column 5 - line 220, column 18): " + [v2.constructor.name]);
                 })())(function() {
                   return pure211(joinId);
                 });
@@ -65833,7 +65955,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 234, column 5 - line 236, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 235, column 5 - line 237, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind220(addNode("decompose(datum) \u2192")("decomposeNode"))(function(decomposeId) {
               return discard213(addEdge(joinId)(decomposeId))(function() {
@@ -65859,10 +65981,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           });
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 251, column 9 - line 256, column 22): " + [v1.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 252, column 9 - line 257, column 22): " + [v1.constructor.name]);
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 247, column 5 - line 256, column 22): " + [v2.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 248, column 5 - line 257, column 22): " + [v2.constructor.name]);
                     })())(function() {
                       return pure211(joinId);
                     });
@@ -65874,7 +65996,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 116, column 28 - line 258, column 16): " + [tree2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Interpreter.Mermaid (line 117, column 28 - line 259, column 16): " + [tree2.constructor.name]);
     };
   };
   var runMermaidTree = function(tree2) {
@@ -72678,6 +72800,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "gradient stop";
     }
     ;
+    if (v2 instanceof PatternFill) {
+      return "fill pattern";
+    }
+    ;
     throw new Error("Failed pattern match at PSD3.Interpreter.English (line 107, column 1 - line 107, column 38): " + [v2.constructor.name]);
   };
   var showAttrValue = function(v2) {
@@ -72693,7 +72819,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return show132(v2.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.English (line 132, column 1 - line 132, column 42): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Interpreter.English (line 133, column 1 - line 133, column 42): " + [v2.constructor.name]);
   };
   var showAttrName = function(v2) {
     return v2;
@@ -72956,6 +73082,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ;
     if (v2 instanceof Stop2) {
       return "Stop";
+    }
+    ;
+    if (v2 instanceof PatternFill) {
+      return "PatternFill";
     }
     ;
     throw new Error("Failed pattern match at PSD3.Interpreter.MetaAST (line 189, column 1 - line 189, column 38): " + [v2.constructor.name]);
@@ -81345,7 +81475,11 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return "Stop";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 232, column 16 - line 250, column 17): " + [v2.constructor.name]);
+    if (v2 instanceof PatternFill) {
+      return "PatternFill";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 232, column 16 - line 251, column 31): " + [v2.constructor.name]);
   };
   var showAttrValue2 = function(v2) {
     if (v2 instanceof StringValue) {
@@ -81360,7 +81494,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return show139(v2.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 254, column 17 - line 257, column 27): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 255, column 17 - line 258, column 27): " + [v2.constructor.name]);
   };
   var indent2 = function(n) {
     return joinWith("")(replicate(n)("  "));
@@ -81490,7 +81624,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return "Just { attrs: " + (attrsInlineToCode(v2)(v1.value0.attrs) + ", transition: Nothing }");
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 273, column 1 - line 273, column 82): " + [v2.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 274, column 1 - line 274, column 82): " + [v2.constructor.name, v1.constructor.name]);
     };
   };
   var gupBehaviorsToLines = function(maybeSample) {

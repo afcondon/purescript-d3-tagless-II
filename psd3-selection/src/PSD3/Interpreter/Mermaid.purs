@@ -87,6 +87,7 @@ showElement Tbody = "tbody"
 showElement Defs = "defs"
 showElement LinearGradient = "linearGradient"
 showElement Stop = "stop"
+showElement PatternFill = "pattern"
 
 -- | Format a single attribute for display
 formatAttribute :: forall d. Attribute d -> String

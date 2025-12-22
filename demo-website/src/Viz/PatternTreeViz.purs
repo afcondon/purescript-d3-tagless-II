@@ -1043,6 +1043,30 @@ sunburstColor = case _ of
   "elongate" -> "#009688"   -- Teal for elongate
   _ -> "#607D8B"
 
+-- | Get fill for node type - uses patterns for combinators
+-- | Returns either a color or a pattern URL
+sunburstFill :: String -> String
+sunburstFill = case _ of
+  "fast" -> "url(#fastPattern)"       -- Diagonal stripes for compression
+  "slow" -> "url(#slowPattern)"       -- Horizontal bands for expansion
+  "euclidean" -> "url(#euclidPattern)" -- Dots for rhythmic distribution
+  "degrade" -> "url(#degradePattern)" -- Checkerboard for probability
+  "repeat" -> "url(#repeatPattern)"   -- Vertical stripes for stutter
+  "elongate" -> "url(#elongatePattern)" -- Gradient for stretch
+  other -> sunburstColor other         -- Regular color for other types
+
+-- | Get stroke style for node type
+-- | Different combinators get distinctive strokes
+sunburstStroke :: String -> { color :: String, width :: Number, dashArray :: String }
+sunburstStroke = case _ of
+  "fast" -> { color: "#C2185B", width: 2.0, dashArray: "3,2" }    -- Dashed pink
+  "slow" -> { color: "#0097A7", width: 3.0, dashArray: "" }       -- Thick cyan
+  "euclidean" -> { color: "#F57F17", width: 2.0, dashArray: "1,3" } -- Dotted yellow
+  "degrade" -> { color: "#5D4037", width: 1.5, dashArray: "4,2" }  -- Dashed brown
+  "repeat" -> { color: "#512DA8", width: 2.5, dashArray: "" }     -- Thick purple
+  "elongate" -> { color: "#00796B", width: 2.0, dashArray: "6,2" } -- Long dash teal
+  _ -> { color: "#fff", width: 1.0, dashArray: "" }
+
 -- | Convert partition coordinates to sunburst arc path
 -- | x0, x1 are normalized [0,1] representing angles around the circle
 -- | y0, y1 are normalized [0,1] representing radius from center
@@ -1148,7 +1172,7 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
     liftEffect $ Console.log "Container selected for sunburst"
 
     -- Render each sunburst separately
-    -- First render the SVG container
+    -- First render the SVG container with pattern definitions
     let
       svgTree :: T.Tree Unit
       svgTree =
@@ -1159,12 +1183,148 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
           , attr "class" $ text "pattern-forest-viz pattern-forest-sunburst"
           ]
           `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#pattern-sunburst-zoom-group" ]
-          `T.withChild`
-            ( T.named Group "zoom-group"
+          `T.withChildren`
+            [ -- Pattern definitions for fast/slow visual treatment
+              T.named Defs "patterns" []
+                `T.withChildren`
+                  [ -- Fast pattern: diagonal stripes (compression feel)
+                    T.named PatternFill "fastPattern"
+                      [ attr "id" $ text "fastPattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 6.0
+                      , height $ num 6.0
+                      , attr "patternTransform" $ text "rotate(45)"
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 3.0
+                            , height $ num 6.0
+                            , fill $ text "#E91E63"  -- Pink
+                            ]
+                        , T.elem Rect
+                            [ x $ num 3.0
+                            , width $ num 3.0
+                            , height $ num 6.0
+                            , fill $ text "#F48FB1"  -- Lighter pink
+                            ]
+                        ]
+                  , -- Slow pattern: horizontal gradient bands (expansion feel)
+                    T.named PatternFill "slowPattern"
+                      [ attr "id" $ text "slowPattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 8.0
+                      , height $ num 8.0
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 8.0
+                            , height $ num 4.0
+                            , fill $ text "#00BCD4"  -- Cyan
+                            ]
+                        , T.elem Rect
+                            [ y $ num 4.0
+                            , width $ num 8.0
+                            , height $ num 4.0
+                            , fill $ text "#4DD0E1"  -- Lighter cyan
+                            ]
+                        ]
+                  , -- Euclidean pattern: dots for rhythmic distribution
+                    T.named PatternFill "euclidPattern"
+                      [ attr "id" $ text "euclidPattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 10.0
+                      , height $ num 10.0
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 10.0
+                            , height $ num 10.0
+                            , fill $ text "#FFEB3B"  -- Yellow background
+                            ]
+                        , T.elem Circle
+                            [ cx $ num 5.0
+                            , cy $ num 5.0
+                            , r $ num 2.5
+                            , fill $ text "#FFF176"  -- Lighter yellow dot
+                            ]
+                        ]
+                  , -- Degrade pattern: checkerboard for probability/uncertainty
+                    T.named PatternFill "degradePattern"
+                      [ attr "id" $ text "degradePattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 8.0
+                      , height $ num 8.0
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 8.0
+                            , height $ num 8.0
+                            , fill $ text "#795548"  -- Brown
+                            ]
+                        , T.elem Rect
+                            [ width $ num 4.0
+                            , height $ num 4.0
+                            , fill $ text "#A1887F"  -- Lighter brown
+                            ]
+                        , T.elem Rect
+                            [ x $ num 4.0
+                            , y $ num 4.0
+                            , width $ num 4.0
+                            , height $ num 4.0
+                            , fill $ text "#A1887F"  -- Lighter brown
+                            ]
+                        ]
+                  , -- Repeat pattern: vertical stripes for stutter/echo
+                    T.named PatternFill "repeatPattern"
+                      [ attr "id" $ text "repeatPattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 6.0
+                      , height $ num 6.0
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 3.0
+                            , height $ num 6.0
+                            , fill $ text "#673AB7"  -- Deep purple
+                            ]
+                        , T.elem Rect
+                            [ x $ num 3.0
+                            , width $ num 3.0
+                            , height $ num 6.0
+                            , fill $ text "#9575CD"  -- Lighter purple
+                            ]
+                        ]
+                  , -- Elongate pattern: diagonal gradient for stretch
+                    T.named PatternFill "elongatePattern"
+                      [ attr "id" $ text "elongatePattern"
+                      , attr "patternUnits" $ text "userSpaceOnUse"
+                      , width $ num 12.0
+                      , height $ num 4.0
+                      ]
+                      `T.withChildren`
+                        [ T.elem Rect
+                            [ width $ num 12.0
+                            , height $ num 4.0
+                            , fill $ text "#009688"  -- Teal
+                            ]
+                        , T.elem Rect
+                            [ width $ num 4.0
+                            , height $ num 4.0
+                            , fill $ text "#4DB6AC"  -- Lighter teal
+                            ]
+                        , T.elem Rect
+                            [ x $ num 8.0
+                            , width $ num 4.0
+                            , height $ num 4.0
+                            , fill $ text "#4DB6AC"  -- Lighter teal
+                            ]
+                        ]
+                  ]
+            , T.named Group "zoom-group"
                 [ attr "id" $ text "pattern-sunburst-zoom-group"
                 , attr "class" $ text "zoom-group"
                 ]
-            )
+            ]
 
     svgSel <- renderTree container svgTree
     zoomGroupSel <- liftEffect $ reselectD3v2 "zoom-group" svgSel
@@ -1174,7 +1334,7 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
       -- Opacity based on active state
       let arcOpacity = if active then 0.85 else 0.25
 
-      -- Render arcs
+      -- Render arcs with enhanced styling for fast/slow
       let
         arcsTree :: T.Tree (PartitionNode { label :: String, nodeType :: String })
         arcsTree =
@@ -1182,14 +1342,18 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
             [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
             `T.withChild`
               ( T.joinData ("arcs-" <> show idx) "path" nodes $ \(PartNode node) ->
-                  T.elem Path
-                    [ path $ text (sunburstArcPath node.x0 node.y0 node.x1 node.y1 r')
-                    , fill $ text (sunburstColor node.data_.nodeType)
-                    , attr "fill-opacity" $ num arcOpacity
-                    , stroke $ text "#fff"
-                    , strokeWidth $ num 1.0
-                    , attr "class" $ text ("arc arc-" <> node.data_.nodeType)
-                    ]
+                  let
+                    strokeStyle = sunburstStroke node.data_.nodeType
+                  in
+                    T.elem Path
+                      [ path $ text (sunburstArcPath node.x0 node.y0 node.x1 node.y1 r')
+                      , fill $ text (sunburstFill node.data_.nodeType)
+                      , attr "fill-opacity" $ num arcOpacity
+                      , stroke $ text strokeStyle.color
+                      , strokeWidth $ num strokeStyle.width
+                      , attr "stroke-dasharray" $ text strokeStyle.dashArray
+                      , attr "class" $ text ("arc arc-" <> node.data_.nodeType)
+                      ]
               )
       _ <- renderTree zoomGroupSel arcsTree
 

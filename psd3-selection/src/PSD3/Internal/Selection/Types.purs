@@ -184,6 +184,7 @@ data ElementType
   | Defs
   | LinearGradient
   | Stop
+  | PatternFill  -- SVG pattern element for fills (used in fast/slow visual treatment)
   -- HTML elements (use default namespace)
   | Div
   | Span
@@ -212,6 +213,7 @@ elementContext SVG = SVGContext
 elementContext Defs = SVGContext
 elementContext LinearGradient = SVGContext
 elementContext Stop = SVGContext
+elementContext PatternFill = SVGContext
 elementContext Div = HTMLContext
 elementContext Span = HTMLContext
 elementContext Table = HTMLContext

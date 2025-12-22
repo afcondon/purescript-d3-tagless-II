@@ -233,6 +233,76 @@ Side-by-side: original pattern vs transformed, with visual diff highlighting wha
 
 ---
 
+---
+
+## Key Insight: Structure vs Transformation
+
+**Mini-notation = Nouns/Structure** — the "what"
+- Sounds, sequences, parallels, choices
+- Static tree structure
+- Currently visualized as sunbursts
+
+**Combinators = Verbs/Transformations** — the "how"
+- jux, rev, chop, fast, slow, layer, every...
+- Actions applied to nodes
+- Transform the structure
+
+### Affordances-First Thinking
+
+Instead of asking "how do we visualize combinators?", ask:
+**"What actions should be possible on the visualization?"**
+
+The mute button is already an affordance — click center to toggle. What if:
+
+- **Click interior node** → menu of applicable combinators appears
+- **Drag combinator tool** onto a node → applies transformation
+- **Right-click** → "reverse this", "chop 4", "fast 2"
+- **Keyboard shortcuts** while hovering → r=reverse, f=fast, s=slow
+- **Gesture** → draw circle around node to add `spin`
+
+### The Viz Becomes the Instrument
+
+This shifts from "visualize the code" to **"the visualization IS the code"**:
+
+1. Visual edits flow back to code (round-trip)
+2. The sunburst is a live performance interface
+3. Direct manipulation of musical structure
+4. Combinators are tools/brushes, nodes are canvas
+
+### Interior Nodes as Transformation Points
+
+Combinators naturally apply to **interior nodes** (sequences, parallels, choices):
+
+```
+     [seq]  ← apply `fast 2` here
+     / | \
+   bd sn  hh
+```
+
+Becomes:
+
+```
+    [fast 2]
+       |
+     [seq]
+     / | \
+   bd sn  hh
+```
+
+The sunburst grows a new ring representing the combinator wrapper.
+
+### Interaction Model Sketch
+
+1. **Hover** over interior node → highlight, show tooltip with current transforms
+2. **Click** → select node, show transform toolbar
+3. **Apply transform** →
+   - Update tree structure (add wrapper node)
+   - Re-render sunburst (new ring/visual treatment)
+   - Update code output (show new combinator)
+4. **Undo/history** → step back through transformations
+
+---
+
 ## Implementation Priority (TBD)
 
 1. [ ] Start with `fast`/`slow` - already parsed, just need visual treatment
