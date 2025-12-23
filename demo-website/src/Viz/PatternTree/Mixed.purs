@@ -397,8 +397,74 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
       _ <- renderTree zoomGroupSel euclidControlsTree
       pure unit
 
+  -- Render outer combinator annotation ring (experimental)
+  -- This shows pattern-level combinators as a thin outer ring
+  when track.active do
+    let testCombinators = case track.name of
+          "L4-poly" -> ["jux rev", "chop 4"]
+          "L6-tabla" -> ["slow 6", "spin 4"]
+          "L6-ardha" -> ["layer [ply 4]"]
+          _ -> []
+    when (Array.length testCombinators > 0) do
+      let outerRingInner = r' + 5.0
+      let outerRingOuter = r' + 22.0
+      let numCombinators = Array.length testCombinators
+      let combinatorArcs = Array.mapWithIndex (\i comb ->
+            let startAngle = (Int.toNumber i / Int.toNumber numCombinators) * 2.0 * pi - (pi / 2.0)
+                endAngle = (Int.toNumber (i + 1) / Int.toNumber numCombinators) * 2.0 * pi - (pi / 2.0)
+                midAngle = (startAngle + endAngle) / 2.0
+                labelRadius = (outerRingInner + outerRingOuter) / 2.0
+                labelX = cos midAngle * labelRadius
+                labelY = sin midAngle * labelRadius
+                -- Arc path
+                x0 = cos startAngle * outerRingInner
+                y0 = sin startAngle * outerRingInner
+                x1 = cos endAngle * outerRingInner
+                y1 = sin endAngle * outerRingInner
+                x2 = cos endAngle * outerRingOuter
+                y2 = sin endAngle * outerRingOuter
+                x3 = cos startAngle * outerRingOuter
+                y3 = sin startAngle * outerRingOuter
+                largeArc = if (endAngle - startAngle) > pi then 1 else 0
+                arcPath = "M" <> show x0 <> "," <> show y0
+                  <> "A" <> show outerRingInner <> "," <> show outerRingInner <> " 0 " <> show largeArc <> " 1 " <> show x1 <> "," <> show y1
+                  <> "L" <> show x2 <> "," <> show y2
+                  <> "A" <> show outerRingOuter <> "," <> show outerRingOuter <> " 0 " <> show largeArc <> " 0 " <> show x3 <> "," <> show y3
+                  <> "Z"
+            in { path: arcPath, label: comb, labelX, labelY, midAngle }
+          ) testCombinators
+      let combinatorRingTree :: T.Tree Unit
+          combinatorRingTree =
+            T.named Group ("combinator-ring-" <> show idx)
+              [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")")
+              , attr "class" $ text "combinator-ring"
+              ]
+              `T.withChildren`
+                (Array.concatMap (\arc ->
+                  [ T.elem Path
+                      [ path $ text arc.path
+                      , fill $ text "rgba(156, 39, 176, 0.15)"  -- Light purple
+                      , stroke $ text "#9C27B0"
+                      , strokeWidth $ num 1.0
+                      ]
+                  , T.elem Text
+                      [ x $ num arc.labelX
+                      , y $ num arc.labelY
+                      , textContent $ text arc.label
+                      , fontSize $ num 9.0
+                      , textAnchor $ text "middle"
+                      , attr "dominant-baseline" $ text "middle"
+                      , fill $ text "#7B1FA2"
+                      , attr "font-weight" $ text "500"
+                      , attr "transform" $ text ("rotate(" <> show (arc.midAngle * 180.0 / pi + 90.0) <> "," <> show arc.labelX <> "," <> show arc.labelY <> ")")
+                      ]
+                  ]
+                ) combinatorArcs)
+      _ <- renderTree zoomGroupSel combinatorRingTree
+      pure unit
+
   -- Render control buttons below sunburst (mute on left, layout on right)
-  let buttonY = centerY + r' + 15.0
+  let buttonY = centerY + r' + 35.0  -- Increased to account for combinator ring
   _ <- renderMuteButton zoomGroupSel (centerX - 15.0) buttonY track.trackIndex track.active onToggleActive
   _ <- renderToggleButton zoomGroupSel (centerX + 15.0) buttonY track.trackIndex onToggleLayout "tree"
 

@@ -35943,8 +35943,8 @@
           return function(onToggle) {
             return function(targetLayout) {
               var buttonTree = withChildren(withBehaviors(named(Group.value)("toggle-btn-" + show16(trackIdx))([attr2("transform")(text6("translate(" + (show9(btnX) + ("," + (show9(btnY) + ")"))))), attr2("style")(text6("cursor: pointer;")), attr2("class")(text6("layout-toggle-btn"))]))([onClick(onToggle(trackIdx))]))([elem3(Circle.value)([cx2(num2(0)), cy2(num2(0)), r2(num2(10)), fill2(text6("#f5f5f5")), stroke2(text6("#999")), strokeWidth2(num2(1.5))]), elem3(Text.value)([x3(num2(0)), y3(num2(4)), textContent3(text6((function() {
-                var $155 = targetLayout === "sunburst";
-                if ($155) {
+                var $156 = targetLayout === "sunburst";
+                if ($156) {
                   return "\u25C9";
                 }
                 ;
@@ -36008,21 +36008,21 @@
             return function(idx) {
               var densityPct = round2(metrics.density * 100);
               var speedStr = (function() {
-                var $160 = metrics.speedFactor === 1;
-                if ($160) {
+                var $161 = metrics.speedFactor === 1;
+                if ($161) {
                   return "";
                 }
                 ;
-                var $161 = metrics.speedFactor > 1;
-                if ($161) {
+                var $162 = metrics.speedFactor > 1;
+                if ($162) {
                   return " \xD7" + show16(round2(metrics.speedFactor));
                 }
                 ;
                 return " \xF7" + show16(round2(1 / metrics.speedFactor));
               })();
               var polyStr = (function() {
-                var $162 = metrics.maxPolyphony > 1;
-                if ($162) {
+                var $163 = metrics.maxPolyphony > 1;
+                if ($163) {
                   return " \u266A" + show16(metrics.maxPolyphony);
                 }
                 ;
@@ -36227,12 +36227,75 @@
                                     });
                                   });
                                 })()))(function() {
-                                  var buttonY = centerY + r$prime + 15;
-                                  return bind9(renderMuteButton(zoomGroupSel)(centerX - 15)(buttonY)(track2.trackIndex)(track2.active)(onToggleActive))(function() {
-                                    return bind9(renderToggleButton(zoomGroupSel)(centerX + 15)(buttonY)(track2.trackIndex)(onToggleLayout)("tree"))(function() {
-                                      var metrics = analyzePattern(track2.pattern);
-                                      return bind9(renderMetrics(zoomGroupSel)(centerX)(buttonY + 18)(metrics)(track2.active)(idx))(function() {
+                                  return discard4(when3(track2.active)((function() {
+                                    var testCombinators = (function() {
+                                      if (track2.name === "L4-poly") {
+                                        return ["jux rev", "chop 4"];
+                                      }
+                                      ;
+                                      if (track2.name === "L6-tabla") {
+                                        return ["slow 6", "spin 4"];
+                                      }
+                                      ;
+                                      if (track2.name === "L6-ardha") {
+                                        return ["layer [ply 4]"];
+                                      }
+                                      ;
+                                      return [];
+                                    })();
+                                    return when3(length(testCombinators) > 0)((function() {
+                                      var outerRingInner = r$prime + 5;
+                                      var outerRingOuter = r$prime + 22;
+                                      var numCombinators = length(testCombinators);
+                                      var combinatorArcs = mapWithIndex2(function(i2) {
+                                        return function(comb) {
+                                          var startAngle = toNumber(i2) / toNumber(numCombinators) * 2 * pi - pi / 2;
+                                          var x0 = cos(startAngle) * outerRingInner;
+                                          var x33 = cos(startAngle) * outerRingOuter;
+                                          var y0 = sin(startAngle) * outerRingInner;
+                                          var y33 = sin(startAngle) * outerRingOuter;
+                                          var labelRadius = (outerRingInner + outerRingOuter) / 2;
+                                          var endAngle = toNumber(i2 + 1 | 0) / toNumber(numCombinators) * 2 * pi - pi / 2;
+                                          var largeArc = (function() {
+                                            var $198 = endAngle - startAngle > pi;
+                                            if ($198) {
+                                              return 1;
+                                            }
+                                            ;
+                                            return 0;
+                                          })();
+                                          var midAngle = (startAngle + endAngle) / 2;
+                                          var labelX = cos(midAngle) * labelRadius;
+                                          var labelY = sin(midAngle) * labelRadius;
+                                          var x116 = cos(endAngle) * outerRingInner;
+                                          var x213 = cos(endAngle) * outerRingOuter;
+                                          var y117 = sin(endAngle) * outerRingInner;
+                                          var y213 = sin(endAngle) * outerRingOuter;
+                                          var arcPath4 = "M" + (show9(x0) + ("," + (show9(y0) + ("A" + (show9(outerRingInner) + ("," + (show9(outerRingInner) + (" 0 " + (show16(largeArc) + (" 1 " + (show9(x116) + ("," + (show9(y117) + ("L" + (show9(x213) + ("," + (show9(y213) + ("A" + (show9(outerRingOuter) + ("," + (show9(outerRingOuter) + (" 0 " + (show16(largeArc) + (" 0 " + (show9(x33) + ("," + (show9(y33) + "Z")))))))))))))))))))))))))));
+                                          return {
+                                            path: arcPath4,
+                                            label: comb,
+                                            labelX,
+                                            labelY,
+                                            midAngle
+                                          };
+                                        };
+                                      })(testCombinators);
+                                      var combinatorRingTree = withChildren(named(Group.value)("combinator-ring-" + show16(idx))([attr2("transform")(text6("translate(" + (show9(centerX) + ("," + (show9(centerY) + ")"))))), attr2("class")(text6("combinator-ring"))]))(concatMap(function(arc) {
+                                        return [elem3(Path.value)([path2(text6(arc.path)), fill2(text6("rgba(156, 39, 176, 0.15)")), stroke2(text6("#9C27B0")), strokeWidth2(num2(1))]), elem3(Text.value)([x3(num2(arc.labelX)), y3(num2(arc.labelY)), textContent3(text6(arc.label)), fontSize2(num2(9)), textAnchor2(text6("middle")), attr2("dominant-baseline")(text6("middle")), fill2(text6("#7B1FA2")), attr2("font-weight")(text6("500")), attr2("transform")(text6("rotate(" + (show9(arc.midAngle * 180 / pi + 90) + ("," + (show9(arc.labelX) + ("," + (show9(arc.labelY) + ")")))))))])];
+                                      })(combinatorArcs));
+                                      return bind9(renderTree1(zoomGroupSel)(combinatorRingTree))(function() {
                                         return pure9(unit);
+                                      });
+                                    })());
+                                  })()))(function() {
+                                    var buttonY = centerY + r$prime + 35;
+                                    return bind9(renderMuteButton(zoomGroupSel)(centerX - 15)(buttonY)(track2.trackIndex)(track2.active)(onToggleActive))(function() {
+                                      return bind9(renderToggleButton(zoomGroupSel)(centerX + 15)(buttonY)(track2.trackIndex)(onToggleLayout)("tree"))(function() {
+                                        var metrics = analyzePattern(track2.pattern);
+                                        return bind9(renderMetrics(zoomGroupSel)(centerX)(buttonY + 18)(metrics)(track2.active)(idx))(function() {
+                                          return pure9(unit);
+                                        });
                                       });
                                     });
                                   });
