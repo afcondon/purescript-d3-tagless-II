@@ -1,16 +1,20 @@
 module D3.Viz.PatternTree.CombinatorTree
   ( CombinatorNode(..)
   , drawCombinatorTree
+  , exampleCombinatorTree
+  , testCombinatorTree
   ) where
 
 import Prelude
 
-import Component.PatternTree (PatternTree)
+import Component.PatternTree (PatternTree(..))
 import Control.Comonad.Cofree (head, tail)
 import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstArcPath, flattenPartition, fixParallelLayout)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Data.String as String
+import Data.List ((:))
+import Data.List as List
 import Data.Tree (Tree, mkTree)
 import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
@@ -222,3 +226,34 @@ verticalLink x0 y0 x1 y1 =
      <> "C" <> show x0 <> "," <> show midY
      <> " " <> show x1 <> "," <> show midY
      <> " " <> show x1 <> "," <> show y1
+
+-- | Example combinator tree for testing
+-- | Represents: jux rev $ slow 2 [bd sd:3, ~ hh] # [hh*4]
+-- | Structure:
+-- |   jux rev
+-- |   ├── slow 2
+-- |   │   └── [bd sd:3, ~ hh] (pattern)
+-- |   └── [hh*4] (pattern)
+exampleCombinatorTree :: Tree CombinatorNode
+exampleCombinatorTree =
+  mkTree (Combinator "jux rev")
+    ( mkTree (Combinator "slow 2")
+        ( mkTree (PatternLeaf "drums"
+            (Sequence
+              [ Parallel [Sound "bd", Sound "sd:3"]
+              , Parallel [Rest, Sound "hh"]
+              ]
+            )) List.Nil
+        : List.Nil
+        )
+    : mkTree (PatternLeaf "hats"
+        (Fast 4.0 (Sound "hh"))
+      ) List.Nil
+    : List.Nil
+    )
+
+-- | Test function: draws the example combinator tree on the given selector
+-- | Use this from the browser console or from a test button
+-- | Example: testCombinatorTree "combinator-test-svg"
+testCombinatorTree :: String -> Effect Unit
+testCombinatorTree selector = drawCombinatorTree selector exampleCombinatorTree

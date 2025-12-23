@@ -76,6 +76,7 @@ import Component.SPLOM as SPLOM
 import Component.GUPDebug as GUPDebug
 import VizMatrix.App as VizMatrix
 import Component.AlgoraveViz as AlgoraveViz
+import D3.Viz.PatternTree.CombinatorTree (testCombinatorTree)
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -489,6 +490,13 @@ handleAction = case _ of
 
 -- | Entry point
 main :: Effect Unit
-main = HA.runHalogenAff do
-  body <- HA.awaitBody
-  runUI component unit body
+main = do
+  -- Expose test functions to browser console
+  exposeToWindow "testCombinatorTree" testCombinatorTree
+  HA.runHalogenAff do
+    body <- HA.awaitBody
+    runUI component unit body
+
+-- | Export testCombinatorTree for browser console testing
+-- | Usage in browser console: window.testCombinatorTree("svg-id")()
+foreign import exposeToWindow :: forall a. String -> a -> Effect Unit
