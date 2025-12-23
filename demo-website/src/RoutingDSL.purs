@@ -76,6 +76,7 @@ routes =
   <|> treeBuilder
   <|> treeBuilder2
   <|> treeBuilder3
+  <|> simpleTreeBuilder
   <|> splom
   <|> gupDebug
   <|> vizMatrix
@@ -324,6 +325,10 @@ treeBuilder2 = TreeBuilder2 <$ lit "tree-builder2" <* end
 treeBuilder3 :: Match Route
 treeBuilder3 = TreeBuilder3 <$ lit "tree-builder3" <* end
 
+-- | Match: /simple-tree-builder
+simpleTreeBuilder :: Match Route
+simpleTreeBuilder = SimpleTreeBuilder <$ lit "simple-tree-builder" <* end
+
 -- | Match: /splom
 splom :: Match Route
 splom = SPLOM <$ lit "splom" <* end
@@ -411,6 +416,7 @@ routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"
 routeToPath TreeBuilder2 = "/tree-builder2"
 routeToPath TreeBuilder3 = "/tree-builder3"
+routeToPath SimpleTreeBuilder = "/simple-tree-builder"
 routeToPath SPLOM = "/splom"
 routeToPath GUPDebug = "/gup-debug"
 routeToPath VizMatrix = "/viz-matrix"

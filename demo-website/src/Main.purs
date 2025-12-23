@@ -72,6 +72,7 @@ import Component.ForcePlayground as ForcePlayground
 import TreeBuilder.App as TreeBuilder
 import TreeBuilder2.App as TreeBuilder2
 import TreeBuilder3.App as TreeBuilder3
+import PSD3.SimpleTreeBuilder as SimpleTreeBuilder
 import Component.SPLOM as SPLOM
 import Component.GUPDebug as GUPDebug
 import VizMatrix.App as VizMatrix
@@ -147,6 +148,7 @@ type Slots =
   , treeBuilder :: forall q. H.Slot q Void Unit
   , treeBuilder2 :: forall q. H.Slot q Void Unit
   , treeBuilder3 :: forall q. H.Slot q Void Unit
+  , simpleTreeBuilder :: forall q. H.Slot q Void Unit
   , splom :: forall q. H.Slot q Void Unit
   , gupDebug :: forall q. H.Slot q Void Unit
   , vizMatrix :: forall q. H.Slot q Void Unit
@@ -204,6 +206,7 @@ _forcePlayground = Proxy :: Proxy "forcePlayground"
 _treeBuilder = Proxy :: Proxy "treeBuilder"
 _treeBuilder2 = Proxy :: Proxy "treeBuilder2"
 _treeBuilder3 = Proxy :: Proxy "treeBuilder3"
+_simpleTreeBuilder = Proxy :: Proxy "simpleTreeBuilder"
 _splom = Proxy :: Proxy "splom"
 _gupDebug = Proxy :: Proxy "gupDebug"
 _vizMatrix = Proxy :: Proxy "vizMatrix"
@@ -426,6 +429,9 @@ renderPage route = case spy "Route is" route of
 
   TreeBuilder3 ->
     HH.slot_ _treeBuilder3 unit TreeBuilder3.component unit
+
+  SimpleTreeBuilder ->
+    HH.slot_ _simpleTreeBuilder unit SimpleTreeBuilder.component unit
 
   SPLOM ->
     HH.slot_ _splom unit SPLOM.component unit
