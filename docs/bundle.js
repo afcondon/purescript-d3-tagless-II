@@ -34750,6 +34750,10 @@
       return "#009688";
     }
     ;
+    if (v2 === "spacer") {
+      return "#FFFFFF";
+    }
+    ;
     return "#607D8B";
   };
   var sunburstFill = function(v2) {
@@ -34784,17 +34788,25 @@
       return function(x1_) {
         return function(y1_) {
           return function(radius) {
-            var startAngle = x0_ * 2 * pi - pi / 2;
             var outerRadius = y1_ * radius;
-            var x102 = cos(startAngle) * outerRadius;
-            var y102 = sin(startAngle) * outerRadius;
             var innerRadius = y0_ * radius;
+            var arcSpan = x1_ - x0_;
+            var $106 = arcSpan > 0.99;
+            if ($106) {
+              var topOuterY = -outerRadius;
+              var topInnerY = -innerRadius;
+              return "M" + (show8(0) + ("," + (show8(topOuterY) + ("A" + (show8(outerRadius) + ("," + (show8(outerRadius) + (" 0 0 1 " + (show8(0) + ("," + (show8(outerRadius) + ("A" + (show8(outerRadius) + ("," + (show8(outerRadius) + (" 0 0 1 " + (show8(0) + ("," + (show8(topOuterY) + ("M" + (show8(0) + ("," + (show8(topInnerY) + ("A" + (show8(innerRadius) + ("," + (show8(innerRadius) + (" 0 0 0 " + (show8(0) + ("," + (show8(innerRadius) + ("A" + (show8(innerRadius) + ("," + (show8(innerRadius) + (" 0 0 0 " + (show8(0) + ("," + (show8(topInnerY) + "Z")))))))))))))))))))))))))))))))))))))));
+            }
+            ;
+            var startAngle = x0_ * 2 * pi - pi / 2;
             var x00 = cos(startAngle) * innerRadius;
+            var x102 = cos(startAngle) * outerRadius;
             var y00 = sin(startAngle) * innerRadius;
+            var y102 = sin(startAngle) * outerRadius;
             var endAngle = x1_ * 2 * pi - pi / 2;
             var largeArc = (function() {
-              var $102 = endAngle - startAngle > pi;
-              if ($102) {
+              var $107 = endAngle - startAngle > pi;
+              if ($107) {
                 return 1;
               }
               ;
@@ -34811,6 +34823,17 @@
     };
   };
   var patternToHierarchy = function(pattern2) {
+    var isContainer = function(v2) {
+      if (v2 instanceof Sound) {
+        return false;
+      }
+      ;
+      if (v2 instanceof Rest) {
+        return false;
+      }
+      ;
+      return true;
+    };
     var go2 = function(currentPath) {
       return function(weight) {
         return function(v2) {
@@ -34839,6 +34862,25 @@
           }
           ;
           if (v2 instanceof Sequence) {
+            var hasContainers = any2(isContainer)(v2.value0);
+            var processChild = function(i2) {
+              return function(c2) {
+                var $113 = hasContainers && !isContainer(c2);
+                if ($113) {
+                  return {
+                    data_: {
+                      label: "",
+                      nodeType: "spacer",
+                      path: append13(currentPath)([i2])
+                    },
+                    value: Nothing.value,
+                    children: new Just([go2(append13(currentPath)([i2, 0]))(weight)(c2)])
+                  };
+                }
+                ;
+                return go2(append13(currentPath)([i2]))(weight)(c2);
+              };
+            };
             return {
               data_: {
                 label: "seq",
@@ -34846,11 +34888,7 @@
                 path: currentPath
               },
               value: Nothing.value,
-              children: new Just(mapWithIndex2(function(i2) {
-                return function(c2) {
-                  return go2(append13(currentPath)([i2]))(weight)(c2);
-                };
-              })(v2.value0))
+              children: new Just(mapWithIndex2(processChild)(v2.value0))
             };
           }
           ;
@@ -34896,8 +34934,8 @@
             })(replicate(copies)(unit));
             return {
               data_: {
-                label: "seq",
-                nodeType: "sequence",
+                label: "*" + show15(round2(v2.value0)),
+                nodeType: "fast",
                 path: currentPath
               },
               value: Nothing.value,
@@ -34970,7 +35008,7 @@
             };
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 56, column 27 - line 150, column 10): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 63, column 27 - line 171, column 10): " + [v2.constructor.name]);
         };
       };
     };
@@ -34985,8 +35023,8 @@
     return go2([])(1)(pattern2);
   };
   var flattenPartition = function(v2) {
-    var $125 = length(v2.value0.children) === 0;
-    if ($125) {
+    var $133 = length(v2.value0.children) === 0;
+    if ($133) {
       return [v2];
     }
     ;
@@ -35004,16 +35042,16 @@
                     return function(v1) {
                       var oldYHeight = oldParentY1 - oldParentY0;
                       var relativeY0 = (function() {
-                        var $137 = oldYHeight > 0;
-                        if ($137) {
+                        var $145 = oldYHeight > 0;
+                        if ($145) {
                           return (v1.value0.y0 - oldParentY0) / oldYHeight;
                         }
                         ;
                         return 0;
                       })();
                       var relativeY1 = (function() {
-                        var $138 = oldYHeight > 0;
-                        if ($138) {
+                        var $146 = oldYHeight > 0;
+                        if ($146) {
                           return (v1.value0.y1 - oldParentY0) / oldYHeight;
                         }
                         ;
@@ -35021,16 +35059,16 @@
                       })();
                       var oldXWidth = oldParentX1 - oldParentX0;
                       var relativeX0 = (function() {
-                        var $139 = oldXWidth > 0;
-                        if ($139) {
+                        var $147 = oldXWidth > 0;
+                        if ($147) {
                           return (v1.value0.x0 - oldParentX0) / oldXWidth;
                         }
                         ;
                         return 0;
                       })();
                       var relativeX1 = (function() {
-                        var $140 = oldXWidth > 0;
-                        if ($140) {
+                        var $148 = oldXWidth > 0;
+                        if ($148) {
                           return (v1.value0.x1 - oldParentX0) / oldXWidth;
                         }
                         ;
@@ -35104,7 +35142,7 @@
                 return 1;
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 292, column 15 - line 294, column 23): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 351, column 15 - line 353, column 23): " + [v1.constructor.name]);
             })();
             var baseY0 = (function() {
               var v1 = head(children3);
@@ -35116,12 +35154,12 @@
                 return 0;
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 289, column 16 - line 291, column 23): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 348, column 16 - line 350, column 23): " + [v1.constructor.name]);
             })();
             var totalRadialSpace = maxY1 - baseY0;
             var radialSlice = (function() {
-              var $155 = numChildren > 0;
-              if ($155) {
+              var $163 = numChildren > 0;
+              if ($163) {
                 return totalRadialSpace / toNumber(numChildren);
               }
               ;
@@ -35134,8 +35172,8 @@
     };
     var fixedChildren = map28(fixParallelLayout)(v2.value0.children);
     var adjustedChildren = (function() {
-      var $156 = v2.value0.data_.nodeType === "parallel";
-      if ($156) {
+      var $164 = v2.value0.data_.nodeType === "parallel";
+      if ($164) {
         return stackRadially(v2.value0.x0)(v2.value0.x1)(v2.value0.y1)(fixedChildren);
       }
       ;
@@ -35190,7 +35228,7 @@
       return false;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 217, column 25 - line 219, column 19): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 239, column 25 - line 241, column 19): " + [v2.constructor.name]);
   };
 
   // output/D3.Viz.PatternTree.Types/index.js
@@ -35905,8 +35943,8 @@
           return function(onToggle) {
             return function(targetLayout) {
               var buttonTree = withChildren(withBehaviors(named(Group.value)("toggle-btn-" + show16(trackIdx))([attr2("transform")(text6("translate(" + (show9(btnX) + ("," + (show9(btnY) + ")"))))), attr2("style")(text6("cursor: pointer;")), attr2("class")(text6("layout-toggle-btn"))]))([onClick(onToggle(trackIdx))]))([elem3(Circle.value)([cx2(num2(0)), cy2(num2(0)), r2(num2(10)), fill2(text6("#f5f5f5")), stroke2(text6("#999")), strokeWidth2(num2(1.5))]), elem3(Text.value)([x3(num2(0)), y3(num2(4)), textContent3(text6((function() {
-                var $153 = targetLayout === "sunburst";
-                if ($153) {
+                var $155 = targetLayout === "sunburst";
+                if ($155) {
                   return "\u25C9";
                 }
                 ;
@@ -35970,21 +36008,21 @@
             return function(idx) {
               var densityPct = round2(metrics.density * 100);
               var speedStr = (function() {
-                var $158 = metrics.speedFactor === 1;
-                if ($158) {
+                var $160 = metrics.speedFactor === 1;
+                if ($160) {
                   return "";
                 }
                 ;
-                var $159 = metrics.speedFactor > 1;
-                if ($159) {
+                var $161 = metrics.speedFactor > 1;
+                if ($161) {
                   return " \xD7" + show16(round2(metrics.speedFactor));
                 }
                 ;
                 return " \xF7" + show16(round2(1 / metrics.speedFactor));
               })();
               var polyStr = (function() {
-                var $160 = metrics.maxPolyphony > 1;
-                if ($160) {
+                var $162 = metrics.maxPolyphony > 1;
+                if ($162) {
                   return " \u266A" + show16(metrics.maxPolyphony);
                 }
                 ;
@@ -36140,23 +36178,37 @@
                               });
                             })()))(function() {
                               var innerRadius = r$prime * 0.35;
+                              var rootNode = find2(function(v2) {
+                                return v2.value0.depth === 0;
+                              })(allNodes);
+                              var rootType = (function() {
+                                if (rootNode instanceof Just) {
+                                  return rootNode.value0.value0.data_.nodeType;
+                                }
+                                ;
+                                if (rootNode instanceof Nothing) {
+                                  return "sequence";
+                                }
+                                ;
+                                throw new Error("Failed pattern match at D3.Viz.PatternTree.Mixed (line 305, column 18 - line 307, column 30): " + [rootNode.constructor.name]);
+                              })();
                               var centerBg = (function() {
                                 if (track2.active) {
-                                  return "#fff";
+                                  return sunburstColor(rootType);
                                 }
                                 ;
                                 return "#f5f5f5";
                               })();
                               var centerStroke = (function() {
                                 if (track2.active) {
-                                  return "#ddd";
+                                  return "#fff";
                                 }
                                 ;
                                 return "#ccc";
                               })();
                               var centerTextColor = (function() {
                                 if (track2.active) {
-                                  return "#333";
+                                  return "#fff";
                                 }
                                 ;
                                 return "#999";

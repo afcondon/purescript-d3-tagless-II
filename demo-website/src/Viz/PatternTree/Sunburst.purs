@@ -51,6 +51,13 @@ patternToHierarchy pattern =
     Rest -> go [] 1.0 (Sequence [pattern])
     _ -> go [] 1.0 pattern
   where
+  -- Helper: is this pattern a container (has structural children)?
+  isContainer :: PatternTree -> Boolean
+  isContainer = case _ of
+    Sound _ -> false
+    Rest -> false
+    _ -> true  -- All others are containers
+
   -- weight: the time value each leaf should have (1.0 normally, subdivided inside Fast/Repeat)
   go :: Array Int -> Number -> PatternTree -> HierarchyData HierarchyNodeData
   go currentPath weight = case _ of
@@ -69,11 +76,24 @@ patternToHierarchy pattern =
         }
 
     Sequence children ->
-      HierarchyData
-        { data_: { label: "seq", nodeType: "sequence", path: currentPath }
-        , value: Nothing  -- Will sum children
-        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) weight c) children
-        }
+      let
+        -- Check if any siblings are containers - if so, wrap leaves in spacers
+        hasContainers = Array.any isContainer children
+        processChild i c =
+          if hasContainers && not (isContainer c)
+          then -- Wrap leaf in transparent spacer to push it to same depth as container contents
+            HierarchyData
+              { data_: { label: "", nodeType: "spacer", path: currentPath <> [i] }
+              , value: Nothing  -- Will inherit from child
+              , children: Just [ go (currentPath <> [i, 0]) weight c ]
+              }
+          else go (currentPath <> [i]) weight c
+      in
+        HierarchyData
+          { data_: { label: "seq", nodeType: "sequence", path: currentPath }
+          , value: Nothing  -- Will sum children
+          , children: Just $ Array.mapWithIndex processChild children
+          }
 
     Parallel children ->
       HierarchyData
@@ -91,6 +111,7 @@ patternToHierarchy pattern =
 
     -- SEMANTIC EXPANSION: Fast n subdivides the slot into n parts
     -- Each child gets weight/n so they total to parent's weight
+    -- Keep nodeType as "fast" so it shows pink, even though structurally it's a sequence
     Fast n child ->
       let
         copies = Int.round n
@@ -100,7 +121,7 @@ patternToHierarchy pattern =
           (Array.replicate copies unit)
       in
         HierarchyData
-          { data_: { label: "seq", nodeType: "sequence", path: currentPath }
+          { data_: { label: "*" <> show (Int.round n), nodeType: "fast", path: currentPath }
           , value: Nothing
           , children: Just expandedChildren
           }
@@ -163,6 +184,7 @@ sunburstColor = case _ of
   "degrade" -> "#795548"    -- Brown for degrade/probability
   "repeat" -> "#673AB7"     -- Deep purple for repeat
   "elongate" -> "#009688"   -- Teal for elongate
+  "spacer" -> "#FFFFFF"     -- White for spacers (visual depth alignment)
   _ -> "#607D8B"
 
 -- | Get alternating green shade for sound nodes
@@ -224,37 +246,74 @@ isCombinator nodeType = case combinatorBadge nodeType of
 sunburstArcPath :: Number -> Number -> Number -> Number -> Number -> String
 sunburstArcPath x0_ y0_ x1_ y1_ radius =
   let
-    -- Convert normalized x to angles (0 to 2π), starting at top
-    startAngle = x0_ * 2.0 * pi - (pi / 2.0)
-    endAngle = x1_ * 2.0 * pi - (pi / 2.0)
-
     -- Convert normalized y to radius
     innerRadius = y0_ * radius
     outerRadius = y1_ * radius
 
-    -- Calculate arc points
-    x00 = cos startAngle * innerRadius
-    y00 = sin startAngle * innerRadius
-    x01 = cos endAngle * innerRadius
-    y01 = sin endAngle * innerRadius
-    x10 = cos startAngle * outerRadius
-    y10 = sin startAngle * outerRadius
-    x11 = cos endAngle * outerRadius
-    y11 = sin endAngle * outerRadius
-
-    -- Large arc flag: 1 if angle > π, 0 otherwise
-    largeArc = if (endAngle - startAngle) > pi then 1 else 0
+    -- Check if arc spans nearly full circle (>99%) - SVG can't handle this with single arc
+    arcSpan = x1_ - x0_
   in
-    -- SVG path for arc segment
-    "M" <> show x10 <> "," <> show y10
-      <> "A" <> show outerRadius <> "," <> show outerRadius
-      <> " 0 " <> show largeArc <> " 1 "
-      <> show x11 <> "," <> show y11
-      <> "L" <> show x01 <> "," <> show y01
-      <> "A" <> show innerRadius <> "," <> show innerRadius
-      <> " 0 " <> show largeArc <> " 0 "
-      <> show x00 <> "," <> show y00
-      <> "Z"
+    if arcSpan > 0.99 then
+      -- Full ring: use two semicircular arcs
+      let
+        -- Top point (angle = -π/2)
+        topOuterX = 0.0
+        topOuterY = -outerRadius
+        topInnerX = 0.0
+        topInnerY = -innerRadius
+        -- Bottom point (angle = π/2)
+        bottomOuterX = 0.0
+        bottomOuterY = outerRadius
+        bottomInnerX = 0.0
+        bottomInnerY = innerRadius
+      in
+        -- Draw full ring as two semicircles
+        "M" <> show topOuterX <> "," <> show topOuterY
+          -- Outer arc: top to bottom (right side)
+          <> "A" <> show outerRadius <> "," <> show outerRadius <> " 0 0 1 "
+          <> show bottomOuterX <> "," <> show bottomOuterY
+          -- Outer arc: bottom to top (left side)
+          <> "A" <> show outerRadius <> "," <> show outerRadius <> " 0 0 1 "
+          <> show topOuterX <> "," <> show topOuterY
+          -- Line to inner top
+          <> "M" <> show topInnerX <> "," <> show topInnerY
+          -- Inner arc: top to bottom (right side, counterclockwise)
+          <> "A" <> show innerRadius <> "," <> show innerRadius <> " 0 0 0 "
+          <> show bottomInnerX <> "," <> show bottomInnerY
+          -- Inner arc: bottom to top (left side)
+          <> "A" <> show innerRadius <> "," <> show innerRadius <> " 0 0 0 "
+          <> show topInnerX <> "," <> show topInnerY
+          <> "Z"
+    else
+      -- Normal arc path
+      let
+        -- Convert normalized x to angles (0 to 2π), starting at top
+        startAngle = x0_ * 2.0 * pi - (pi / 2.0)
+        endAngle = x1_ * 2.0 * pi - (pi / 2.0)
+
+        -- Calculate arc points
+        x00 = cos startAngle * innerRadius
+        y00 = sin startAngle * innerRadius
+        x01 = cos endAngle * innerRadius
+        y01 = sin endAngle * innerRadius
+        x10 = cos startAngle * outerRadius
+        y10 = sin startAngle * outerRadius
+        x11 = cos endAngle * outerRadius
+        y11 = sin endAngle * outerRadius
+
+        -- Large arc flag: 1 if angle > π, 0 otherwise
+        largeArc = if (endAngle - startAngle) > pi then 1 else 0
+      in
+        -- SVG path for arc segment
+        "M" <> show x10 <> "," <> show y10
+          <> "A" <> show outerRadius <> "," <> show outerRadius
+          <> " 0 " <> show largeArc <> " 1 "
+          <> show x11 <> "," <> show y11
+          <> "L" <> show x01 <> "," <> show y01
+          <> "A" <> show innerRadius <> "," <> show innerRadius
+          <> " 0 " <> show largeArc <> " 0 "
+          <> show x00 <> "," <> show y00
+          <> "Z"
 
 -- | Flatten PartitionNode tree to array
 flattenPartition :: forall a. PartitionNode a -> Array (PartitionNode a)
@@ -375,9 +434,10 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
           partitioned = partition config partRoot
           -- Fix parallel layout: make parallel children share angular extent
           fixedPartitioned = fixParallelLayout partitioned
-          -- Flatten and filter out root (depth 0)
+          -- Flatten all nodes - show everything for consistent structure visualization
+          -- (center circle is rendered on top to maintain label area)
           allNodes = flattenPartition fixedPartitioned
-          nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
+          nodes = allNodes
           -- Separate leaf nodes (sounds/rests) for labeling
           leafNodes = Array.filter (\(PartNode n) -> n.data_.nodeType == "sound" || n.data_.nodeType == "rest") nodes
           -- Grid position
@@ -559,21 +619,21 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
       -- Opacity based on active state
       let arcOpacity = if active then 0.85 else 0.25
 
-      -- Render arcs with enhanced styling for fast/slow
+      -- Render arcs - filter out depth-0 nodes (root spans full circle, SVG arc limitation)
+      -- Depth > 0 nodes render fine; we'll add ring support for roots later
+      let nonRootNodes = Array.filter (\(PartNode n) -> n.depth > 0) nodes
       let
         arcsTree :: T.Tree (PartitionNode HierarchyNodeData)
         arcsTree =
           T.named Group ("sunburst-" <> show idx)
             [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
             `T.withChild`
-              ( T.joinData ("arcs-" <> show idx) "path" nodes $ \(PartNode node) ->
+              ( T.joinData ("arcs-" <> show idx) "path" nonRootNodes $ \(PartNode node) ->
                   let
                     strokeStyle = sunburstStroke node.data_.nodeType
-                    -- Use last element of path as index for alternating colors
                     pathIdx = case Array.last node.data_.path of
                       Just i -> i
                       Nothing -> 0
-                    -- Use alternating greens for sounds, regular fill for others
                     fillColor = if node.data_.nodeType == "sound"
                       then soundColorByIndex pathIdx
                       else sunburstFill node.data_.nodeType
@@ -586,16 +646,29 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
                       , strokeWidth $ num strokeStyle.width
                       , attr "stroke-dasharray" $ text strokeStyle.dashArray
                       , attr "class" $ text ("arc arc-" <> node.data_.nodeType)
+                      , attr "data-nodetype" $ text node.data_.nodeType
+                      , attr "data-depth" $ text (show node.depth)
+                      , attr "data-fill" $ text fillColor
                       ]
               )
       _ <- renderTree zoomGroupSel arcsTree
 
       -- Render center circle with track name (clickable to toggle)
+      -- Color the center based on root node type (layer 0 = center circle)
       let
         innerRadius = r' * 0.35  -- Inner hole radius
-        centerBg = if active then "#fff" else "#f5f5f5"
-        centerStroke = if active then "#ddd" else "#ccc"
-        centerTextColor = if active then "#333" else "#999"
+        -- Find root node (depth 0) to get its type for coloring
+        rootNode = Array.find (\(PartNode n) -> n.depth == 0) nodes
+        rootType = case rootNode of
+          Just (PartNode n) -> n.data_.nodeType
+          Nothing -> "sequence"  -- fallback
+        -- Use root's color for center background when active
+        centerBg = if active
+          then sunburstColor rootType
+          else "#f5f5f5"
+        centerStroke = if active then "#fff" else "#ccc"
+        -- White text on colored background, dark on inactive
+        centerTextColor = if active then "#fff" else "#999"
         centerTree :: T.Tree Unit
         centerTree =
           T.named Group ("center-" <> show idx)

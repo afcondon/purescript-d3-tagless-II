@@ -299,10 +299,15 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
       pure unit
 
   -- Render center circle with track name (no click behavior - use buttons instead)
+  -- Color the center based on root node type (layer 0 = center circle)
   let innerRadius = r' * 0.35
-  let centerBg = if track.active then "#fff" else "#f5f5f5"
-  let centerStroke = if track.active then "#ddd" else "#ccc"
-  let centerTextColor = if track.active then "#333" else "#999"
+  let rootNode = Array.find (\(PartNode n) -> n.depth == 0) allNodes
+  let rootType = case rootNode of
+        Just (PartNode n) -> n.data_.nodeType
+        Nothing -> "sequence"  -- fallback
+  let centerBg = if track.active then sunburstColor rootType else "#f5f5f5"
+  let centerStroke = if track.active then "#fff" else "#ccc"
+  let centerTextColor = if track.active then "#fff" else "#999"
   let centerTree :: T.Tree Unit
       centerTree =
         T.named Group ("center-" <> show idx)
