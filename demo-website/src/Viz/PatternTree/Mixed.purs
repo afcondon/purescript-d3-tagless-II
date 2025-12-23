@@ -32,7 +32,7 @@ import Control.Monad (when)
 import D3.Viz.PatternTree.Types (PatternNode, LinkDatum, TrackLayout(..), TrackWithLayout, ZoomTransform)
 import D3.Viz.PatternTree.Layout (patternTreeToTree, makeLinks, nodeColor)
 import D3.Viz.PatternTree.Euclidean (parseEuclideanLabel, euclideanPattern)
-import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstFill, sunburstStroke, sunburstArcPath, flattenPartition, combinatorBadge, isCombinator, HierarchyNodeData)
+import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstFill, sunburstStroke, sunburstArcPath, flattenPartition, fixParallelLayout, combinatorBadge, isCombinator, HierarchyNodeData)
 
 -- | Draw patterns with per-track layout (tree or sunburst)
 -- | onToggleActive: called when center is clicked (toggle mute)
@@ -181,7 +181,9 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
   let partRoot = hierarchy hierData
   let config = defaultPartitionConfig { size = { width: 1.0, height: 1.0 }, padding = 0.002 }
   let partitioned = partition config partRoot
-  let allNodes = flattenPartition partitioned
+  -- Fix parallel layout: make parallel children share angular extent
+  let fixedPartitioned = fixParallelLayout partitioned
+  let allNodes = flattenPartition fixedPartitioned
   let nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
 
   -- Render arcs (with click handlers on toggleable nodes)

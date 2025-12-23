@@ -6,6 +6,7 @@ module D3.Viz.PatternTree.Sunburst
   , sunburstStroke
   , sunburstArcPath
   , flattenPartition
+  , fixParallelLayout
   , combinatorBadge
   , isCombinator
   , HierarchyNodeData
@@ -69,7 +70,7 @@ patternToHierarchy = go []
     Parallel children ->
       HierarchyData
         { data_: { label: "par", nodeType: "parallel", path: currentPath }
-        , value: Nothing
+        , value: Just 1.0  -- Parallel = 1 time slot (simultaneous, not sequential)
         , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) c) children
         }
 
@@ -225,6 +226,81 @@ flattenPartition node@(PartNode n) =
   if Array.length n.children == 0 then [ node ]
   else [ node ] <> (n.children >>= flattenPartition)
 
+-- | Fix parallel layout: make children of "parallel" nodes share the parent's angular extent
+-- | and stack radially (same angle, different radius) instead of dividing angular space.
+fixParallelLayout :: PartitionNode HierarchyNodeData -> PartitionNode HierarchyNodeData
+fixParallelLayout (PartNode node) =
+  let
+    -- Recursively fix children first
+    fixedChildren = map fixParallelLayout node.children
+
+    -- If this node is a parallel node, adjust children to stack radially
+    adjustedChildren =
+      if node.data_.nodeType == "parallel" then
+        stackRadially node.x0 node.x1 node.y1 fixedChildren
+      else
+        fixedChildren
+  in
+    PartNode (node { children = adjustedChildren })
+  where
+  -- Stack children radially: same angular extent, divided radial space
+  stackRadially :: Number -> Number -> Number -> Array (PartitionNode HierarchyNodeData) -> Array (PartitionNode HierarchyNodeData)
+  stackRadially parentX0 parentX1 _parentY1 children =
+    let
+      numChildren = Array.length children
+      -- Get the y0 and y1 from first child (they all have same y range from partition)
+      -- Children extend OUTWARD from parent, so use their actual y range
+      baseY0 = case Array.head children of
+        Just (PartNode c) -> c.y0
+        Nothing -> 0.0
+      maxY1 = case Array.head children of
+        Just (PartNode c) -> c.y1
+        Nothing -> 1.0
+      -- Total radial space available for children (their outer ring)
+      totalRadialSpace = maxY1 - baseY0
+      -- Divide radial space equally among children
+      radialSlice = if numChildren > 0 then totalRadialSpace / Int.toNumber numChildren else 0.0
+    in
+      Array.mapWithIndex (stackChild parentX0 parentX1 baseY0 radialSlice) children
+
+  -- Stack a single child at its radial position
+  stackChild :: Number -> Number -> Number -> Number -> Int -> PartitionNode HierarchyNodeData -> PartitionNode HierarchyNodeData
+  stackChild parentX0 parentX1 baseY0 radialSlice idx (PartNode child) =
+    let
+      -- Calculate this child's radial band
+      newY0 = baseY0 + Int.toNumber idx * radialSlice
+      newY1 = newY0 + radialSlice
+      -- Recursively adjust all descendants
+      adjustedDescendants = map (adjustDescendant parentX0 parentX1 newY0 newY1 child.x0 child.x1 child.y0 child.y1) child.children
+    in
+      -- Set angular extent to parent's and radial extent to this slice
+      PartNode (child { x0 = parentX0, x1 = parentX1, y0 = newY0, y1 = newY1, children = adjustedDescendants })
+
+  -- Adjust descendants: remap their coordinates relative to the new parent extent
+  adjustDescendant :: Number -> Number -> Number -> Number -> Number -> Number -> Number -> Number -> PartitionNode HierarchyNodeData -> PartitionNode HierarchyNodeData
+  adjustDescendant newParentX0 newParentX1 newParentY0 newParentY1 oldParentX0 oldParentX1 oldParentY0 oldParentY1 (PartNode desc) =
+    let
+      -- Remap angular coordinates proportionally
+      oldXWidth = oldParentX1 - oldParentX0
+      newXWidth = newParentX1 - newParentX0
+      relativeX0 = if oldXWidth > 0.0 then (desc.x0 - oldParentX0) / oldXWidth else 0.0
+      relativeX1 = if oldXWidth > 0.0 then (desc.x1 - oldParentX0) / oldXWidth else 1.0
+      newX0 = newParentX0 + relativeX0 * newXWidth
+      newX1 = newParentX0 + relativeX1 * newXWidth
+
+      -- Remap radial coordinates proportionally
+      oldYHeight = oldParentY1 - oldParentY0
+      newYHeight = newParentY1 - newParentY0
+      relativeY0 = if oldYHeight > 0.0 then (desc.y0 - oldParentY0) / oldYHeight else 0.0
+      relativeY1 = if oldYHeight > 0.0 then (desc.y1 - oldParentY0) / oldYHeight else 1.0
+      newY0 = newParentY0 + relativeY0 * newYHeight
+      newY1 = newParentY0 + relativeY1 * newYHeight
+
+      -- Recursively adjust this descendant's children
+      adjustedChildren = map (adjustDescendant newX0 newX1 newY0 newY1 desc.x0 desc.x1 desc.y0 desc.y1) desc.children
+    in
+      PartNode (desc { x0 = newX0, x1 = newX1, y0 = newY0, y1 = newY1, children = adjustedChildren })
+
 -- | Named pattern for standalone sunburst visualization
 type NamedPattern = { name :: String, pattern :: PatternTree, trackIndex :: Int, active :: Boolean }
 
@@ -261,8 +337,10 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
             , padding = 0.002
             }
           partitioned = partition config partRoot
+          -- Fix parallel layout: make parallel children share angular extent
+          fixedPartitioned = fixParallelLayout partitioned
           -- Flatten and filter out root (depth 0)
-          allNodes = flattenPartition partitioned
+          allNodes = flattenPartition fixedPartitioned
           nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
           -- Separate leaf nodes (sounds/rests) for labeling
           leafNodes = Array.filter (\(PartNode n) -> n.data_.nodeType == "sound" || n.data_.nodeType == "rest") nodes
