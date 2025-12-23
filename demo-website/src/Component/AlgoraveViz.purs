@@ -94,6 +94,7 @@ type State =
   , miniNotationInput :: String
   , parseError :: Maybe String
   , zoomTransform :: ZoomTransform  -- Preserved zoom state
+  , leftPanelOpen :: Boolean        -- Slide-out panel state
   }
 
 -- | Path to a node in the pattern tree (list of child indices)
@@ -114,6 +115,7 @@ data Action
   | ParseAndAddTrack
   | AddPresetPattern String String  -- name, pattern
   | ClearTracks
+  | ToggleLeftPanel  -- Toggle slide-out panel
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -123,6 +125,7 @@ component = H.mkComponent
       , miniNotationInput: "bd sn*2 [cp hh]"
       , parseError: Nothing
       , zoomTransform: identityZoom
+      , leftPanelOpen: true  -- Start with panel open
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -213,6 +216,9 @@ handleAction = case _ of
   ClearTracks -> do
     H.modify_ \s -> s { tracks = [] }
     handleAction RenderForest
+
+  ToggleLeftPanel -> do
+    H.modify_ \s -> s { leftPanelOpen = not s.leftPanelOpen }
 
   RenderForest -> do
     state <- H.get
@@ -346,17 +352,15 @@ render state =
             ]
             []
 
-        -- Floating input panel (top-left)
+        -- Slide-out input panel (left side)
         , HH.div
-            [ HP.classes
-                [ HH.ClassName "floating-panel"
-                , HH.ClassName "floating-panel--top-left"
-                , HH.ClassName "floating-panel--large"
-                , HH.ClassName "algorave-input-panel"
-                ]
+            [ HP.classes $
+                [ HH.ClassName "slide-panel"
+                , HH.ClassName "slide-panel--left"
+                ] <> if state.leftPanelOpen then [ HH.ClassName "slide-panel--open" ] else []
             ]
             [ HH.h2
-                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HP.classes [ HH.ClassName "slide-panel__title" ] ]
                 [ HH.text "Mini-notation Parser" ]
             -- Mini-notation input
             , HH.div
@@ -390,7 +394,7 @@ render state =
                 ]
             -- Preset patterns
             , HH.h3
-                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HP.classes [ HH.ClassName "slide-panel__subtitle" ] ]
                 [ HH.text "Test Patterns" ]
             , HH.div
                 [ HP.classes [ HH.ClassName "preset-grid" ] ]
@@ -407,9 +411,23 @@ render state =
                 , presetButton "complex" "al_perc:00*2 [tabla2:23 tabla2:09]"
                 , presetButton "nested" "[bd sn] [cp [hh oh]]"
                 ]
+            -- Usage hint
+            , HH.p
+                [ HP.classes [ HH.ClassName "hint-text" ] ]
+                [ HH.text "Click seq/par nodes to toggle" ]
             ]
 
-        -- Floating output panel (top-right)
+        -- Toggle tab for slide-out panel
+        , HH.button
+            [ HE.onClick \_ -> ToggleLeftPanel
+            , HP.classes $
+                [ HH.ClassName "slide-panel__toggle"
+                , HH.ClassName "slide-panel__toggle--left"
+                ] <> if state.leftPanelOpen then [ HH.ClassName "slide-panel__toggle--open" ] else []
+            ]
+            [ HH.text $ if state.leftPanelOpen then "◀" else "▶" ]
+
+        -- Floating output panel (top-right) - keeping for now
         , HH.div
             [ HP.classes
                 [ HH.ClassName "floating-panel"
@@ -424,30 +442,6 @@ render state =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-display" ] ]
                 [ HH.code_ [ HH.text $ generateTidalCode state.tracks ] ]
-            ]
-
-        -- Floating control panel (bottom-center)
-        , HH.div
-            [ HP.classes
-                [ HH.ClassName "floating-panel"
-                , HH.ClassName "floating-panel--bottom-center"
-                , HH.ClassName "floating-panel--small"
-                , HH.ClassName "algorave-control-panel"
-                ]
-            ]
-            [ -- Hint about controls
-              HH.div
-                [ HP.classes [ HH.ClassName "control-group" ] ]
-                [ HH.p
-                    [ HP.classes [ HH.ClassName "hint-text" ] ]
-                    [ HH.text "Click seq/par nodes to toggle • 🔊 mute • ◉⬡ layout" ]
-                ]
-            -- Visualize button
-            , HH.button
-                [ HE.onClick \_ -> RenderForest
-                , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--primary" ]
-                ]
-                [ HH.text "▶ Visualize" ]
             ]
         ]
     ]
