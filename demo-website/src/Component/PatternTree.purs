@@ -2,13 +2,18 @@ module Component.PatternTree
   ( PatternTree(..)
   , fromTPat
   , parseMiniNotation
+  , PatternMetrics
+  , analyzePattern
   ) where
 
 import Prelude
 
 import Data.Array as Array
 import Data.Either (Either)
-import Data.Maybe (Maybe(..))
+import Data.Foldable (foldl, maximum)
+import Data.Int as Int
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Set as Set
 import Data.Rational (Rational, toNumber)
 import Data.String as String
 import Parsing (ParseError)
@@ -132,3 +137,172 @@ tpatIntToInt :: TPat Int -> Int
 tpatIntToInt = case _ of
   TPat_Atom (Located _ n) -> n
   _ -> 0  -- Default for complex patterns
+
+-- ============================================================================
+-- Pattern Analysis - Compute derived metrics from patterns
+-- ============================================================================
+
+-- | Metrics computed from a pattern
+-- | These are "at a glance" values that are tedious to mentally compute from text
+type PatternMetrics =
+  { events :: Int           -- Number of sound events (excluding rests)
+  , rests :: Int            -- Number of rest slots
+  , slots :: Int            -- Total slots (events + rests)
+  , density :: Number       -- events / slots (0.0 to 1.0)
+  , maxPolyphony :: Int     -- Maximum concurrent voices (from parallel stacking)
+  , uniqueSamples :: Int    -- Number of distinct sample names
+  , samples :: Array String -- List of unique sample names
+  , hasEuclidean :: Boolean -- Uses euclidean rhythm
+  , hasProbability :: Boolean -- Uses probabilistic elements
+  , speedFactor :: Number   -- Net speed multiplier (fast/slow combined)
+  , depth :: Int            -- Maximum nesting depth
+  }
+
+-- | Analyze a pattern and compute all metrics
+analyzePattern :: PatternTree -> PatternMetrics
+analyzePattern pattern =
+  { events: countEvents pattern
+  , rests: countRests pattern
+  , slots: countEvents pattern + countRests pattern
+  , density: computeDensity pattern
+  , maxPolyphony: computeMaxPolyphony pattern
+  , uniqueSamples: Set.size (collectSamples pattern)
+  , samples: Array.fromFoldable (collectSamples pattern)
+  , hasEuclidean: hasEuclideanRhythm pattern
+  , hasProbability: hasProbabilityNode pattern
+  , speedFactor: computeSpeedFactor pattern
+  , depth: computeDepth pattern
+  }
+
+-- | Count sound events (excluding rests)
+countEvents :: PatternTree -> Int
+countEvents = case _ of
+  Sound _ -> 1
+  Rest -> 0
+  Sequence children -> foldl (\acc c -> acc + countEvents c) 0 children
+  Parallel children -> foldl (\acc c -> acc + countEvents c) 0 children
+  Choice children -> foldl (\acc c -> acc + countEvents c) 0 children
+  Fast _ child -> countEvents child
+  Slow _ child -> countEvents child
+  Euclidean _ _ child -> countEvents child
+  Degrade _ child -> countEvents child
+  Repeat n child -> n * countEvents child
+  Elongate _ child -> countEvents child
+
+-- | Count rest slots
+countRests :: PatternTree -> Int
+countRests = case _ of
+  Sound _ -> 0
+  Rest -> 1
+  Sequence children -> foldl (\acc c -> acc + countRests c) 0 children
+  Parallel children -> foldl (\acc c -> acc + countRests c) 0 children
+  Choice children -> foldl (\acc c -> acc + countRests c) 0 children
+  Fast _ child -> countRests child
+  Slow _ child -> countRests child
+  Euclidean _ _ child -> countRests child
+  Degrade _ child -> countRests child
+  Repeat n child -> n * countRests child
+  Elongate _ child -> countRests child
+
+-- | Compute density (events / total slots)
+computeDensity :: PatternTree -> Number
+computeDensity pattern =
+  let events = countEvents pattern
+      slots = events + countRests pattern
+  in if slots == 0 then 0.0 else Int.toNumber events / Int.toNumber slots
+
+-- | Compute maximum polyphony (concurrent voices)
+computeMaxPolyphony :: PatternTree -> Int
+computeMaxPolyphony = go 1
+  where
+  go currentPoly = case _ of
+    Sound _ -> currentPoly
+    Rest -> currentPoly
+    Sequence children -> fromMaybe currentPoly $ maximum (map (go currentPoly) children)
+    Parallel children ->
+      -- Parallel adds voices; each branch contributes its max
+      let branchPolys = map (go 1) children
+          totalPoly = foldl (+) 0 branchPolys
+      in max currentPoly totalPoly
+    Choice children -> fromMaybe currentPoly $ maximum (map (go currentPoly) children)
+    Fast _ child -> go currentPoly child
+    Slow _ child -> go currentPoly child
+    Euclidean _ _ child -> go currentPoly child
+    Degrade _ child -> go currentPoly child
+    Repeat _ child -> go currentPoly child
+    Elongate _ child -> go currentPoly child
+
+-- | Collect all unique sample names
+collectSamples :: PatternTree -> Set.Set String
+collectSamples = case _ of
+  Sound s -> Set.singleton s
+  Rest -> Set.empty
+  Sequence children -> foldl (\acc c -> Set.union acc (collectSamples c)) Set.empty children
+  Parallel children -> foldl (\acc c -> Set.union acc (collectSamples c)) Set.empty children
+  Choice children -> foldl (\acc c -> Set.union acc (collectSamples c)) Set.empty children
+  Fast _ child -> collectSamples child
+  Slow _ child -> collectSamples child
+  Euclidean _ _ child -> collectSamples child
+  Degrade _ child -> collectSamples child
+  Repeat _ child -> collectSamples child
+  Elongate _ child -> collectSamples child
+
+-- | Check if pattern uses euclidean rhythm
+hasEuclideanRhythm :: PatternTree -> Boolean
+hasEuclideanRhythm = case _ of
+  Sound _ -> false
+  Rest -> false
+  Sequence children -> Array.any hasEuclideanRhythm children
+  Parallel children -> Array.any hasEuclideanRhythm children
+  Choice children -> Array.any hasEuclideanRhythm children
+  Fast _ child -> hasEuclideanRhythm child
+  Slow _ child -> hasEuclideanRhythm child
+  Euclidean _ _ _ -> true
+  Degrade _ child -> hasEuclideanRhythm child
+  Repeat _ child -> hasEuclideanRhythm child
+  Elongate _ child -> hasEuclideanRhythm child
+
+-- | Check if pattern uses probability/degrade
+hasProbabilityNode :: PatternTree -> Boolean
+hasProbabilityNode = case _ of
+  Sound _ -> false
+  Rest -> false
+  Sequence children -> Array.any hasProbabilityNode children
+  Parallel children -> Array.any hasProbabilityNode children
+  Choice children -> Array.any hasProbabilityNode children
+  Fast _ child -> hasProbabilityNode child
+  Slow _ child -> hasProbabilityNode child
+  Euclidean _ _ child -> hasProbabilityNode child
+  Degrade _ _ -> true
+  Repeat _ child -> hasProbabilityNode child
+  Elongate _ child -> hasProbabilityNode child
+
+-- | Compute net speed factor (product of all fast/slow modifiers)
+computeSpeedFactor :: PatternTree -> Number
+computeSpeedFactor = case _ of
+  Sound _ -> 1.0
+  Rest -> 1.0
+  Sequence children -> fromMaybe 1.0 $ maximum (map computeSpeedFactor children)
+  Parallel children -> fromMaybe 1.0 $ maximum (map computeSpeedFactor children)
+  Choice children -> fromMaybe 1.0 $ maximum (map computeSpeedFactor children)
+  Fast n child -> n * computeSpeedFactor child
+  Slow n child -> (1.0 / n) * computeSpeedFactor child
+  Euclidean _ _ child -> computeSpeedFactor child
+  Degrade _ child -> computeSpeedFactor child
+  Repeat _ child -> computeSpeedFactor child
+  Elongate _ child -> computeSpeedFactor child
+
+-- | Compute maximum nesting depth
+computeDepth :: PatternTree -> Int
+computeDepth = case _ of
+  Sound _ -> 0
+  Rest -> 0
+  Sequence children -> 1 + (fromMaybe 0 $ maximum (map computeDepth children))
+  Parallel children -> 1 + (fromMaybe 0 $ maximum (map computeDepth children))
+  Choice children -> 1 + (fromMaybe 0 $ maximum (map computeDepth children))
+  Fast _ child -> 1 + computeDepth child
+  Slow _ child -> 1 + computeDepth child
+  Euclidean _ _ child -> 1 + computeDepth child
+  Degrade _ child -> 1 + computeDepth child
+  Repeat _ child -> 1 + computeDepth child
+  Elongate _ child -> 1 + computeDepth child
