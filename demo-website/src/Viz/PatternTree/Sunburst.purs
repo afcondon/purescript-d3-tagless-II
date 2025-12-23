@@ -41,22 +41,30 @@ type HierarchyNodeData =
   }
 
 -- | Convert PatternTree to HierarchyData for partition layout
+-- | This does SEMANTIC expansion - Fast/Repeat are expanded to show subdivisions
+-- | The weight parameter ensures subdivisions get proportional space
 patternToHierarchy :: PatternTree -> HierarchyData HierarchyNodeData
-patternToHierarchy = go []
+patternToHierarchy pattern =
+  -- Wrap single sounds/rests in a sequence so they show as full ring
+  case pattern of
+    Sound _ -> go [] 1.0 (Sequence [pattern])
+    Rest -> go [] 1.0 (Sequence [pattern])
+    _ -> go [] 1.0 pattern
   where
-  go :: Array Int -> PatternTree -> HierarchyData HierarchyNodeData
-  go currentPath = case _ of
+  -- weight: the time value each leaf should have (1.0 normally, subdivided inside Fast/Repeat)
+  go :: Array Int -> Number -> PatternTree -> HierarchyData HierarchyNodeData
+  go currentPath weight = case _ of
     Sound s ->
       HierarchyData
         { data_: { label: s, nodeType: "sound", path: currentPath }
-        , value: Just 1.0  -- Leaf nodes have explicit value
+        , value: Just weight  -- Use inherited weight for proper proportions
         , children: Nothing
         }
 
     Rest ->
       HierarchyData
         { data_: { label: "~", nodeType: "rest", path: currentPath }
-        , value: Just 1.0
+        , value: Just weight
         , children: Nothing
         }
 
@@ -64,70 +72,87 @@ patternToHierarchy = go []
       HierarchyData
         { data_: { label: "seq", nodeType: "sequence", path: currentPath }
         , value: Nothing  -- Will sum children
-        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) c) children
+        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) weight c) children
         }
 
     Parallel children ->
       HierarchyData
         { data_: { label: "par", nodeType: "parallel", path: currentPath }
-        , value: Just 1.0  -- Parallel = 1 time slot (simultaneous, not sequential)
-        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) c) children
+        , value: Just weight  -- Parallel = same time slot (simultaneous)
+        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) weight c) children
         }
 
     Choice children ->
       HierarchyData
         { data_: { label: "?", nodeType: "choice", path: currentPath }
         , value: Nothing
-        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) c) children
+        , children: Just $ Array.mapWithIndex (\i c -> go (currentPath <> [i]) weight c) children
         }
 
-    -- New extended constructors - wrap child with modifier
+    -- SEMANTIC EXPANSION: Fast n subdivides the slot into n parts
+    -- Each child gets weight/n so they total to parent's weight
     Fast n child ->
-      HierarchyData
-        { data_: { label: "*" <> show (Int.round n), nodeType: "fast", path: currentPath }
-        , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
-        }
+      let
+        copies = Int.round n
+        childWeight = weight / n  -- Subdivide: each copy gets 1/n of parent's time
+        expandedChildren = Array.mapWithIndex
+          (\i _ -> go (currentPath <> [i]) childWeight child)
+          (Array.replicate copies unit)
+      in
+        HierarchyData
+          { data_: { label: "seq", nodeType: "sequence", path: currentPath }
+          , value: Nothing
+          , children: Just expandedChildren
+          }
 
+    -- Slow doesn't subdivide, it stretches - keep as wrapper for now
+    -- (metrics will show cycle length > 1)
     Slow n child ->
       HierarchyData
         { data_: { label: "/" <> show (Int.round n), nodeType: "slow", path: currentPath }
         , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
+        , children: Just [ go (currentPath <> [0]) weight child ]
         }
 
     Euclidean n k child ->
       HierarchyData
         { data_: { label: "(" <> show n <> "," <> show k <> ")", nodeType: "euclidean", path: currentPath }
         , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
+        , children: Just [ go (currentPath <> [0]) weight child ]
         }
 
     Degrade prob child ->
       HierarchyData
         { data_: { label: "?" <> show (Int.round (prob * 100.0)) <> "%", nodeType: "degrade", path: currentPath }
         , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
+        , children: Just [ go (currentPath <> [0]) weight child ]
         }
 
+    -- SEMANTIC EXPANSION: Repeat n means play child n times sequentially
+    -- Unlike Fast, Repeat ADDS time (n slots), so each child keeps the weight
     Repeat n child ->
-      HierarchyData
-        { data_: { label: "!" <> show n, nodeType: "repeat", path: currentPath }
-        , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
-        }
+      let
+        expandedChildren = Array.mapWithIndex
+          (\i _ -> go (currentPath <> [i]) weight child)
+          (Array.replicate n unit)
+      in
+        HierarchyData
+          { data_: { label: "seq", nodeType: "sequence", path: currentPath }
+          , value: Nothing
+          , children: Just expandedChildren
+          }
 
     Elongate n child ->
       HierarchyData
         { data_: { label: "@" <> show (Int.round n), nodeType: "elongate", path: currentPath }
         , value: Nothing
-        , children: Just [ go (currentPath <> [0]) child ]
+        , children: Just [ go (currentPath <> [0]) weight child ]
         }
 
 -- | Get color for node type (sunburst version - more saturated)
 sunburstColor :: String -> String
 sunburstColor = case _ of
-  "sound" -> "#4CAF50"      -- Green for sounds
+  "sound" -> "#4CAF50"      -- Green for sounds (default)
   "rest" -> "#9E9E9E"       -- Gray for rests
   "sequence" -> "#2196F3"   -- Blue for sequences
   "parallel" -> "#FF9800"   -- Orange for parallel
@@ -139,6 +164,17 @@ sunburstColor = case _ of
   "repeat" -> "#673AB7"     -- Deep purple for repeat
   "elongate" -> "#009688"   -- Teal for elongate
   _ -> "#607D8B"
+
+-- | Get alternating green shade for sound nodes
+-- | Uses the index to determine which shade to use (cycles through 4 greens)
+soundColorByIndex :: Int -> String
+soundColorByIndex idx =
+  case idx `mod` 4 of
+    0 -> "#4CAF50"  -- Material green 500
+    1 -> "#66BB6A"  -- Material green 400
+    2 -> "#81C784"  -- Material green 300
+    3 -> "#43A047"  -- Material green 600
+    _ -> "#4CAF50"
 
 -- | Get fill for node type - uses patterns for combinators
 -- | Returns either a color or a pattern URL
@@ -533,10 +569,18 @@ drawPatternForestSunburst selector namedPatterns onToggle = do
               ( T.joinData ("arcs-" <> show idx) "path" nodes $ \(PartNode node) ->
                   let
                     strokeStyle = sunburstStroke node.data_.nodeType
+                    -- Use last element of path as index for alternating colors
+                    pathIdx = case Array.last node.data_.path of
+                      Just i -> i
+                      Nothing -> 0
+                    -- Use alternating greens for sounds, regular fill for others
+                    fillColor = if node.data_.nodeType == "sound"
+                      then soundColorByIndex pathIdx
+                      else sunburstFill node.data_.nodeType
                   in
                     T.elem Path
                       [ path $ text (sunburstArcPath node.x0 node.y0 node.x1 node.y1 r')
-                      , fill $ text (sunburstFill node.data_.nodeType)
+                      , fill $ text fillColor
                       , attr "fill-opacity" $ num arcOpacity
                       , stroke $ text strokeStyle.color
                       , strokeWidth $ num strokeStyle.width

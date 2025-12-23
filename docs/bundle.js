@@ -34793,8 +34793,8 @@
             var y00 = sin(startAngle) * innerRadius;
             var endAngle = x1_ * 2 * pi - pi / 2;
             var largeArc = (function() {
-              var $98 = endAngle - startAngle > pi;
-              if ($98) {
+              var $102 = endAngle - startAngle > pi;
+              if ($102) {
                 return 1;
               }
               ;
@@ -34810,161 +34810,183 @@
       };
     };
   };
-  var patternToHierarchy = /* @__PURE__ */ (function() {
+  var patternToHierarchy = function(pattern2) {
     var go2 = function(currentPath) {
-      return function(v2) {
-        if (v2 instanceof Sound) {
-          return {
-            data_: {
-              label: v2.value0,
-              nodeType: "sound",
-              path: currentPath
-            },
-            value: new Just(1),
-            children: Nothing.value
-          };
-        }
-        ;
-        if (v2 instanceof Rest) {
-          return {
-            data_: {
-              label: "~",
-              nodeType: "rest",
-              path: currentPath
-            },
-            value: new Just(1),
-            children: Nothing.value
-          };
-        }
-        ;
-        if (v2 instanceof Sequence) {
-          return {
-            data_: {
-              label: "seq",
-              nodeType: "sequence",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just(mapWithIndex2(function(i2) {
-              return function(c2) {
-                return go2(append13(currentPath)([i2]))(c2);
+      return function(weight) {
+        return function(v2) {
+          if (v2 instanceof Sound) {
+            return {
+              data_: {
+                label: v2.value0,
+                nodeType: "sound",
+                path: currentPath
+              },
+              value: new Just(weight),
+              children: Nothing.value
+            };
+          }
+          ;
+          if (v2 instanceof Rest) {
+            return {
+              data_: {
+                label: "~",
+                nodeType: "rest",
+                path: currentPath
+              },
+              value: new Just(weight),
+              children: Nothing.value
+            };
+          }
+          ;
+          if (v2 instanceof Sequence) {
+            return {
+              data_: {
+                label: "seq",
+                nodeType: "sequence",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just(mapWithIndex2(function(i2) {
+                return function(c2) {
+                  return go2(append13(currentPath)([i2]))(weight)(c2);
+                };
+              })(v2.value0))
+            };
+          }
+          ;
+          if (v2 instanceof Parallel) {
+            return {
+              data_: {
+                label: "par",
+                nodeType: "parallel",
+                path: currentPath
+              },
+              value: new Just(weight),
+              children: new Just(mapWithIndex2(function(i2) {
+                return function(c2) {
+                  return go2(append13(currentPath)([i2]))(weight)(c2);
+                };
+              })(v2.value0))
+            };
+          }
+          ;
+          if (v2 instanceof Choice) {
+            return {
+              data_: {
+                label: "?",
+                nodeType: "choice",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just(mapWithIndex2(function(i2) {
+                return function(c2) {
+                  return go2(append13(currentPath)([i2]))(weight)(c2);
+                };
+              })(v2.value0))
+            };
+          }
+          ;
+          if (v2 instanceof Fast) {
+            var copies = round2(v2.value0);
+            var childWeight = weight / v2.value0;
+            var expandedChildren = mapWithIndex2(function(i2) {
+              return function(v1) {
+                return go2(append13(currentPath)([i2]))(childWeight)(v2.value1);
               };
-            })(v2.value0))
-          };
-        }
-        ;
-        if (v2 instanceof Parallel) {
-          return {
-            data_: {
-              label: "par",
-              nodeType: "parallel",
-              path: currentPath
-            },
-            value: new Just(1),
-            children: new Just(mapWithIndex2(function(i2) {
-              return function(c2) {
-                return go2(append13(currentPath)([i2]))(c2);
+            })(replicate(copies)(unit));
+            return {
+              data_: {
+                label: "seq",
+                nodeType: "sequence",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just(expandedChildren)
+            };
+          }
+          ;
+          if (v2 instanceof Slow) {
+            return {
+              data_: {
+                label: "/" + show15(round2(v2.value0)),
+                nodeType: "slow",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just([go2(append13(currentPath)([0]))(weight)(v2.value1)])
+            };
+          }
+          ;
+          if (v2 instanceof Euclidean) {
+            return {
+              data_: {
+                label: "(" + (show15(v2.value0) + ("," + (show15(v2.value1) + ")"))),
+                nodeType: "euclidean",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just([go2(append13(currentPath)([0]))(weight)(v2.value2)])
+            };
+          }
+          ;
+          if (v2 instanceof Degrade) {
+            return {
+              data_: {
+                label: "?" + (show15(round2(v2.value0 * 100)) + "%"),
+                nodeType: "degrade",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just([go2(append13(currentPath)([0]))(weight)(v2.value1)])
+            };
+          }
+          ;
+          if (v2 instanceof Repeat) {
+            var expandedChildren = mapWithIndex2(function(i2) {
+              return function(v1) {
+                return go2(append13(currentPath)([i2]))(weight)(v2.value1);
               };
-            })(v2.value0))
-          };
-        }
-        ;
-        if (v2 instanceof Choice) {
-          return {
-            data_: {
-              label: "?",
-              nodeType: "choice",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just(mapWithIndex2(function(i2) {
-              return function(c2) {
-                return go2(append13(currentPath)([i2]))(c2);
-              };
-            })(v2.value0))
-          };
-        }
-        ;
-        if (v2 instanceof Fast) {
-          return {
-            data_: {
-              label: "*" + show15(round2(v2.value0)),
-              nodeType: "fast",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value1)])
-          };
-        }
-        ;
-        if (v2 instanceof Slow) {
-          return {
-            data_: {
-              label: "/" + show15(round2(v2.value0)),
-              nodeType: "slow",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value1)])
-          };
-        }
-        ;
-        if (v2 instanceof Euclidean) {
-          return {
-            data_: {
-              label: "(" + (show15(v2.value0) + ("," + (show15(v2.value1) + ")"))),
-              nodeType: "euclidean",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value2)])
-          };
-        }
-        ;
-        if (v2 instanceof Degrade) {
-          return {
-            data_: {
-              label: "?" + (show15(round2(v2.value0 * 100)) + "%"),
-              nodeType: "degrade",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value1)])
-          };
-        }
-        ;
-        if (v2 instanceof Repeat) {
-          return {
-            data_: {
-              label: "!" + show15(v2.value0),
-              nodeType: "repeat",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value1)])
-          };
-        }
-        ;
-        if (v2 instanceof Elongate) {
-          return {
-            data_: {
-              label: "@" + show15(round2(v2.value0)),
-              nodeType: "elongate",
-              path: currentPath
-            },
-            value: Nothing.value,
-            children: new Just([go2(append13(currentPath)([0]))(v2.value1)])
-          };
-        }
-        ;
-        throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 48, column 20 - line 125, column 10): " + [v2.constructor.name]);
+            })(replicate(v2.value0)(unit));
+            return {
+              data_: {
+                label: "seq",
+                nodeType: "sequence",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just(expandedChildren)
+            };
+          }
+          ;
+          if (v2 instanceof Elongate) {
+            return {
+              data_: {
+                label: "@" + show15(round2(v2.value0)),
+                nodeType: "elongate",
+                path: currentPath
+              },
+              value: Nothing.value,
+              children: new Just([go2(append13(currentPath)([0]))(weight)(v2.value1)])
+            };
+          }
+          ;
+          throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 56, column 27 - line 150, column 10): " + [v2.constructor.name]);
+        };
       };
     };
-    return go2([]);
-  })();
+    if (pattern2 instanceof Sound) {
+      return go2([])(1)(new Sequence([pattern2]));
+    }
+    ;
+    if (pattern2 instanceof Rest) {
+      return go2([])(1)(new Sequence([pattern2]));
+    }
+    ;
+    return go2([])(1)(pattern2);
+  };
   var flattenPartition = function(v2) {
-    var $118 = length(v2.value0.children) === 0;
-    if ($118) {
+    var $125 = length(v2.value0.children) === 0;
+    if ($125) {
       return [v2];
     }
     ;
@@ -34982,16 +35004,16 @@
                     return function(v1) {
                       var oldYHeight = oldParentY1 - oldParentY0;
                       var relativeY0 = (function() {
-                        var $130 = oldYHeight > 0;
-                        if ($130) {
+                        var $137 = oldYHeight > 0;
+                        if ($137) {
                           return (v1.value0.y0 - oldParentY0) / oldYHeight;
                         }
                         ;
                         return 0;
                       })();
                       var relativeY1 = (function() {
-                        var $131 = oldYHeight > 0;
-                        if ($131) {
+                        var $138 = oldYHeight > 0;
+                        if ($138) {
                           return (v1.value0.y1 - oldParentY0) / oldYHeight;
                         }
                         ;
@@ -34999,16 +35021,16 @@
                       })();
                       var oldXWidth = oldParentX1 - oldParentX0;
                       var relativeX0 = (function() {
-                        var $132 = oldXWidth > 0;
-                        if ($132) {
+                        var $139 = oldXWidth > 0;
+                        if ($139) {
                           return (v1.value0.x0 - oldParentX0) / oldXWidth;
                         }
                         ;
                         return 0;
                       })();
                       var relativeX1 = (function() {
-                        var $133 = oldXWidth > 0;
-                        if ($133) {
+                        var $140 = oldXWidth > 0;
+                        if ($140) {
                           return (v1.value0.x1 - oldParentX0) / oldXWidth;
                         }
                         ;
@@ -35082,7 +35104,7 @@
                 return 1;
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 256, column 15 - line 258, column 23): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 292, column 15 - line 294, column 23): " + [v1.constructor.name]);
             })();
             var baseY0 = (function() {
               var v1 = head(children3);
@@ -35094,12 +35116,12 @@
                 return 0;
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 253, column 16 - line 255, column 23): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 289, column 16 - line 291, column 23): " + [v1.constructor.name]);
             })();
             var totalRadialSpace = maxY1 - baseY0;
             var radialSlice = (function() {
-              var $148 = numChildren > 0;
-              if ($148) {
+              var $155 = numChildren > 0;
+              if ($155) {
                 return totalRadialSpace / toNumber(numChildren);
               }
               ;
@@ -35112,8 +35134,8 @@
     };
     var fixedChildren = map28(fixParallelLayout)(v2.value0.children);
     var adjustedChildren = (function() {
-      var $149 = v2.value0.data_.nodeType === "parallel";
-      if ($149) {
+      var $156 = v2.value0.data_.nodeType === "parallel";
+      if ($156) {
         return stackRadially(v2.value0.x0)(v2.value0.x1)(v2.value0.y1)(fixedChildren);
       }
       ;
@@ -35168,7 +35190,7 @@
       return false;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 181, column 25 - line 183, column 19): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.PatternTree.Sunburst (line 217, column 25 - line 219, column 19): " + [v2.constructor.name]);
   };
 
   // output/D3.Viz.PatternTree.Types/index.js
@@ -42422,7 +42444,7 @@
           return fromMaybe(arr)(updateAt(idx)(f(v2.value0))(arr));
         }
         ;
-        throw new Error("Failed pattern match at Component.AlgoraveViz (line 264, column 3 - line 266, column 65): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.AlgoraveViz (line 316, column 3 - line 318, column 65): " + [v2.constructor.name]);
       };
     };
   };
@@ -42523,7 +42545,7 @@
         return tree2;
       }
       ;
-      throw new Error("Failed pattern match at Component.AlgoraveViz (line 271, column 28 - line 299, column 19): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at Component.AlgoraveViz (line 323, column 28 - line 351, column 19): " + [v2.constructor.name]);
     };
   };
   var toggleLayout = function(v2) {
@@ -42535,7 +42557,7 @@
       return TreeLayout.value;
     }
     ;
-    throw new Error("Failed pattern match at Component.AlgoraveViz (line 257, column 1 - line 257, column 43): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.AlgoraveViz (line 309, column 1 - line 309, column 43): " + [v2.constructor.name]);
   };
   var presetButton = function(name16) {
     return function(pattern2) {
@@ -42589,7 +42611,7 @@
       return patternToMiniNotation(v2.value1) + ("@" + show19(v2.value0));
     }
     ;
-    throw new Error("Failed pattern match at Component.AlgoraveViz (line 469, column 25 - line 489, column 49): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.AlgoraveViz (line 521, column 25 - line 541, column 49): " + [v2.constructor.name]);
   };
   var generateTidalCode = function(tracks) {
     return joinWith("\n")(mapMaybe(function(t2) {
@@ -42625,7 +42647,7 @@
         return text7("");
       }
       ;
-      throw new Error("Failed pattern match at Component.AlgoraveViz (line 389, column 19 - line 393, column 42): " + [state3.parseError.constructor.name]);
+      throw new Error("Failed pattern match at Component.AlgoraveViz (line 441, column 19 - line 445, column 42): " + [state3.parseError.constructor.name]);
     })()]), h3([classes(["slide-panel__subtitle"])])([text7("Test Patterns")]), div4([classes(["preset-grid"])])([presetButton("fast")("808bd:05*4"), presetButton("slow")("bd/2 sn"), presetButton("euclid")("bd(3,8)"), presetButton("choice")("<bd sn cp hh>"), presetButton("group")("[tabla2:23 tabla2:09]"), presetButton("mixed")("bd*2 [sn cp] hh"), presetButton("rest")("bd ~ sn ~"), presetButton("poly")("{bd sn, cp cp cp}"), presetButton("prob")("bd? sn?0.5 cp"), presetButton("repeat")("bd!4"), presetButton("complex")("al_perc:00*2 [tabla2:23 tabla2:09]"), presetButton("nested")("[bd sn] [cp [hh oh]]")]), p([classes(["hint-text"])])([text7("Click seq/par nodes to toggle")])]), button2([onClick2(function(v2) {
       return ToggleLeftPanel.value;
     }), classes(append15(["slide-panel__toggle", "slide-panel__toggle--left"])((function() {
@@ -42644,39 +42666,89 @@
   };
   var exampleSet = /* @__PURE__ */ (function() {
     return [{
-      name: "kick",
-      pattern: new Sequence([new Sound("bd"), Rest.value, new Sound("bd"), Rest.value]),
+      name: "L1-single",
+      pattern: new Sound("bd"),
       active: true,
       layout: SunburstLayout.value
     }, {
-      name: "snare",
-      pattern: new Sequence([Rest.value, new Sound("sn"), Rest.value, new Parallel([new Sound("sn"), new Sound("sn")])]),
+      name: "L1-seq",
+      pattern: new Sequence([new Sound("bd"), new Sound("sn"), new Sound("cp"), new Sound("hh")]),
       active: true,
       layout: SunburstLayout.value
     }, {
-      name: "hats",
-      pattern: new Sequence([new Sound("hh"), new Sound("hh"), new Sound("oh"), new Sound("hh"), new Sound("hh"), new Sound("cp"), new Sound("hh"), new Sound("oh")]),
+      name: "L1-rest",
+      pattern: new Sequence([new Sound("bd"), Rest.value, new Sound("sn"), Rest.value]),
       active: true,
       layout: SunburstLayout.value
     }, {
-      name: "bass",
-      pattern: new Choice([new Sequence([new Sound("bass1"), new Sound("bass1"), Rest.value, new Sound("bass2")]), new Sequence([new Sound("bass3"), Rest.value, new Sound("bass1"), new Sound("bass1")])]),
+      name: "L2-fast",
+      pattern: new Fast(4, new Sound("bd")),
       active: true,
       layout: SunburstLayout.value
     }, {
-      name: "perc",
-      pattern: new Sequence([new Parallel([new Sound("rim"), new Sound("clap")]), new Sound("rim"), Rest.value, new Sound("cp")]),
-      active: false,
+      name: "L2-slow",
+      pattern: new Slow(2, new Sound("bd")),
+      active: true,
       layout: SunburstLayout.value
     }, {
-      name: "melody",
-      pattern: new Sequence([new Sound("c4"), new Sound("e4"), new Parallel([new Sound("g4"), new Sound("b4")]), new Sound("a4")]),
-      active: false,
+      name: "L2-repeat",
+      pattern: new Repeat(3, new Sound("bd")),
+      active: true,
       layout: SunburstLayout.value
     }, {
-      name: "texture",
-      pattern: new Choice([new Sound("crackle"), new Sequence([new Sound("noise"), Rest.value, new Sound("noise")]), new Parallel([new Sound("pad1"), new Sound("pad2")])]),
-      active: false,
+      name: "L2-prob",
+      pattern: new Degrade(0.5, new Sound("bd")),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L3-par",
+      pattern: new Parallel([new Sound("bd"), new Sound("sn")]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L3-choice",
+      pattern: new Choice([new Sound("bd"), new Sound("sn"), new Sound("cp")]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L4-mixed",
+      pattern: new Sequence([new Fast(2, new Sound("bd")), new Sound("sn"), new Parallel([new Sound("cp"), new Sound("hh")])]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L4-sample",
+      pattern: new Fast(4, new Sound("808bd:05")),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L4-euclid",
+      pattern: new Euclidean(3, 8, new Sound("bd")),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L4-poly",
+      pattern: new Sequence([new Fast(3, new Sound("bd")), new Fast(5, new Sound("sn"))]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L5-nested",
+      pattern: new Sequence([new Parallel([new Sound("bd"), new Sound("sn")]), new Parallel([new Sound("cp"), new Parallel([new Sound("hh"), new Sound("oh")])])]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L5-complex",
+      pattern: new Sequence([new Fast(2, new Sound("bd")), new Parallel([new Sound("sn"), new Sound("cp")]), Rest.value, new Sound("hh")]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L6-tabla",
+      pattern: new Sequence([new Fast(2, new Sound("al_perc:00")), new Parallel([new Sound("tabla2:23"), new Sound("tabla2:09")])]),
+      active: true,
+      layout: SunburstLayout.value
+    }, {
+      name: "L6-ardha",
+      pattern: new Sequence([new Parallel([new Sound("ardha_ac"), new Sound("ardha_ac")]), new Sound("tabla2"), new Parallel([new Sound("ardha_ac"), new Sound("ardha_ac")])]),
+      active: true,
       layout: SunburstLayout.value
     }];
   })();
@@ -42777,7 +42849,7 @@
             return tree2;
           }
           ;
-          throw new Error("Failed pattern match at Component.AlgoraveViz (line 304, column 43 - line 332, column 19): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at Component.AlgoraveViz (line 356, column 43 - line 384, column 19): " + [v2.constructor.name]);
         };
       };
     };
@@ -43025,7 +43097,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Component.AlgoraveViz (line 189, column 5 - line 204, column 34): " + [v12.constructor.name]);
+          throw new Error("Failed pattern match at Component.AlgoraveViz (line 241, column 5 - line 256, column 34): " + [v12.constructor.name]);
         });
       }
       ;
@@ -43060,7 +43132,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at Component.AlgoraveViz (line 207, column 5 - line 214, column 34): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at Component.AlgoraveViz (line 259, column 5 - line 266, column 34): " + [v1.constructor.name]);
       }
       ;
       if (v2 instanceof ClearTracks) {
@@ -43161,7 +43233,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.AlgoraveViz (line 138, column 16 - line 254, column 52): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at Component.AlgoraveViz (line 190, column 16 - line 306, column 52): " + [v2.constructor.name]);
     };
   };
   var component = function(dictMonadAff) {

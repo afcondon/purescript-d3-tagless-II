@@ -28,62 +28,114 @@ type Track =
   , layout :: TrackLayout  -- Per-track layout (click to toggle)
   }
 
--- | Example algorave set with realistic patterns
--- | Mix of simple and complex mini-notation from real performances
+-- | Test set with ascending complexity of mini-notation patterns
 exampleSet :: Array Track
 exampleSet =
-  [ { name: "kick"
-    , pattern: Sequence [Sound "bd", Rest, Sound "bd", Rest]
+  -- Level 1: Basics
+  [ { name: "L1-single"
+    , pattern: Sound "bd"
     , active: true
     , layout: SunburstLayout
     }
-  , { name: "snare"
-    , pattern: Sequence [Rest, Sound "sn", Rest, Parallel [Sound "sn", Sound "sn"]]
+  , { name: "L1-seq"
+    , pattern: Sequence [Sound "bd", Sound "sn", Sound "cp", Sound "hh"]
     , active: true
     , layout: SunburstLayout
     }
-  , { name: "hats"
+  , { name: "L1-rest"
+    , pattern: Sequence [Sound "bd", Rest, Sound "sn", Rest]
+    , active: true
+    , layout: SunburstLayout
+    }
+  -- Level 2: Modifiers
+  , { name: "L2-fast"
+    , pattern: Fast 4.0 (Sound "bd")
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L2-slow"
+    , pattern: Slow 2.0 (Sound "bd")
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L2-repeat"
+    , pattern: Repeat 3 (Sound "bd")
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L2-prob"
+    , pattern: Degrade 0.5 (Sound "bd")
+    , active: true
+    , layout: SunburstLayout
+    }
+  -- Level 3: Groups
+  , { name: "L3-par"
+    , pattern: Parallel [Sound "bd", Sound "sn"]
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L3-choice"
+    , pattern: Choice [Sound "bd", Sound "sn", Sound "cp"]
+    , active: true
+    , layout: SunburstLayout
+    }
+  -- Level 4: Combined
+  , { name: "L4-mixed"
+    , pattern: Sequence [Fast 2.0 (Sound "bd"), Sound "sn", Parallel [Sound "cp", Sound "hh"]]
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L4-sample"
+    , pattern: Fast 4.0 (Sound "808bd:05")
+    , active: true
+    , layout: SunburstLayout
+    }
+  , { name: "L4-euclid"
+    , pattern: Euclidean 3 8 (Sound "bd")
+    , active: true
+    , layout: SunburstLayout
+    }
+  -- Level 4b: Polymetric test (bd*3 sn*5)
+  , { name: "L4-poly"
+    , pattern: Sequence [Fast 3.0 (Sound "bd"), Fast 5.0 (Sound "sn")]
+    , active: true
+    , layout: SunburstLayout
+    }
+  -- Level 5: Nested
+  , { name: "L5-nested"
     , pattern: Sequence
-        [ Sound "hh", Sound "hh", Sound "oh", Sound "hh"
-        , Sound "hh", Sound "cp", Sound "hh", Sound "oh"
+        [ Parallel [Sound "bd", Sound "sn"]
+        , Parallel [Sound "cp", Parallel [Sound "hh", Sound "oh"]]
         ]
     , active: true
     , layout: SunburstLayout
     }
-  , { name: "bass"
-    , pattern: Choice
-        [ Sequence [Sound "bass1", Sound "bass1", Rest, Sound "bass2"]
-        , Sequence [Sound "bass3", Rest, Sound "bass1", Sound "bass1"]
-        ]
-    , active: true
-    , layout: SunburstLayout
-    }
-  , { name: "perc"
+  , { name: "L5-complex"
     , pattern: Sequence
-        [ Parallel [Sound "rim", Sound "clap"]
-        , Sound "rim"
+        [ Fast 2.0 (Sound "bd")
+        , Parallel [Sound "sn", Sound "cp"]
         , Rest
-        , Sound "cp"
+        , Sound "hh"
         ]
-    , active: false
+    , active: true
     , layout: SunburstLayout
     }
-  , { name: "melody"
+  -- Level 6: Real-world from video
+  , { name: "L6-tabla"
     , pattern: Sequence
-        [ Sound "c4", Sound "e4"
-        , Parallel [Sound "g4", Sound "b4"]
-        , Sound "a4"
+        [ Fast 2.0 (Sound "al_perc:00")
+        , Parallel [Sound "tabla2:23", Sound "tabla2:09"]
         ]
-    , active: false
+    , active: true
     , layout: SunburstLayout
     }
-  , { name: "texture"
-    , pattern: Choice
-        [ Sound "crackle"
-        , Sequence [Sound "noise", Rest, Sound "noise"]
-        , Parallel [Sound "pad1", Sound "pad2"]
+  , { name: "L6-ardha"
+    , pattern: Sequence
+        [ Parallel [Sound "ardha_ac", Sound "ardha_ac"]
+        , Sound "tabla2"
+        , Parallel [Sound "ardha_ac", Sound "ardha_ac"]
         ]
-    , active: false
+    , active: true
     , layout: SunburstLayout
     }
   ]
