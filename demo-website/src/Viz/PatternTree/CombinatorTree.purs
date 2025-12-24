@@ -73,8 +73,10 @@ drawCombinatorTree selector combTree = do
           flattenTree t = [head t] <> Array.concatMap flattenTree (Array.fromFoldable (tail t))
       let nodes = flattenTree positioned
 
-      -- Build the entire visualization tree declaratively
+      -- Build the entire visualization tree declaratively with ConditionalRender
       let links = collectLinks positioned
+
+      -- CHIMERIC TREE: Uses ConditionalRender to switch between combinator and sunburst templates
       let vizTree :: T.Tree Unit
           vizTree =
             T.named Group "combinator-tree"
@@ -91,22 +93,43 @@ drawCombinatorTree selector combTree = do
                             , strokeWidth $ num 2.0
                             ]
                         ) links
+                  -- Nodes group placeholder (will be populated in step 2)
+                  , T.named Group "nodes" [ attr "id" $ text "nodes" ]
                   ]
-                  <>
-                  -- Nodes (x, y, isPattern, pattern, label are all fields of LayoutNode)
-                  Array.concatMap (\node ->
-                    if node.isPattern
-                    then [ buildMiniSunburst node.x node.y 40.0 node.pattern node.label ]
-                    else [ buildCombinatorNode node.x node.y node.label ]
-                  ) nodes
                 )
 
-      -- Render the tree using the CSS selector
+      -- Nodes tree: separate from scaffolding to allow different phantom types
+      let nodesTree :: T.Tree LayoutNode
+          nodesTree =
+            T.named Group "nodes" []
+              `T.withChild`
+                ( T.joinData "chimeric-nodes" "g" nodes $ \node ->
+                    T.elem Group
+                      [ attr "transform" $ text ("translate(" <> show node.x <> "," <> show node.y <> ")") ]
+                      `T.withChildren`
+                        [ -- CHIMERIC RENDERING: ConditionalRender chooses template based on node type
+                          T.conditionalRender
+                            [ { predicate: \n -> n.isPattern
+                              , spec: miniSunburstTemplate
+                              }
+                            , { predicate: \n -> not n.isPattern
+                              , spec: combinatorNodeTemplate
+                              }
+                            ]
+                        ]
+                )
+
+      -- Render using two-step pattern: scaffolding first, then chimeric nodes
       let cssSelector = if String.take 1 selector == "#" then selector else "#" <> selector
       runD3v2M do
         _ <- Ops.clear cssSelector
         svg <- select cssSelector
+        -- Step 1: Render scaffolding (Tree Unit) with links and placeholder nodes group
         _ <- renderTree svg vizTree
+        -- Step 2: Select nodes group and render chimeric tree (Tree LayoutNode)
+        -- This is where ConditionalRender chooses between combinator and sunburst templates
+        nodesGroup <- select "#nodes"
+        _ <- renderTree nodesGroup nodesTree
         pure unit
 
 -- | Map CombinatorNode tree to layout tree
@@ -119,11 +142,15 @@ mapCombinatorTree t =
       children = map mapCombinatorTree (tail t)
   in mkTree val children
 
--- | Build a combinator node as a labeled circle (pure tree-building)
-buildCombinatorNode :: Number -> Number -> String -> T.Tree Unit
-buildCombinatorNode nodeX nodeY label =
-  T.named Group ("comb-" <> label)
-    [ attr "transform" $ text ("translate(" <> show nodeX <> "," <> show nodeY <> ")") ]
+-- =============================================================================
+-- CHIMERIC TEMPLATES: Functions that return Tree LayoutNode for ConditionalRender
+-- =============================================================================
+
+-- | Template for combinator nodes: labeled purple circles
+-- | Used by ConditionalRender when node.isPattern == false
+combinatorNodeTemplate :: LayoutNode -> T.Tree LayoutNode
+combinatorNodeTemplate node =
+  T.named Group ("comb-" <> node.label) []
     `T.withChildren`
       [ T.elem Circle
           [ cx $ num 0.0
@@ -136,7 +163,7 @@ buildCombinatorNode nodeX nodeY label =
       , T.elem Text
           [ x $ num 0.0
           , y $ num 4.0
-          , textContent $ text label
+          , textContent $ text node.label
           , fontSize $ num 10.0
           , textAnchor $ text "middle"
           , fill $ text "#4A148C"
@@ -144,11 +171,12 @@ buildCombinatorNode nodeX nodeY label =
           ]
       ]
 
--- | Build a pattern leaf as a mini sunburst (pure tree-building)
-buildMiniSunburst :: Number -> Number -> Number -> Maybe PatternTree -> String -> T.Tree Unit
-buildMiniSunburst nodeX nodeY radius maybePattern label =
-  case maybePattern of
-    Nothing -> buildCombinatorNode nodeX nodeY label
+-- | Template for pattern leaf nodes: mini sunburst diagrams
+-- | Used by ConditionalRender when node.isPattern == true
+miniSunburstTemplate :: LayoutNode -> T.Tree LayoutNode
+miniSunburstTemplate node =
+  case node.pattern of
+    Nothing -> combinatorNodeTemplate node  -- Fallback if no pattern
     Just pattern ->
       -- Build hierarchy from pattern
       let hierData = patternToHierarchy pattern
@@ -166,6 +194,7 @@ buildMiniSunburst nodeX nodeY radius maybePattern label =
             Nothing -> "sequence"
 
           -- Build mini sunburst arcs
+          radius = 40.0
           innerRadius = radius * 0.3
           arcs = map (\(PartNode n) ->
                 let arcPath = sunburstArcPath n.x0 n.y0 n.x1 n.y1 radius
@@ -173,8 +202,7 @@ buildMiniSunburst nodeX nodeY radius maybePattern label =
                 in { path: arcPath, fill: fillColor }
               ) nodes
       in
-        T.named Group ("mini-sunburst-" <> label)
-          [ attr "transform" $ text ("translate(" <> show nodeX <> "," <> show nodeY <> ")") ]
+        T.named Group ("mini-sunburst-" <> node.label) []
           `T.withChildren`
             ( -- Arcs
               map (\arc ->
@@ -199,7 +227,7 @@ buildMiniSunburst nodeX nodeY radius maybePattern label =
               , T.elem Text
                   [ x $ num 0.0
                   , y $ num (radius + 12.0)
-                  , textContent $ text label
+                  , textContent $ text node.label
                   , fontSize $ num 10.0
                   , textAnchor $ text "middle"
                   , fill $ text "#333"

@@ -38,6 +38,9 @@ data PatternTree
   | Repeat Int PatternTree      -- ^ Repetition: bd!3
   | Elongate Number PatternTree -- ^ Stretch: bd@2
 
+derive instance Eq PatternTree
+derive instance Ord PatternTree
+
 instance Show PatternTree where
   show (Sound s) = "Sound(" <> s <> ")"
   show Rest = "Rest"
