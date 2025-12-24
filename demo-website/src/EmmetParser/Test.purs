@@ -2,11 +2,13 @@ module EmmetParser.Test where
 
 import Prelude
 
-import Data.Either (Either(..), isRight)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Console (log)
 import EmmetParser.Parser (parseEmmet)
+import EmmetParser.Converter (convertToTree)
+import EmmetParser.Printer (printEmmet)
 import EmmetParser.Types (EmmetExpr(..), EmmetNode(..), ElementType(..), JoinType(..), Attribute(..))
 
 -- | Run all parser tests
@@ -20,6 +22,12 @@ runTests = do
   testSiblings
   testMultiplier
   testComplexExpression
+  log "\n=== Round-Trip Tests ==="
+  testRoundTripSimple
+  testRoundTripNested
+  testRoundTripSiblings
+  testRoundTripJoin
+  testRoundTripComplex
   log "=== All Emmet Parser Tests Passed! ==="
 
 testSimpleElement :: Effect Unit
@@ -90,3 +98,34 @@ testComplexExpression = do
   case result of
     Right _ -> log "✓ Passed - parses successfully"
     Left err -> log $ "✗ Failed: " <> show err
+
+-- =============================================================================
+-- Round-Trip Tests: String → parse → convert → print → String
+-- =============================================================================
+
+testRoundTrip :: String -> Effect Unit
+testRoundTrip input = do
+  log $ "\nRound-trip: " <> input
+  case parseEmmet input of
+    Left err -> log $ "✗ Failed to parse: " <> show err
+    Right expr -> do
+      let tree = convertToTree expr
+      let output = printEmmet tree
+      if input == output
+        then log $ "✓ Passed: " <> input <> " → " <> output
+        else log $ "✗ Failed: " <> input <> " → " <> output
+
+testRoundTripSimple :: Effect Unit
+testRoundTripSimple = testRoundTrip "g"
+
+testRoundTripNested :: Effect Unit
+testRoundTripNested = testRoundTrip "g>c>r"
+
+testRoundTripSiblings :: Effect Unit
+testRoundTripSiblings = testRoundTrip "c+r"
+
+testRoundTripJoin :: Effect Unit
+testRoundTripJoin = testRoundTrip "j(Point)>c"
+
+testRoundTripComplex :: Effect Unit
+testRoundTripComplex = testRoundTrip "j(Point)>c[cx:x,cy:y,r=5]"
