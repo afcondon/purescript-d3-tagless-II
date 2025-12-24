@@ -102,6 +102,7 @@ data Route
   | UnderstandingAttributes    -- Type-safe attribute system with phantom types
   | UnderstandingSelections    -- Selection phantom types (Indexed Monad pattern)
   | UnderstandingTreeAPI       -- TreeAPI declarative layer
+  | UnderstandingEmmet         -- Emmet notation for concise visualization syntax
   | UnderstandingScenes        -- Scene structures for interactive visualizations
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
@@ -177,6 +178,7 @@ instance showRoute :: Show Route where
   show UnderstandingAttributes = "Understanding: Attributes"
   show UnderstandingSelections = "Understanding: Selections"
   show UnderstandingTreeAPI = "Understanding: TreeAPI"
+  show UnderstandingEmmet = "Understanding: Emmet Notation"
   show UnderstandingScenes = "Understanding: Scenes"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName

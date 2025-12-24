@@ -37,6 +37,7 @@ data AttrSource
   | FieldSource String      -- ^ Single field access: d.fieldName
   | ExprSource String       -- ^ Computed expression: "d.x * 20 + 50"
   | IndexSource             -- ^ Uses element index
+  | OpaqueSource            -- ^ Placeholder requiring metadata substitution (Emmet round-trip)
 
 derive instance Eq AttrSource
 derive instance Ord AttrSource
@@ -47,6 +48,7 @@ instance Show AttrSource where
   show (FieldSource f) = "(FieldSource " <> show f <> ")"
   show (ExprSource e) = "(ExprSource " <> show e <> ")"
   show IndexSource = "IndexSource"
+  show OpaqueSource = "OpaqueSource"
 
 -- | Type-safe attribute with datum phantom type
 -- |

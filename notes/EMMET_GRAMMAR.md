@@ -13,10 +13,12 @@ Factor         ::= Element | Join | '(' Expression ')' Multiplier?
 Element        ::= ElementChar Attributes? Multiplier?
 Join           ::= JoinChar '(' TypeName ')' Attributes? Multiplier?
 Attributes     ::= '[' Attribute (',' Attribute)* ']'
-Attribute      ::= StaticAttr | FieldAttr | IndexAttr
+Attribute      ::= StaticAttr | FieldAttr | IndexAttr | OpaqueAttr
 StaticAttr     ::= AttrName '=' Value
 FieldAttr      ::= AttrName ':' FieldName
 IndexAttr      ::= AttrName '@' 'index'
+OpaqueAttr     ::= AttrName ':' OpaqueToken
+OpaqueToken    ::= 'COMPUTED' | 'SCALE' | 'CONDITIONAL'
 Multiplier     ::= '*' Number
 ElementChar    ::= 'g' | 'c' | 'r' | 'p' | 'l' | 't'
 JoinChar       ::= 'j' | 'n' | 'u' | 'x'
@@ -130,11 +132,79 @@ r[x@index,y:y,width=40,height:y,fill=steelblue]  - All three types
 c[cx@index,cy:y,r=5,fill=coral,opacity=0.7]      - Index + field + static
 ```
 
-#### 3.5 Attribute Name Format
+#### 3.5 Opaque Attributes (Round-Trip Support)
+
+**Syntax:** `attrName:TOKEN` where TOKEN is `COMPUTED`, `SCALE`, or `CONDITIONAL`
+
+Opaque attributes are placeholders for complex PureScript computations that cannot be represented in Emmet notation. They enable round-trip conversion (AST → Emmet+Metadata → AST) by preserving structural information while storing the actual computation separately.
+
+**Three Token Types:**
+
+1. **`name:COMPUTED`** - Computed attribute (expressions, function composition)
+   - Represents any attribute value computed from data via expressions
+   - Example: `cx:COMPUTED` might represent `d.x * scale + offset`
+
+2. **`name:SCALE`** - Scale function
+   - Represents D3 scale functions (linear, log, quantize, etc.)
+   - Example: `cy:SCALE` might represent `yScale(d.value)`
+
+3. **`name:CONDITIONAL`** - Conditional logic
+   - Represents if-then-else or pattern matching on data
+   - Example: `fill:CONDITIONAL` might represent `if d.value > 50 then "red" else "blue"`
+
+**Examples:**
+```
+c[cx:COMPUTED,cy:SCALE,r=5]                    - Mixed opaque + static
+c[cx:x,cy:SCALE,fill:CONDITIONAL]              - Field + opaque
+j(Point)>c[cx:COMPUTED,cy:COMPUTED,r:value]    - Complex scatter plot
+r[x@index,y:SCALE,height:SCALE,fill:CONDITIONAL] - Bar chart with scales
+```
+
+**When to Use:**
+
+Opaque attributes are automatically generated during `toEmmetWithMetadata` conversion. You typically won't write them manually unless:
+- Building a visual AST editor
+- Implementing round-trip editing tools
+- Creating structural templates that preserve computation
+
+**How Round-Trip Works:**
+
+```purescript
+-- AST with complex attributes
+let ast = joinData "points" "circle" myData $ \d ->
+  elem Circle
+    [ cx (d.x * 40.0 + 50.0)    -- Complex expression
+    , cy (yScale d.y)            -- Scale function
+    , fill (if d.value > 50 then "red" else "blue")  -- Conditional
+    ]
+
+-- Convert to Emmet + metadata
+let emmetData = toEmmetWithMetadata ast
+-- emmetData.emmetString = "j(Point)>c[cx:COMPUTED,cy:SCALE,fill:CONDITIONAL]"
+-- emmetData.metadata = { opaqueFeatures: Map with actual functions }
+
+-- Edit structure (preserves opaque features)
+let edited = "j(Point)>g>c[cx:COMPUTED,cy:SCALE,fill:CONDITIONAL]"  -- Added group wrapper
+
+-- Convert back with metadata substitution
+let newAST = fromEmmetWithMetadata { emmetData | emmetString = edited }
+-- Result: Same computation, new structure!
+```
+
+**Important Notes:**
+
+- Opaque tokens are **parsed** but **cannot execute** without metadata
+- Using opaque attributes without `fromEmmetWithMetadata` will error at runtime
+- The actual PureScript functions are stored in metadata, indexed by node path
+- Structural changes (adding siblings, changing nesting) work fine
+- Moving nodes to different paths may lose metadata association
+
+#### 3.6 Attribute Name Format
 
 - Must start with alphanumeric character
 - Can contain hyphens for SVG attributes like `stroke-width`
 - Examples: `r`, `cx`, `cy`, `fill`, `stroke-width`, `opacity`
+- Special tokens: `COMPUTED`, `SCALE`, `CONDITIONAL` (case-sensitive)
 
 ## 4. Join Syntax - `j(TypeName)`
 

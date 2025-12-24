@@ -22,6 +22,7 @@ import Data.Foldable (foldl)
 import Data.List (List)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tree (Tree) as DT
+import Partial.Unsafe (unsafeCrashWith)
 import PSD3.AST as AST
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Behavior.Types (Behavior(Zoom, Drag, ClickWithDatum, MouseEnter), defaultZoom, defaultDrag, ScaleExtent(..))
@@ -324,6 +325,13 @@ attrKindToAttribute = case _ of
     DataAttr (AttributeName name) (ExprSource expr) (\_ -> StringValue expr)
   AttrIndex name ->
     IndexedAttr (AttributeName name) IndexSource (\_ _ -> NumberValue 0.0)
+  AttrOpaque name opaqueType ->
+    -- Opaque attributes are placeholders requiring metadata substitution
+    -- This will error at runtime if used without fromEmmetWithMetadata
+    DataAttr (AttributeName name) OpaqueSource
+      (\_ -> unsafeCrashWith $
+        "Opaque attribute '" <> name <> ":" <> opaqueType <>
+        "' requires metadata - use fromEmmetWithMetadata for round-trip conversion")
 
 -- | Convert behavior child nodes to PSD3 Behaviors
 convertBehaviors :: Array (DT.Tree TreeNode) -> Either ASTConversionError (Array (Behavior Unit))

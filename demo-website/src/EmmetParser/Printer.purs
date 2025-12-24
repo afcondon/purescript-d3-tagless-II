@@ -140,6 +140,7 @@ formatAttribute = case _ of
   AttrStatic name value -> name <> "=" <> value
   AttrField name field -> name <> ":" <> field
   AttrIndex name -> name <> "@index"
+  AttrOpaque name opaqueType -> name <> ":" <> opaqueType  -- e.g., "cx:COMPUTED"
   AttrExpr _ _ -> "" -- Not supported in Emmet yet
 
 -- | Filter out badge children to get only structural children

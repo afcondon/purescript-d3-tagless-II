@@ -55,6 +55,7 @@ data Attribute
   = StaticAttr String String      -- name, literal value
   | FieldAttr String String       -- name, field accessor
   | IndexAttr String              -- name (uses index parameter)
+  | OpaqueAttr String String      -- name, opaque type (COMPUTED, SCALE, CONDITIONAL)
 
 derive instance eqAttribute :: Eq Attribute
 
@@ -63,6 +64,7 @@ instance showAttribute :: Show Attribute where
     StaticAttr name val -> name <> "=" <> val
     FieldAttr name field -> name <> ":" <> field
     IndexAttr name -> name <> "@index"
+    OpaqueAttr name typ -> name <> ":" <> typ
 
 -- | Emmet expression tree structure
 data EmmetExpr

@@ -209,6 +209,7 @@ attrSourceToCode = case _ of
   FieldSource f -> "field @\"" <> f <> "\""
   ExprSource e -> e
   IndexSource -> "index"
+  OpaqueSource -> "OPAQUE -- requires metadata"
 
 -- | Map attribute names to Friendly DSL function names
 attrFnName :: String -> String

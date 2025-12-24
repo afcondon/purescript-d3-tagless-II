@@ -109,6 +109,7 @@ showSource = case _ of
   FieldSource f -> "d." <> f
   ExprSource e -> e
   IndexSource -> "i"
+  OpaqueSource -> "<OPAQUE>"
 
 -- =============================================================================
 -- Combined Interpreter: EvalWithMeta

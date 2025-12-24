@@ -104,6 +104,7 @@ formatAttrSource name = case _ of
   FieldSource f -> name <> "=d." <> f
   ExprSource e -> name <> "=(" <> e <> ")"
   IndexSource -> name <> "=i"
+  OpaqueSource -> name <> "=OPAQUE"
 
 -- | Format a list of attributes as a comma-separated string
 formatAttributeList :: forall d. Array (Attribute d) -> String

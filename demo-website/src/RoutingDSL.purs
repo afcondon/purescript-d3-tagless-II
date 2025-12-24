@@ -36,6 +36,7 @@ routes =
   <|> understandingAttributes
   <|> understandingSelections
   <|> understandingTreeAPI
+  <|> understandingEmmet
   <|> understandingScenes
   <|> understanding
   <|> referenceModule  -- Must come before reference (more specific)
@@ -169,6 +170,10 @@ understandingSelections = UnderstandingSelections <$ lit "understanding" <* lit 
 -- | Match: /understanding/tree-api
 understandingTreeAPI :: Match Route
 understandingTreeAPI = UnderstandingTreeAPI <$ lit "understanding" <* lit "tree-api" <* end
+
+-- | Match: /understanding/emmet
+understandingEmmet :: Match Route
+understandingEmmet = UnderstandingEmmet <$ lit "understanding" <* lit "emmet" <* end
 
 -- | Match: /understanding/scenes
 understandingScenes :: Match Route
@@ -382,6 +387,7 @@ routeToPath UnderstandingGrammar = "/understanding/grammar"
 routeToPath UnderstandingAttributes = "/understanding/attributes"
 routeToPath UnderstandingSelections = "/understanding/selections"
 routeToPath UnderstandingTreeAPI = "/understanding/tree-api"
+routeToPath UnderstandingEmmet = "/understanding/emmet"
 routeToPath UnderstandingScenes = "/understanding/scenes"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName

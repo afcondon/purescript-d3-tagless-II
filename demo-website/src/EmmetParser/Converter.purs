@@ -205,6 +205,7 @@ convertAttribute = case _ of
   StaticAttr name value -> AttrStatic name value
   FieldAttr name field -> AttrField name field
   IndexAttr name -> AttrIndex name
+  OpaqueAttr name opaqueType -> AttrOpaque name opaqueType
 
 -- | Look up a type by name in the builtin types
 lookupType :: String -> DatumType

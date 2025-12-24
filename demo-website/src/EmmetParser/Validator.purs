@@ -89,6 +89,11 @@ validateAttribute = case _ of
   IndexAttr name ->
     validateAttributeName name
 
+  OpaqueAttr name _opaqueType -> do
+    validateAttributeName name
+    -- Opaque attributes are valid - they'll be substituted during round-trip
+    pure unit
+
 -- | Validate that a type name is recognized
 validateTypeName :: String -> Either ValidationError Unit
 validateTypeName typeName =

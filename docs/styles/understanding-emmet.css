@@ -1,0 +1,174 @@
+/* Understanding Emmet Notation Page Styles */
+
+.understanding-page .code-block {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-left: 3px solid #3b82f6;
+}
+
+.understanding-page .code-block code {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+/* Syntax Tables */
+.syntax-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.syntax-table th {
+  background: #f5f5f5;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+}
+
+.syntax-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+  vertical-align: top;
+}
+
+.syntax-table code {
+  background: #fff;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  color: #c7254e;
+  border: 1px solid #f0f0f0;
+}
+
+.syntax-table tr:hover {
+  background: #fafafa;
+}
+
+/* Comparison Table */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.comparison-table th {
+  background: #3b82f6;
+  color: white;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.comparison-table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e5e5;
+  vertical-align: top;
+}
+
+.comparison-table td:first-child {
+  background: #f0f9ff;
+}
+
+.comparison-table td:last-child {
+  background: #fafafa;
+}
+
+.comparison-table pre {
+  margin: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.comparison-table code {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Demo Cards */
+.demo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.demo-card {
+  background: white;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.demo-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.demo-number {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  background: #3b82f6;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.demo-title {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.demo-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.demo-link {
+  display: inline-block;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.demo-link:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateX(4px);
+}
+
+/* Lead Paragraph */
+.understanding-page .lead {
+  font-size: 1.15rem;
+  color: #555;
+  line-height: 1.7;
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #3b82f6;
+}

@@ -102,6 +102,7 @@ describeSource = case _ of
   FieldSource f -> "from data field '" <> f <> "'"
   ExprSource e -> "computed as " <> e
   IndexSource -> "from element index"
+  OpaqueSource -> "using external metadata (opaque)"
 
 -- | Show element type as English
 showElemType :: ElementType -> String

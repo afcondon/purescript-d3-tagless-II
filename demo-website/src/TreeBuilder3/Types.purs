@@ -50,6 +50,7 @@ data AttrKind
   | AttrField String String -- name, field
   | AttrExpr String String -- name, expr
   | AttrIndex String -- name (uses index)
+  | AttrOpaque String String -- name, opaque type (COMPUTED, SCALE, CONDITIONAL)
 
 derive instance Eq AttrKind
 derive instance Ord AttrKind
@@ -146,6 +147,7 @@ nodeLabel (NodeAttr (AttrStatic name _)) = name
 nodeLabel (NodeAttr (AttrField name _)) = name
 nodeLabel (NodeAttr (AttrExpr name _)) = name
 nodeLabel (NodeAttr (AttrIndex name)) = name
+nodeLabel (NodeAttr (AttrOpaque name _)) = name
 nodeLabel (NodeBehavior BehaviorZoom) = "Zoom"
 nodeLabel (NodeBehavior BehaviorDrag) = "Drag"
 nodeLabel (NodeBehavior BehaviorClick) = "Click"

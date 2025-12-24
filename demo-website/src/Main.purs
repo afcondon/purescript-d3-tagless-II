@@ -37,6 +37,7 @@ import Component.Understanding.UnderstandingGrammar as UnderstandingGrammar
 import Component.Understanding.UnderstandingAttributes as UnderstandingAttributes
 import Component.Understanding.UnderstandingSelections as UnderstandingSelections
 import Component.Understanding.UnderstandingTreeAPI as UnderstandingTreeAPI
+import Component.Understanding.UnderstandingEmmet as UnderstandingEmmet
 import Component.Understanding.UnderstandingScenes as UnderstandingScenes
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
@@ -119,6 +120,7 @@ type Slots =
   , understandingAttributes :: forall q. H.Slot q Void Unit
   , understandingSelections :: forall q. H.Slot q Void Unit
   , understandingTreeAPI :: forall q. H.Slot q Void Unit
+  , understandingEmmet :: forall q. H.Slot q Void Unit
   , understandingScenes :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , tourIndex :: forall q. H.Slot q Void Unit
@@ -178,6 +180,7 @@ _understandingGrammar = Proxy :: Proxy "understandingGrammar"
 _understandingAttributes = Proxy :: Proxy "understandingAttributes"
 _understandingSelections = Proxy :: Proxy "understandingSelections"
 _understandingTreeAPI = Proxy :: Proxy "understandingTreeAPI"
+_understandingEmmet = Proxy :: Proxy "understandingEmmet"
 _understandingScenes = Proxy :: Proxy "understandingScenes"
 _reference = Proxy :: Proxy "reference"
 _tourIndex = Proxy :: Proxy "tourIndex"
@@ -301,6 +304,9 @@ renderPage route = case spy "Route is" route of
 
   UnderstandingTreeAPI ->
     HH.slot_ _understandingTreeAPI unit UnderstandingTreeAPI.component unit
+
+  UnderstandingEmmet ->
+    HH.slot_ _understandingEmmet unit UnderstandingEmmet.component unit
 
   UnderstandingScenes ->
     HH.slot_ _understandingScenes unit UnderstandingScenes.component unit

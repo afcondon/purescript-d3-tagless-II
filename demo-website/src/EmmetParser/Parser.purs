@@ -133,7 +133,10 @@ attribute = try staticAttr <|> try fieldAttr <|> indexAttr
       name <- attrName
       _ <- char ':'
       field <- identifier
-      pure $ FieldAttr name field
+      -- Check if field is an opaque token (COMPUTED, SCALE, CONDITIONAL)
+      if isOpaqueToken field
+        then pure $ OpaqueAttr name field
+        else pure $ FieldAttr name field
 
     indexAttr = do
       name <- attrName
@@ -159,6 +162,14 @@ identifier = do
   first <- satisfy isAlpha
   rest <- many (satisfy isAlphaNum)
   pure $ SCU.fromCharArray ([first] <> Array.fromFoldable rest)
+
+-- | Check if a field name is an opaque token
+isOpaqueToken :: String -> Boolean
+isOpaqueToken = case _ of
+  "COMPUTED" -> true
+  "SCALE" -> true
+  "CONDITIONAL" -> true
+  _ -> false
 
 -- | Multiplier ::= '*' Number
 multiplier :: P Int
