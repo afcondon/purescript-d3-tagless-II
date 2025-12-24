@@ -85312,7 +85312,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     description: "Countries with population-sized bubbles"
   }, {
     name: "Nested Grid",
-    expr: "n(Board)>g>n(Row)>g>n(Cell)>r[x@index,y@index,width=20,height=20]",
+    expr: "n(Board)>g>n(Row)>g>j(Cell)>r[x@index,y@index,width=20,height=20]",
     description: "2D board with nested rows and cells"
   }, {
     name: "Bar Chart",
