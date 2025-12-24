@@ -77,6 +77,7 @@ routes =
   <|> treeBuilder2
   <|> treeBuilder3
   <|> simpleTreeBuilder
+  <|> chartBuilder
   <|> splom
   <|> gupDebug
   <|> vizMatrix
@@ -329,6 +330,10 @@ treeBuilder3 = TreeBuilder3 <$ lit "tree-builder3" <* end
 simpleTreeBuilder :: Match Route
 simpleTreeBuilder = SimpleTreeBuilder <$ lit "simple-tree-builder" <* end
 
+-- | Match: /chart-builder
+chartBuilder :: Match Route
+chartBuilder = ChartBuilder <$ lit "chart-builder" <* end
+
 -- | Match: /splom
 splom :: Match Route
 splom = SPLOM <$ lit "splom" <* end
@@ -417,6 +422,7 @@ routeToPath TreeBuilder = "/tree-builder"
 routeToPath TreeBuilder2 = "/tree-builder2"
 routeToPath TreeBuilder3 = "/tree-builder3"
 routeToPath SimpleTreeBuilder = "/simple-tree-builder"
+routeToPath ChartBuilder = "/chart-builder"
 routeToPath SPLOM = "/splom"
 routeToPath GUPDebug = "/gup-debug"
 routeToPath VizMatrix = "/viz-matrix"

@@ -1,0 +1,369 @@
+/* =============================================================================
+   Chart Builder Page Styles
+   ============================================================================= */
+
+/* Page layout */
+.chart-builder-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f1e8;
+}
+
+.chart-builder-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* =============================================================================
+   Header with tabs
+   ============================================================================= */
+
+.builder-header {
+  margin-bottom: 2rem;
+}
+
+.builder-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.builder-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.chart-type-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.chart-type-tab {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s;
+  color: #333;
+}
+
+.chart-type-tab:hover {
+  background: #f8f9fa;
+  border-color: #bbb;
+}
+
+.chart-type-tab.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* =============================================================================
+   Three-panel layout
+   ============================================================================= */
+
+.builder-panels {
+  display: grid;
+  grid-template-columns: 320px 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1400px) {
+  .builder-panels {
+    grid-template-columns: 280px 1fr 1fr;
+  }
+}
+
+@media (max-width: 1200px) {
+  .builder-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =============================================================================
+   Panel common styles
+   ============================================================================= */
+
+.recipe-panel,
+.editor-panel,
+.preview-panel {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.panel-header {
+  margin-bottom: 1rem;
+}
+
+.panel-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.ast-header {
+  margin-top: 1.5rem;
+}
+
+/* =============================================================================
+   Recipe panel
+   ============================================================================= */
+
+.recipe-code {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.recipe-code code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.recipe-explanation {
+  background: #f0f9ff;
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 3px solid #3b82f6;
+}
+
+.explanation-title {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.explanation-text {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  color: #333;
+}
+
+/* =============================================================================
+   Editor panel
+   ============================================================================= */
+
+.emmet-editor {
+  width: 100%;
+  padding: 1rem;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.9rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 120px;
+  margin-bottom: 1rem;
+  background: #fafafa;
+}
+
+.emmet-editor:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+}
+
+.editor-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Parse status */
+.parse-status {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.status-empty {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-left: 3px solid #9ca3af;
+}
+
+.status-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border-left: 3px solid #dc2626;
+}
+
+.status-success {
+  background: #f0fdf4;
+  color: #166534;
+  border-left: 3px solid #22c55e;
+}
+
+/* =============================================================================
+   Preview panel
+   ============================================================================= */
+
+.chart-preview,
+.ast-preview {
+  min-height: 300px;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.chart-preview {
+  min-height: 400px;
+}
+
+.ast-preview {
+  min-height: 200px;
+}
+
+.preview-placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* =============================================================================
+   Footer
+   ============================================================================= */
+
+.builder-footer {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .builder-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =============================================================================
+   Dataset selector
+   ============================================================================= */
+
+.dataset-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dataset-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.dataset-select {
+  padding: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+}
+
+.dataset-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.dataset-description {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* =============================================================================
+   Tips section
+   ============================================================================= */
+
+.tips-section {
+  padding-left: 1.5rem;
+  border-left: 3px solid #22c55e;
+}
+
+.tips-title {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.tip-item {
+  margin-bottom: 0.5rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* =============================================================================
+   Buttons
+   ============================================================================= */
+
+.button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.button-primary:hover {
+  background: #2563eb;
+}
+
+.button-secondary {
+  background: #e5e7eb;
+  color: #1a1a1a;
+}
+
+.button-secondary:hover {
+  background: #d1d5db;
+}

@@ -145,6 +145,7 @@ data Route
   | TreeBuilder2   -- Interactive tree builder with node creation
   | TreeBuilder3   -- DSL grammar tree builder (keyboard-driven)
   | SimpleTreeBuilder -- Simple Emmet-style tree builder
+  | ChartBuilder   -- Interactive chart builder (bar/line/scatter recipes)
   | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   | GUPDebug       -- Standalone debug page for Setup.applySetupWithData GUP API
   | VizMatrix     -- Type × AST × Data matrix demo
@@ -216,6 +217,7 @@ instance showRoute :: Show Route where
   show TreeBuilder2 = "Tree Builder 2"
   show TreeBuilder3 = "DSL Tree Builder"
   show SimpleTreeBuilder = "Simple Tree Builder"
+  show ChartBuilder = "Interactive Chart Builder"
   show SPLOM = "Brushable SPLOM"
   show GUPDebug = "GUP Debug"
   show VizMatrix = "VizMatrix"
