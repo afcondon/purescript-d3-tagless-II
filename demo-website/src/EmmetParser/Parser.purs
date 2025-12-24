@@ -5,278 +5,211 @@ module EmmetParser.Parser
 
 import Prelude
 
+import Control.Alt ((<|>))
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
-import EmmetParser.Lexer (Token(..), ElementChar(..), JoinChar(..), tokenize)
+import Data.List (List, many, some, (:))
+import Data.List as List
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String.CodeUnits as SCU
+import Data.Enum (fromEnum)
 import EmmetParser.Types (EmmetExpr(..), EmmetNode(..), ElementType(..), JoinType(..), Attribute(..), ParseError(..))
-
--- | Parser state
-type ParserState =
-  { tokens :: Array Token
-  , pos :: Int
-  }
+import Parsing (Parser, runParser, fail)
+import Parsing (ParseError) as P
+import Parsing.Combinators (between, sepBy1, optionMaybe, try)
+import Parsing.String (char, satisfy, string, eof)
+import Parsing.String.Basic (digit)
 
 -- | Parse an Emmet expression from a string
 parseEmmet :: String -> Either ParseError EmmetExpr
-parseEmmet input = do
-  tokens <- tokenize input
-  if Array.null tokens
-    then Left EmptyExpression
-    else parse tokens
+parseEmmet input =
+  case runParser input emmetParser of
+    Left err -> Left $ InvalidAttribute (show err) 0  -- Map parsing errors
+    Right expr -> Right expr
 
--- | Parse tokens into an Emmet expression
-parse :: Array Token -> Either ParseError EmmetExpr
-parse tokens = do
-  result <- parseExpression { tokens, pos: 0 }
-  -- Check if we consumed all tokens
-  if result.state.pos < Array.length tokens
-    then Left $ UnexpectedChar '?' result.state.pos  -- TODO: improve error
-    else Right result.expr
+-- | Alias for parseEmmet (legacy compatibility)
+parse :: Array _ -> Either ParseError EmmetExpr
+parse _ = Left $ InvalidAttribute "parse from tokens deprecated - use parseEmmet" 0
 
-type ParseResult = { expr :: EmmetExpr, state :: ParserState }
+-- =============================================================================
+-- Parser Combinators
+-- =============================================================================
 
--- | Parse: Expression ::= Term (('+' Term))*
-parseExpression :: ParserState -> Either ParseError ParseResult
-parseExpression state = do
-  firstTerm <- parseTerm state
-  parseRestSiblings firstTerm
+type P a = Parser String a
 
-  where
-    parseRestSiblings :: ParseResult -> Either ParseError ParseResult
-    parseRestSiblings result = do
-      case peekToken result.state of
-        Just TSibling -> do
-          let nextState = advance result.state
-          nextTerm <- parseTerm nextState
-          -- Combine with Sibling
-          let combined = { expr: Sibling result.expr nextTerm.expr, state: nextTerm.state }
-          parseRestSiblings combined
-        _ -> Right result
+-- | Parse one of the given characters
+oneOf :: Array Char -> P Char
+oneOf chars = satisfy (\c -> Array.elem c chars)
 
--- | Parse: Term ::= Factor ('>' Term)?
--- | Right-associative: a>b>c parses as a>(b>c)
-parseTerm :: ParserState -> Either ParseError ParseResult
-parseTerm state = do
-  firstFactor <- parseFactor state
+-- | Skip whitespace (spaces, tabs, newlines, carriage returns)
+skipSpaces :: P Unit
+skipSpaces = void $ many $ satisfy (\c -> c == ' ' || c == '\t' || c == '\n' || c == '\r')
 
-  -- Check for child operator
-  case peekToken firstFactor.state of
-    Just TChild -> do
-      let nextState = advance firstFactor.state
-      -- Recursively parse the rest as a term (right-associative)
-      childTerm <- parseTerm nextState
-      -- Add child to current node
-      let combined = addChild firstFactor.expr childTerm.expr
-      Right { expr: combined, state: childTerm.state }
-    _ -> Right firstFactor
+emmetParser :: P EmmetExpr
+emmetParser = do
+  expr <- expression
+  eof
+  pure expr
 
+-- | Expression ::= Term ('+' Term)*
+expression :: P EmmetExpr
+expression = do
+  skipSpaces
+  first <- term
+  rest <- many (skipSpaces *> char '+' *> skipSpaces *> term)
+  pure $ List.foldl (\acc t -> Sibling acc t) first rest
+
+-- | Term ::= Factor ('>' Term)?  (right-associative)
+term :: P EmmetExpr
+term = do
+  skipSpaces
+  fact <- factor
+  mChild <- optionMaybe (skipSpaces *> char '>' *> term)
+  case mChild of
+    Nothing -> pure fact
+    Just child -> pure $ addChild fact child
   where
     addChild :: EmmetExpr -> EmmetExpr -> EmmetExpr
     addChild parent child = case parent of
-      Single node children ->
-        Single node (Array.snoc children child)
-      _ ->
-        -- Parent should always be Single at this point
-        parent
+      Single node children -> Single node (Array.snoc children child)
+      _ -> parent  -- Shouldn't happen
 
--- | Parse: Factor ::= (Element | Join) Attributes? Name? Multiplier? | '(' Expression ')' Multiplier?
-parseFactor :: ParserState -> Either ParseError ParseResult
-parseFactor state = case peekToken state of
-  Just TLParen -> parseGrouped state
-  Just (TElement elemChar) -> parseElement elemChar state
-  Just (TJoin joinChar) -> parseJoin joinChar state
-  Just token -> Left $ UnexpectedChar '?' state.pos  -- TODO: better error
-  Nothing -> Left $ UnexpectedEnd "element or join"
-
--- | Parse grouped expression: '(' Expression ')' Multiplier?
-parseGrouped :: ParserState -> Either ParseError ParseResult
-parseGrouped state = do
-  -- Consume '('
-  let state1 = advance state
-  -- Parse inner expression
-  result <- parseExpression state1
-  -- Expect ')'
-  case peekToken result.state of
-    Just TRParen -> do
-      let state2 = advance result.state
-      -- Check for multiplier
-      case peekToken state2 of
-        Just (TMultiplier n) ->
-          Right { expr: Repeat result.expr n, state: advance state2 }
-        _ ->
-          Right { expr: result.expr, state: state2 }
-    _ ->
-      Left $ UnbalancedParens state.pos
-
--- | Parse element: Element Attributes? Name? Multiplier?
-parseElement :: ElementChar -> ParserState -> Either ParseError ParseResult
-parseElement elemChar state = do
-  let elemType = charToElementType elemChar
-  let state1 = advance state  -- consume element char
-
-  -- Parse optional attributes
-  attrsResult <- parseOptionalAttributes state1
-
-  -- Parse optional name
-  nameResult <- parseOptionalName attrsResult.state
-
-  -- Create node
-  let node = ElemNode elemType attrsResult.attrs nameResult.name
-  let expr = Single node []
-
-  -- Parse optional multiplier
-  case peekToken nameResult.state of
-    Just (TMultiplier n) ->
-      Right { expr: Repeat expr n, state: advance nameResult.state }
-    _ ->
-      Right { expr, state: nameResult.state }
-
--- | Parse join: Join '(' TypeName ')' Attributes? Name? Multiplier?
-parseJoin :: JoinChar -> ParserState -> Either ParseError ParseResult
-parseJoin joinChar state = do
-  let joinType = charToJoinType joinChar
-  let state1 = advance state  -- consume join char
-
-  -- Expect '('
-  case peekToken state1 of
-    Just TLParen -> do
-      let state2 = advance state1
-
-      -- Parse type name
-      case peekToken state2 of
-        Just (TIdentifier typeName) -> do
-          let state3 = advance state2
-
-          -- Expect ')'
-          case peekToken state3 of
-            Just TRParen -> do
-              let state4 = advance state3
-
-              -- Parse optional attributes
-              attrsResult <- parseOptionalAttributes state4
-
-              -- Parse optional name
-              nameResult <- parseOptionalName attrsResult.state
-
-              -- Create node
-              let node = JoinNode joinType typeName attrsResult.attrs nameResult.name
-              let expr = Single node []
-
-              -- Parse optional multiplier
-              case peekToken nameResult.state of
-                Just (TMultiplier n) ->
-                  Right { expr: Repeat expr n, state: advance nameResult.state }
-                _ ->
-                  Right { expr, state: nameResult.state }
-
-            _ -> Left $ UnbalancedParens state1.pos
-
-        _ -> Left $ InvalidTypeName "" state2.pos
-
-    _ -> Left $ UnexpectedChar '(' state.pos
-
--- | Parse optional attributes: '[' AttrList ']'?
-parseOptionalAttributes :: ParserState -> Either ParseError { attrs :: Array Attribute, state :: ParserState }
-parseOptionalAttributes state = case peekToken state of
-  Just TLBracket -> do
-    let state1 = advance state
-    parseAttributeList state1 []
-  _ -> Right { attrs: [], state }
-
+-- | Factor ::= (Element | Join) Attributes? Multiplier? | '(' Expression ')' Multiplier?
+factor :: P EmmetExpr
+factor =
+  try groupedExpr <|> try joinNode <|> elementNode
   where
-    parseAttributeList :: ParserState -> Array Attribute -> Either ParseError { attrs :: Array Attribute, state :: ParserState }
-    parseAttributeList st acc = do
-      attrResult <- parseAttribute st
-      let newAcc = Array.snoc acc attrResult.attr
+    groupedExpr = do
+      _ <- char '('
+      expr <- expression
+      _ <- char ')'
+      mult <- optionMaybe multiplier
+      case mult of
+        Nothing -> pure expr
+        Just n -> pure $ Repeat expr n
 
-      case peekToken attrResult.state of
-        Just TComma -> do
-          -- More attributes
-          let nextState = advance attrResult.state
-          parseAttributeList nextState newAcc
+-- | Element node: ElementChar Attributes? Multiplier?
+elementNode :: P EmmetExpr
+elementNode = do
+  elemChar <- oneOf ['g', 'c', 'r', 'p', 'l', 't']
+  attrs <- optionMaybe attributes
+  mult <- optionMaybe multiplier
+  let elemType = charToElementType elemChar
+  let node = ElemNode elemType (Array.fromFoldable $ fromMaybe [] attrs) Nothing
+  let expr = Single node []
+  case mult of
+    Nothing -> pure expr
+    Just n -> pure $ Repeat expr n
 
-        Just TRBracket -> do
-          -- End of attributes
-          Right { attrs: newAcc, state: advance attrResult.state }
+-- | Join node: JoinChar '(' Identifier ')' Attributes? Multiplier?
+joinNode :: P EmmetExpr
+joinNode = do
+  joinChar <- oneOf ['j', 'n', 'u', 'x']
+  typeName <- between (char '(') (char ')') identifier
+  attrs <- optionMaybe attributes
+  mult <- optionMaybe multiplier
+  let joinType = charToJoinType joinChar
+  let node = JoinNode joinType typeName (Array.fromFoldable $ fromMaybe [] attrs) Nothing
+  let expr = Single node []
+  case mult of
+    Nothing -> pure expr
+    Just n -> pure $ Repeat expr n
 
-        _ -> Left $ InvalidAttribute "Expected ',' or ']'" attrResult.state.pos
+-- | Attributes ::= '[' Attribute (',' Attribute)* ']'
+attributes :: P (Array Attribute)
+attributes = between (char '[') (char ']') (Array.fromFoldable <$> sepBy1 attribute (skipSpaces *> char ',' <* skipSpaces))
 
--- | Parse a single attribute: StaticAttr | FieldAttr | IndexAttr
-parseAttribute :: ParserState -> Either ParseError { attr :: Attribute, state :: ParserState }
-parseAttribute state = do
-  -- Expect identifier (attribute name)
-  case peekToken state of
-    Just (TIdentifier attrName) -> do
-      let state1 = advance state
+-- | Attribute ::= Name '=' Value | Name ':' Field | Name '@' 'index'
+attribute :: P Attribute
+attribute = try staticAttr <|> try fieldAttr <|> indexAttr
+  where
+    staticAttr = do
+      name <- attrName
+      _ <- char '='
+      value <- attrValue
+      pure $ StaticAttr name value
 
-      -- Check what follows
-      case peekToken state1 of
-        Just TEquals -> do
-          -- StaticAttr: name=value
-          let state2 = advance state1
-          case peekToken state2 of
-            Just (TIdentifier value) ->
-              Right { attr: StaticAttr attrName value, state: advance state2 }
-            Just (TNumber value) ->
-              Right { attr: StaticAttr attrName value, state: advance state2 }
-            _ -> Left $ InvalidAttribute "Expected value after '='" state2.pos
+    fieldAttr = do
+      name <- attrName
+      _ <- char ':'
+      field <- identifier
+      pure $ FieldAttr name field
 
-        Just TColon -> do
-          -- FieldAttr: name:field
-          let state2 = advance state1
-          case peekToken state2 of
-            Just (TIdentifier fieldName) ->
-              Right { attr: FieldAttr attrName fieldName, state: advance state2 }
-            _ -> Left $ InvalidAttribute "Expected field name after ':'" state2.pos
+    indexAttr = do
+      name <- attrName
+      _ <- char '@'
+      _ <- string "index"
+      pure $ IndexAttr name
 
-        Just TAt -> do
-          -- IndexAttr: name@index
-          let state2 = advance state1
-          case peekToken state2 of
-            Just (TIdentifier "index") ->
-              Right { attr: IndexAttr attrName, state: advance state2 }
-            _ ->
-              -- Allow just @ without "index" keyword
-              Right { attr: IndexAttr attrName, state: state2 }
+-- | Attribute name (alphanumeric, can include hyphens)
+attrName :: P String
+attrName = SCU.fromCharArray <$> Array.fromFoldable <$> some (satisfy isAttrNameChar)
+  where
+    isAttrNameChar c = isAlphaNum c || c == '-'
 
-        _ -> Left $ InvalidAttribute "Expected '=', ':', or '@' after attribute name" state1.pos
+-- | Attribute value (alphanumeric, can include dots for decimals)
+attrValue :: P String
+attrValue = SCU.fromCharArray <$> Array.fromFoldable <$> some (satisfy isValueChar)
+  where
+    isValueChar c = isAlphaNum c || c == '.' || c == '-'
 
-    _ -> Left $ InvalidAttribute "Expected attribute name" state.pos
+-- | Identifier (alphanumeric starting with letter)
+identifier :: P String
+identifier = do
+  first <- satisfy isAlpha
+  rest <- many (satisfy isAlphaNum)
+  pure $ SCU.fromCharArray ([first] <> Array.fromFoldable rest)
 
--- | Parse optional name: '#' Identifier?
-parseOptionalName :: ParserState -> Either ParseError { name :: Maybe String, state :: ParserState }
-parseOptionalName state = case peekToken state of
-  Just THash -> do
-    let state1 = advance state
-    case peekToken state1 of
-      Just (TIdentifier name) ->
-        Right { name: Just name, state: advance state1 }
-      _ -> Left $ InvalidAttribute "Expected identifier after '#'" state1.pos
-  _ -> Right { name: Nothing, state }
+-- | Multiplier ::= '*' Number
+multiplier :: P Int
+multiplier = do
+  _ <- char '*'
+  digits <- some digit
+  let numStr = SCU.fromCharArray (Array.fromFoldable digits)
+  case parseInt numStr of
+    Nothing -> fail "Invalid multiplier number"
+    Just n -> pure n
 
--- | Peek at current token without consuming
-peekToken :: ParserState -> Maybe Token
-peekToken state = Array.index state.tokens state.pos
+-- =============================================================================
+-- Helper Functions
+-- =============================================================================
 
--- | Advance parser position by 1
-advance :: ParserState -> ParserState
-advance state = state { pos = state.pos + 1 }
-
--- | Convert element character to element type
-charToElementType :: ElementChar -> ElementType
+charToElementType :: Char -> ElementType
 charToElementType = case _ of
-  G -> EGroup
-  C -> ECircle
-  R -> ERect
-  P -> EPath
-  L -> ELine
-  T -> EText
+  'g' -> EGroup
+  'c' -> ECircle
+  'r' -> ERect
+  'p' -> EPath
+  'l' -> ELine
+  't' -> EText
+  _ -> EGroup  -- Shouldn't happen
 
--- | Convert join character to join type
-charToJoinType :: JoinChar -> JoinType
+charToJoinType :: Char -> JoinType
 charToJoinType = case _ of
-  J -> SimpleJoin
-  N -> NestedJoin
-  U -> UpdateJoin
-  X -> UpdateNestedJoin
+  'j' -> SimpleJoin
+  'n' -> NestedJoin
+  'u' -> UpdateJoin
+  'x' -> UpdateNestedJoin
+  _ -> SimpleJoin  -- Shouldn't happen
+
+isAlpha :: Char -> Boolean
+isAlpha c = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+
+isAlphaNum :: Char -> Boolean
+isAlphaNum c = isAlpha c || (c >= '0' && c <= '9')
+
+parseInt :: String -> Maybe Int
+parseInt s = case List.fromFoldable (SCU.toCharArray s) of
+  List.Nil -> Nothing
+  digits -> go 0 digits
+  where
+    go acc List.Nil = Just acc
+    go acc (d : ds) =
+      case charToDigit d of
+        Nothing -> Nothing
+        Just n -> go (acc * 10 + n) ds
+
+    charToDigit c =
+      if c >= '0' && c <= '9'
+        then Just (fromEnum c - fromEnum '0')
+        else Nothing
