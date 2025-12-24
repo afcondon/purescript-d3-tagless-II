@@ -4,11 +4,16 @@ module PSD3.SimpleTreeBuilder
 
 import Prelude
 
+import Control.Comonad.Cofree (head)
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.List as List
 import Data.Maybe (Maybe(..))
 import Data.String as String
+import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
+import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -17,11 +22,20 @@ import EmmetParser.Parser (parseEmmet)
 import EmmetParser.Validator (validate)
 import EmmetParser.Converter (convertToTree)
 import EmmetParser.Types (ParseError, ValidationError)
-import TreeBuilder3.TypePropagation (pointType, nodeType, countryType, letterType, boardType, rowType, cellType)
-import TreeBuilder3.Types (DatumType(..), datumTypeLabel, datumTypeFields, PrimType(..))
+import TreeBuilder3.TypePropagation (pointType, nodeType, countryType, letterType, boardType, rowType, cellType, propagateTypes)
+import TreeBuilder3.Types (DatumType(..), datumTypeLabel, datumTypeFields, PrimType(..), TreeNode, DslNodeType(..), nodeLabel)
+import TreeBuilder3.TreeOps (applyLayout, flattenTree, makeLinks, LinkData, filterStructuralTree, getBadgeChildren, positionBadges, isBadgeNodeType)
+import TreeBuilder3.Theme as Theme
 import Data.Tree (Tree)
-import TreeBuilder3.Types (TreeNode)
 import PSD3.Shared.SiteNav as SiteNav
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
+import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
+import PSD3.Expr.Friendly as F
+import PSD3.AST as T
+import PSD3.Transform (clearContainer)
+import Web.DOM.Element (Element)
+import Color (toHexString)
 
 -- =============================================================================
 -- State
@@ -68,7 +82,7 @@ examples =
     , description: "Rectangles for bar chart"
     }
   , { name: "Circle with Multiple Attributes"
-    , expr: "c[cx=100,cy=50,r=25,fill=red,stroke=black,stroke-width=2]"
+    , expr: "c[cx=100,cy=50,r=25,fill=red,stroke=black,k=2]"
     , description: "Circle with many static attributes"
     }
   ]
@@ -285,31 +299,164 @@ renderTypeSelector state =
       TBoolean -> "Boolean"
 
 renderPreview :: forall m. State -> H.ComponentHTML Action () m
-renderPreview state =
+renderPreview _state =
   HH.div
     [ HP.classes [ HH.ClassName "preview-section" ] ]
     [ HH.h3
         [ HP.classes [ HH.ClassName "section-subtitle" ] ]
-        [ HH.text "AST Preview" ]
+        [ HH.text "Visualization" ]
 
-    , case state.parseResult of
-        Just (Right (Right tree)) ->
-          HH.div
-            [ HP.classes [ HH.ClassName "ast-preview" ] ]
-            [ HH.pre
-                [ HP.classes [ HH.ClassName "ast-tree" ] ]
-                [ HH.text (showTree tree) ]
-            ]
-
-        _ ->
-          HH.div
-            [ HP.classes [ HH.ClassName "ast-preview empty" ] ]
-            [ HH.text "Parse an expression to see the AST" ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "tree-visualization" ]
+        , HP.id "simple-tree-viz"
+        ]
+        []
     ]
 
--- | Show tree structure (simplified for preview)
-showTree :: Tree TreeNode -> String
-showTree _tree = "Tree structure parsed successfully!\n(Detailed view coming soon)"
+-- =============================================================================
+-- Visualization
+-- =============================================================================
+
+-- | Render node data for visualization
+type RenderNode =
+  { id :: Int
+  , x :: Number
+  , y :: Number
+  , color :: String
+  , label :: String
+  , typeLabel :: String
+  , isBadge :: Boolean
+  }
+
+-- | Convert TreeNode to RenderNode for visualization
+toRenderNode :: TreeNode -> Int -> RenderNode
+toRenderNode node _badgeIndex =
+  { id: node.id
+  , x: node.x
+  , y: node.y
+  , color: toHexString $ Theme.nodeTypeColor node.nodeType
+  , label: nodeLabel node.nodeType
+  , typeLabel: datumTypeLabel node.datumType
+  , isBadge: isBadgeNodeType node.nodeType
+  }
+
+-- | Render tree visualization with D3
+renderTreeVisualization :: forall o m. MonadAff m => Tree TreeNode -> H.HalogenM State Action () o m Unit
+renderTreeVisualization userTree = do
+  liftEffect $ clearContainer "#simple-tree-viz"
+
+  -- Propagate types through the tree
+  let typedTree = propagateTypes userTree
+
+  -- Apply layout to structural-only tree (excludes badges)
+  let structuralTree = filterStructuralTree typedTree
+  let positioned = applyLayout structuralTree
+  let structuralNodes = flattenTree positioned
+  let links = makeLinks positioned
+
+  -- Collect badges for each structural node and position them
+  let
+    badgeNodes = structuralNodes >>= \parent ->
+      let
+        badges = getBadgeChildren parent.id typedTree
+        positioned' = positionBadges parent badges
+      in
+        map (\b -> { node: b.node, index: b.index }) positioned'
+
+  -- Convert to render nodes
+  let structuralRenderNodes = map (\n -> toRenderNode n 0) structuralNodes
+  let badgeRenderNodes = map (\b -> toRenderNode b.node b.index) badgeNodes
+  let renderNodes = structuralRenderNodes <> badgeRenderNodes
+
+  -- SVG dimensions
+  let svgWidth = 800.0
+  let svgHeight = 600.0
+
+  -- Center the tree
+  let
+    firstX = case Array.head structuralNodes of
+      Just n -> n.x
+      Nothing -> 0.0
+  let minX = Array.foldl (\acc n -> min acc n.x) firstX structuralNodes
+  let maxX = Array.foldl (\acc n -> max acc n.x) firstX structuralNodes
+  let centerX = (minX + maxX) / 2.0
+  let offsetX = (svgWidth / 2.0) - centerX
+  let offsetY = 50.0
+
+  liftEffect $ runD3v2M do
+    container <- select "#simple-tree-viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+    -- Create SVG with links
+    let
+      linksTree :: T.Tree LinkData
+      linksTree =
+        T.named SVG "svg"
+          [ F.staticStr "width" "100%"
+          , F.staticStr "height" "100%"
+          , F.viewBox 0.0 0.0 svgWidth svgHeight
+          , F.staticStr "preserveAspectRatio" "xMidYMid meet"
+          ]
+          `T.withChild`
+            ( T.named Group "mainGroup"
+                []
+                `T.withChild`
+                  ( T.named Group "linksGroup"
+                      [ F.staticStr "class" "links" ]
+                      `T.withChild`
+                        ( T.joinData "linkPaths" "path" links $ \link ->
+                            T.elem Path
+                              [ F.path $ F.text $ linkBezierVertical
+                                  (link.sourceX + offsetX)
+                                  (link.sourceY + offsetY)
+                                  (link.targetX + offsetX)
+                                  (link.targetY + offsetY)
+                              , F.fill (F.text "none")
+                              , F.stroke (F.color Theme.linkColor)
+                              , F.strokeWidth (F.num 1.0)
+                              ]
+                        )
+                  )
+            )
+
+    linksSelections <- renderTree container linksTree
+    mainGroupSel <- liftEffect $ reselectD3v2 "mainGroup" linksSelections
+
+    -- Create nodes
+    let
+      nodesTree :: T.Tree RenderNode
+      nodesTree =
+        T.named Group "nodesGroup"
+          [ F.staticStr "class" "nodes" ]
+          `T.withChild`
+            ( T.joinData "treeNodes" "circle" renderNodes $ \node ->
+                T.named Group "nodeGroup"
+                  []
+                  `T.withChildren`
+                    [ -- Node circle
+                      T.elem Circle
+                        [ F.cx (F.num (node.x + offsetX))
+                        , F.cy (F.num (node.y + offsetY))
+                        , F.r (F.num if node.isBadge then 8.0 else 12.0)
+                        , F.fill (F.text node.color)
+                        , F.stroke (F.text "#333")
+                        , F.strokeWidth (F.num 1.5)
+                        ]
+                    -- Node label
+                    , T.elem Text
+                        [ F.x (F.num (node.x + offsetX))
+                        , F.y (F.num (node.y + offsetY + 25.0))
+                        , F.textAnchor (F.text "middle")
+                        , F.fontFamily (F.text "monospace")
+                        , F.fontSize (F.px 10.0)
+                        , F.fill (F.text "#333")
+                        , F.textContent (F.text node.label)
+                        ]
+                    ]
+            )
+
+    _ <- renderTree mainGroupSel nodesTree
+
+    pure unit
 
 -- =============================================================================
 -- Event Handling
@@ -324,20 +471,25 @@ handleAction = case _ of
     H.modify_ _ { emmetInput = input, exampleIndex = Nothing }
     -- Parse the input
     if String.null input
-      then H.modify_ _ { parseResult = Nothing }
+      then do
+        H.modify_ _ { parseResult = Nothing }
+        liftEffect $ clearContainer "#simple-tree-viz"
       else do
         let parseResult = parseEmmet input
         case parseResult of
-          Left err ->
+          Left err -> do
             H.modify_ _ { parseResult = Just (Left err) }
+            liftEffect $ clearContainer "#simple-tree-viz"
           Right expr -> do
             let validationResult = validate expr
             case validationResult of
-              Left err ->
+              Left err -> do
                 H.modify_ _ { parseResult = Just (Right (Left err)) }
+                liftEffect $ clearContainer "#simple-tree-viz"
               Right validExpr -> do
                 let tree = convertToTree validExpr
                 H.modify_ _ { parseResult = Just (Right (Right tree)) }
+                renderTreeVisualization tree
 
   SelectExample idx -> do
     case Array.index examples idx of
@@ -355,3 +507,4 @@ handleAction = case _ of
       , parseResult = Nothing
       , exampleIndex = Nothing
       }
+    liftEffect $ clearContainer "#simple-tree-viz"

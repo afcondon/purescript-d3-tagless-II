@@ -49,11 +49,6 @@ validateExpr :: EmmetExpr -> Either ValidationError Unit
 validateExpr = case _ of
   Single node children -> do
     validateNode node
-    -- Check that joins have child elements (templates)
-    case node of
-      JoinNode _ _ _ _ | Array.null children ->
-        Left $ JoinWithoutTemplate { position: 0 }
-      _ -> pure unit
     -- Validate children
     traverse_ validateExpr children
 

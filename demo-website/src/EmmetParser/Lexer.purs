@@ -155,13 +155,40 @@ tokenize input = go { input, pos: 0, tokens: [], inBrackets: false }
       -- Identifiers (alphanumeric starting with letter or digit)
       _ | isAlpha c || isDigit c -> do
           let identifier = takeWhileFrom isAlphaNum state.pos state.input
-          let token = if allDigits identifier
-                        then TNumber identifier
-                        else TIdentifier identifier
-          Right $ state
-            { tokens = Array.snoc state.tokens token
-            , pos = state.pos + String.length identifier
-            }
+          -- Check for decimal numbers (e.g., 0.6, 123.45)
+          if allDigits identifier
+            then do
+              let nextPos = state.pos + String.length identifier
+              case SCU.charAt nextPos state.input of
+                Just '.' -> do
+                  -- Check if there are digits after the decimal point
+                  let afterDecimal = takeWhileFrom isDigit (nextPos + 1) state.input
+                  if String.null afterDecimal
+                    then
+                      -- No digits after '.', just return the integer part
+                      Right $ state
+                        { tokens = Array.snoc state.tokens (TNumber identifier)
+                        , pos = nextPos
+                        }
+                    else
+                      -- We have a decimal number
+                      let fullNumber = identifier <> "." <> afterDecimal
+                      in Right $ state
+                        { tokens = Array.snoc state.tokens (TNumber fullNumber)
+                        , pos = nextPos + 1 + String.length afterDecimal
+                        }
+                _ ->
+                  -- No decimal point, just a regular number
+                  Right $ state
+                    { tokens = Array.snoc state.tokens (TNumber identifier)
+                    , pos = nextPos
+                    }
+            else
+              -- Not all digits, it's an identifier
+              Right $ state
+                { tokens = Array.snoc state.tokens (TIdentifier identifier)
+                , pos = state.pos + String.length identifier
+                }
 
       -- Unknown character
       _ -> Left $ UnexpectedChar c state.pos
