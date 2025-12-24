@@ -61837,7 +61837,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Three Little Circles",
         description: "Data join basics - bind data to DOM elements",
-        category: "Basic Examples"
+        category: "Basic Examples",
+        emmet: "svg[viewBox='0 0 400 200']>j(CircleData)>c[cx:x,cy:y,r:r,fill:color]"
       });
     }
     ;
@@ -61846,7 +61847,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Circles Transition",
         description: "Animated transitions with easing and delays",
-        category: "Basic Examples"
+        category: "Basic Examples",
+        emmet: "svg[viewBox='0 0 400 200']>j(CircleData)>c[cx:x,cy:y,r:r,fill:color]"
       });
     }
     ;
@@ -61855,7 +61857,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Simple Tree",
         description: "Basic nesting with named selections",
-        category: "Basic Examples"
+        category: "Basic Examples",
+        emmet: "svg>g[id=tree-container]>g.node*3>(c[r=20]+t[dy=5])"
       });
     }
     ;
@@ -61864,7 +61867,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Nested Elements",
         description: "Multi-level nesting (Group \u2192 Circle + Text)",
-        category: "Basic Examples"
+        category: "Basic Examples",
+        emmet: "svg>g>(c[cx=100,cy=100,r=50]+t[x=100,y=110])"
       });
     }
     ;
@@ -61873,7 +61877,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Three Little Dimensions",
         description: "Nested data joins (2D array \u2192 table)",
-        category: "Basic Examples"
+        category: "Basic Examples",
+        emmet: "svg>j(Row)>g.row[transform:translateY]>j(Cell)>r[x:x,y:y,width=20,height=20]"
       });
     }
     ;
@@ -61882,7 +61887,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Bar Chart",
         description: "Data-driven bars with scaling",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg[viewBox='0 0 600 400']>g[transform='translate(50,20)']>j(DataPoint)>r[x:scaledX,y:scaledY,width=barWidth,height:scaledHeight,fill=steelblue]"
       });
     }
     ;
@@ -61891,7 +61897,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Scatter Plot",
         description: "Points positioned by data coordinates",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg[viewBox='0 0 600 400']>g[transform='translate(50,20)']>j(Point)>c[cx:scaledX,cy:scaledY,r=5,fill=steelblue,opacity=0.6]"
       });
     }
     ;
@@ -61900,7 +61907,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Line Chart",
         description: "Path element generated from data",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg[viewBox='0 0 600 400']>g[transform='translate(50,20)']>p.line[d:pathData,stroke=steelblue,stroke-width=2,fill=none]"
       });
     }
     ;
@@ -61909,7 +61917,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Grouped Bar Chart",
         description: "Nested joins with multiple series",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg>g[transform='translate(50,20)']>j(Category)>g.category[transform:translateX]>j(Series)>r[x:x,y:y,width=barWidth,height:height,fill:seriesColor]"
       });
     }
     ;
@@ -61918,7 +61927,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Multi-Line Chart",
         description: "Multiple data series with path generator",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg>g[transform='translate(50,20)']>j(Series)>p.line[d:pathData,stroke:seriesColor,stroke-width=2,fill=none]"
       });
     }
     ;
@@ -61927,7 +61937,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Radial Stacked Bar",
         description: "Stacked bars in polar coordinates",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg>g[transform='translate(300,200)']>j(DataPoint)>p.arc[d:arcPath,fill:color]"
       });
     }
     ;
@@ -61936,7 +61947,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Anscombe's Quartet",
         description: "Four datasets with same statistics, different shapes",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg>g.quartet*4>g[transform:translateQuadrant]>j(Point)>c[cx:scaledX,cy:scaledY,r=3]"
       });
     }
     ;
@@ -61945,7 +61957,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Wealth & Health",
         description: "Gapminder-style bubble chart",
-        category: "Chart Examples"
+        category: "Chart Examples",
+        emmet: "svg>g[transform='translate(60,20)']>j(Country)>c[cx:wealthScale,cy:healthScale,r:populationScale,fill:regionColor,opacity=0.7]"
       });
     }
     ;
@@ -61954,7 +61967,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Tree Layout",
         description: "Vertical tree with node-link diagram",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(50,50)']>j(HierNode)>(g.node[transform:translate]>(c[r=5,fill=steelblue]+t[dy=20])+p.link[d:linkPath,stroke=#ccc])"
       });
     }
     ;
@@ -61963,7 +61977,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Radial Tree",
         description: "Tree layout in polar coordinates",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(300,300)']>j(HierNode)>(g.node[transform:rotate]>c[r=4]+p.link[d:radialPath])"
       });
     }
     ;
@@ -61972,7 +61987,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Horizontal Tree",
         description: "Tree layout oriented left-to-right",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(50,50)']>j(HierNode)>(g.node[transform:translate]>c[r=5]+p.link[d:horizontalPath])"
       });
     }
     ;
@@ -61981,7 +61997,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Cluster Dendrogram",
         description: "Leaf nodes aligned at same depth",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(50,50)']>j(HierNode)>(g.leaf[transform:translate]>c[r=3]+p.link[d:linkPath])"
       });
     }
     ;
@@ -61990,7 +62007,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Treemap",
         description: "Nested rectangles sized by value",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g>j(HierNode)>r[x:x0,y:y0,width:width,height:height,fill:color,stroke=#fff]"
       });
     }
     ;
@@ -61999,7 +62017,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Sunburst",
         description: "Radial partition diagram",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(400,300)']>j(HierNode)>p.arc[d:arcPath,fill:color]"
       });
     }
     ;
@@ -62008,7 +62027,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Circle Packing",
         description: "Nested circles sized by value",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g[transform='translate(300,300)']>j(HierNode)>c[cx:x,cy:y,r:r,fill:color,stroke=#fff]"
       });
     }
     ;
@@ -62017,7 +62037,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Icicle / Partition",
         description: "Rectangular partition diagram",
-        category: "Hierarchies"
+        category: "Hierarchies",
+        emmet: "svg>g>j(HierNode)>r[x:x,y:y,width:width,height:height,fill:color]"
       });
     }
     ;
@@ -62026,7 +62047,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Sankey Diagram",
         description: "Flow diagram with weighted links",
-        category: "Relational"
+        category: "Relational",
+        emmet: "svg>g[transform='translate(20,20)']>(j(SankeyNode)>r.node[x:x,y:y,width:width,height:height,fill=steelblue]+j(SankeyLink)>p.link[d:linkPath,stroke:color,stroke-width:width,fill=none,opacity=0.5])"
       });
     }
     ;
@@ -62035,7 +62057,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Chord Diagram",
         description: "Circular flow between groups",
-        category: "Relational"
+        category: "Relational",
+        emmet: "svg>g[transform='translate(300,300)']>(j(ChordGroup)>p.arc[d:groupPath,fill:color]+j(Chord)>p.ribbon[d:chordPath,fill:color,opacity=0.7])"
       });
     }
     ;
@@ -62044,7 +62067,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Edge Bundling",
         description: "Hierarchical edge bundling",
-        category: "Relational"
+        category: "Relational",
+        emmet: "svg>g[transform='translate(400,400)']>(j(Node)>c.node[cx:x,cy:y,r=3,fill=steelblue]+j(Link)>p.link[d:bundledPath,stroke=#ccc,fill=none,opacity=0.3])"
       });
     }
     ;
@@ -62053,7 +62077,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Simple Force Graph",
         description: "Basic force-directed layout",
-        category: "Force-Directed"
+        category: "Force-Directed",
+        emmet: "svg>g>(j(Link)>l.link[x1:source.x,y1:source.y,x2:target.x,y2:target.y,stroke=#999]+j(Node)>c.node[cx:x,cy:y,r=5,fill=steelblue])"
       });
     }
     ;
@@ -62062,7 +62087,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "Les Mis\xE9rables Network",
         description: "Character co-occurrence network",
-        category: "Force-Directed"
+        category: "Force-Directed",
+        emmet: "svg[viewBox='0 0 800 600']>g>(j(Link)>l.link[x1:source.x,y1:source.y,x2:target.x,y2:target.y,stroke=#999,stroke-width:value]+j(Node)>g.node[transform:translate]>c[r:degree,fill:groupColor])"
       });
     }
     ;
@@ -62071,7 +62097,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "v3 Parabola",
         description: "Finally Tagless DSL - polymorphic expressions",
-        category: "v3 DSL Examples"
+        category: "v3 DSL Examples",
+        emmet: "svg>g[transform='translate(50,250)']>j(Point)>c[cx:x,cy:y,r=3,fill=purple]"
       });
     }
     ;
@@ -62080,7 +62107,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "v3 Transition",
         description: "v3 expressions as animated transition targets",
-        category: "v3 DSL Examples"
+        category: "v3 DSL Examples",
+        emmet: "svg>g>j(DataPoint)>c[cx:x,cy:y,r:radius,fill:color]"
       });
     }
     ;
@@ -62089,7 +62117,8 @@ clusterViz selector = launchAff_ do
         id: id5,
         name: "v3 GUP",
         description: "General Update Pattern with staggered transitions",
-        category: "v3 DSL Examples"
+        category: "v3 DSL Examples",
+        emmet: "svg[viewBox='0 0 600 200']>u(Letter)>t.letter[x:x,y=100,font-size=48,fill=steelblue]"
       });
     }
     ;
@@ -62221,10 +62250,10 @@ clusterViz selector = launchAff_ do
     }
     ;
     if (v2 instanceof Just) {
-      return div4([classes(["example-page"])])([renderHeader(state3.exampleId)(new Just(v2.value0)), main([classes(["example-content"])])([div4([classes(["example-description"])])([h1([classes(["example-title"])])([text7(v2.value0.name)]), p([classes(["example-subtitle"])])([text7(v2.value0.description)]), p([classes(["example-category-badge"])])([text7(v2.value0.category)])]), div4([classes(["example-viz-panel"])])([div4([id3("viz"), classes(["example-viz"])])([])]), div4([classes(["example-code-panel"])])([h2([classes(["code-panel-title"])])([text7("Source Code")]), p([classes(["code-note"])])([text7("View the source for this example in the "), a([href4(getGithubLink(v2.value0.id)), target6("_blank"), rel4("noopener noreferrer")])([text7("GitHub repository")])]), div4([classes(["code-block"])])(syntaxHighlightedCode(getExampleCodeSummary(v2.value0.id)))])])]);
+      return div4([classes(["example-page"])])([renderHeader(state3.exampleId)(new Just(v2.value0)), main([classes(["example-content"])])([div4([classes(["example-description"])])([h1([classes(["example-title"])])([text7(v2.value0.name)]), p([classes(["example-subtitle"])])([text7(v2.value0.description)]), p([classes(["example-category-badge"])])([text7(v2.value0.category)])]), div4([classes(["example-viz-panel"])])([div4([id3("viz"), classes(["example-viz"])])([])]), div4([classes(["example-code-panel"])])([div4([classes(["emmet-section"])])([h3([classes(["section-title"])])([text7("Emmet Syntax")]), pre([classes(["emmet-code"])])([code([classes(["language-emmet"])])([text7(v2.value0.emmet)])]), p([classes(["emmet-note"])])([text7("Copy this expression to use in "), a([href4("#/simple-tree-builder"), classes(["builder-link"])])([text7("Simple Tree Builder")])])]), h3([classes(["section-title"])])([text7("PureScript Code")]), p([classes(["code-note"])])([text7("View the source for this example in the "), a([href4(getGithubLink(v2.value0.id)), target6("_blank"), rel4("noopener noreferrer")])([text7("GitHub repository")])]), div4([classes(["code-block"])])(syntaxHighlightedCode(getExampleCodeSummary(v2.value0.id)))])])]);
     }
     ;
-    throw new Error("Failed pattern match at Component.Example (line 313, column 3 - line 376, column 10): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.Example (line 372, column 3 - line 458, column 10): " + [v2.constructor.name]);
   };
   var clearVizContainer = function(dictMonadAff) {
     return clear3(monadEffectHalogenM(dictMonadAff.MonadEffect0()))("#viz");

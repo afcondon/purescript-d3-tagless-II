@@ -198,6 +198,82 @@
   color: #333;
 }
 
+/* Code Note */
+.code-note {
+  padding: 0.75rem 2rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  background-color: #fafaf8;
+  border-bottom: 1px solid #e0ddd4;
+  flex-shrink: 0;
+}
+
+.code-note a {
+  color: #007acc;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.code-note a:hover {
+  color: #005a9e;
+}
+
+/* Emmet Section */
+.emmet-section {
+  margin: 1.5rem 2rem;
+  padding: 1.5rem;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border-left: 4px solid #22c55e;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #333;
+  letter-spacing: 0.025em;
+}
+
+.emmet-code {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
+  border: 1px solid #bbf7d0;
+  line-height: 1.6;
+  margin: 0 0 0.75rem 0;
+  color: #166534;
+}
+
+.emmet-code code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.emmet-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.builder-link {
+  color: #16a34a;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.builder-link:hover {
+  color: #15803d;
+}
+
 /* Responsive layout for tablets and smaller */
 @media (max-width: 1024px) {
   .example-content {
