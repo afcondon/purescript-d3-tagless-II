@@ -83,6 +83,16 @@ describeTree tree level = case tree of
       $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
     tell $ indent (level + 1) <> "(Decompose and template functions defined)\n"
 
+  ConditionalRender { cases } -> do
+    tell $ indent level <> "Conditionally render one of " <> show (length cases) <> " different specs "
+    tell "based on data predicates (chimeric visualization):\n"
+    tell $ indent (level + 1) <> "(Predicates and specs defined as functions)\n"
+
+  LocalCoordSpace { child } -> do
+    tell $ indent level <> "Create local coordinate space for embedded visualization:\n"
+    tell $ indent (level + 1) <> "(Scale functions defined for width/height)\n"
+    describeTree child (level + 1)
+
 -- | Describe an attribute in English
 describeAttribute :: forall datum. Attribute datum -> String
 describeAttribute (StaticAttr name value) =

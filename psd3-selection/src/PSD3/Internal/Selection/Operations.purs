@@ -1237,6 +1237,8 @@ renderNodeHelperWithDatum parentSel tree@(Join _) _ = renderNodeHelper parentSel
 renderNodeHelperWithDatum parentSel tree@(NestedJoin _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(UpdateJoin _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(UpdateNestedJoin _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(ConditionalRender _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(LocalCoordSpace _) _ = renderNodeHelper parentSel tree
 
 -- | Helper: Render a single node and its children (no explicit datum)
 -- | Returns the created element and accumulated selections map
@@ -1709,6 +1711,31 @@ renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
     Nothing -> createElementWithNS Group doc -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
+
+-- Render conditional render (chimeric visualization support)
+-- This allows different specs to be rendered based on data predicates
+renderNodeHelper parentSel (ConditionalRender { cases }) = do
+  -- For now, implement a simplified version that renders nothing
+  -- A full implementation would need to evaluate predicates on bound data
+  -- and render the appropriate spec for each datum
+  -- TODO: Implement full conditional rendering logic
+  let Selection impl = parentSel
+  let doc = case impl of
+        EmptySelection rec -> rec.document
+        _ -> unsafePartial (case impl of EmptySelection rec -> rec.document)
+  dummyElement <- createElementWithNS Group doc
+  pure $ Tuple dummyElement Map.empty
+
+-- Render local coordinate space (for embedded visualizations)
+-- This creates a nested coordinate system for the child tree
+renderNodeHelper parentSel (LocalCoordSpace { scaleX, scaleY, child }) = do
+  -- For now, implement a simplified version that just renders the child
+  -- A full implementation would:
+  -- 1. Create a group element
+  -- 2. Apply viewBox or transform to establish local coordinates
+  -- 3. Render child inside the group
+  -- TODO: Implement full local coordinate space with transforms
+  renderNodeHelper parentSel child
 
 -- | Helper: Render nested templates for pending selection
 -- |

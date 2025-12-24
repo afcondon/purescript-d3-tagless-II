@@ -70,6 +70,11 @@ module PSD3.AST
   , nestedJoin
   , updateJoin
   , updateNestedJoin
+    -- * Chimeric Visualizations
+  , conditionalRender
+  , conditionalRenderOr
+  , localCoordSpace
+  , localCoordSpaceFixed
     -- * Combinators
   , beside
   , siblings
@@ -189,6 +194,46 @@ data Tree datum
       , template :: datum -> Tree datum             -- Template for inner elements (type-erased)
       , behaviors :: GUPBehaviors datum             -- Enter/update/exit behaviors (type-erased)
       }
+  -- | ConditionalRender enables chimeric visualizations by rendering different specs
+  -- | based on data predicates.
+  -- |
+  -- | This is the foundation for "structural exception handling" - using different
+  -- | visual representations for different structural patterns in the data.
+  -- |
+  -- | Example: Sankey-Network chimera
+  -- | ```purescript
+  -- | conditionalRender
+  -- |   [ { predicate: isCyclicCluster, spec: \d -> forceNetworkSpec d }
+  -- |   , { predicate: isNormalNode, spec: \d -> sankeyNodeSpec d }
+  -- |   ]
+  -- | ```
+  -- |
+  -- | The first matching predicate determines which spec to render.
+  -- | If no predicates match, no element is rendered (could be extended with fallback).
+  | ConditionalRender
+      { cases :: Array { predicate :: datum -> Boolean, spec :: datum -> Tree datum }
+      }
+  -- | LocalCoordSpace creates a nested coordinate system for embedded visualizations.
+  -- |
+  -- | This enables chimeric visualizations where some nodes contain entire embedded
+  -- | visualizations (like a Sankey node that contains a force network).
+  -- |
+  -- | The child tree is rendered in its own coordinate space, isolated from the parent.
+  -- | Transform configuration specifies how to map between parent and child coordinates.
+  -- |
+  -- | Example: Embedded network in Sankey node
+  -- | ```purescript
+  -- | localCoordSpace
+  -- |   { scaleX: \d -> 100.0  -- child width
+  -- |   , scaleY: \d -> 100.0  -- child height
+  -- |   }
+  -- |   forceNetworkTree
+  -- | ```
+  | LocalCoordSpace
+      { scaleX :: datum -> Number  -- Width of local coord space
+      , scaleY :: datum -> Number  -- Height of local coord space
+      , child :: Tree datum        -- Child tree to render in local space
+      }
 
 -- | Unified behavior specification for any GUP phase (enter, update, or exit)
 -- |
@@ -240,6 +285,8 @@ withChild parent child = case parent of
   NestedJoin nj -> NestedJoin nj  -- Nested joins can't have additional children
   UpdateJoin sj -> UpdateJoin sj  -- Scene joins can't have additional children (template already defined)
   UpdateNestedJoin snj -> UpdateNestedJoin snj  -- Scene nested joins can't have additional children
+  ConditionalRender cr -> ConditionalRender cr  -- Conditional renders define children in specs
+  LocalCoordSpace lcs -> LocalCoordSpace lcs  -- Local coord spaces define child explicitly
 
 -- | Add multiple children to a tree node
 -- |
@@ -251,6 +298,8 @@ withChildren parent newChildren = case parent of
   NestedJoin nj -> NestedJoin nj
   UpdateJoin sj -> UpdateJoin sj
   UpdateNestedJoin snj -> UpdateNestedJoin snj
+  ConditionalRender cr -> ConditionalRender cr
+  LocalCoordSpace lcs -> LocalCoordSpace lcs
 
 -- | Add behaviors to a tree node
 -- |
@@ -276,6 +325,8 @@ withBehaviors tree newBehaviors = case tree of
   NestedJoin nj -> NestedJoin nj
   UpdateJoin sj -> UpdateJoin sj
   UpdateNestedJoin snj -> UpdateNestedJoin snj
+  ConditionalRender cr -> ConditionalRender cr
+  LocalCoordSpace lcs -> LocalCoordSpace lcs
 
 -- | Create a named data join
 -- |
@@ -415,6 +466,93 @@ updateNestedJoin name key data' decomposeFn templateFn behaviors =
     , decompose: unsafeCoerce decomposeFn
     , template: unsafeCoerce templateFn
     , behaviors: unsafeCoerce behaviors
+    }
+
+-- | Create a conditional render that chooses specs based on predicates
+-- |
+-- | This is the foundation for chimeric visualizations - rendering different
+-- | visual representations based on data properties.
+-- |
+-- | Usage:
+-- | ```purescript
+-- | conditionalRender
+-- |   [ { predicate: \d -> d.nodeType == "cluster"
+-- |     , spec: \d -> forceNetworkSpec d
+-- |     }
+-- |   , { predicate: \d -> d.nodeType == "normal"
+-- |     , spec: \d -> normalNodeSpec d
+-- |     }
+-- |   ]
+-- | ```
+-- |
+-- | The first matching predicate determines which spec to render.
+-- | If no predicates match, nothing is rendered.
+conditionalRender
+  :: forall datum
+   . Array { predicate :: datum -> Boolean, spec :: datum -> Tree datum }
+  -> Tree datum
+conditionalRender cases = ConditionalRender { cases }
+
+-- | Combinator version that takes a fallback spec for unmatched cases
+-- |
+-- | Usage:
+-- | ```purescript
+-- | conditionalRenderOr
+-- |   [ { predicate: isCluster, spec: clusterSpec }
+-- |   , { predicate: isSpecial, spec: specialSpec }
+-- |   ]
+-- |   defaultSpec  -- Used when no predicate matches
+-- | ```
+conditionalRenderOr
+  :: forall datum
+   . Array { predicate :: datum -> Boolean, spec :: datum -> Tree datum }
+  -> (datum -> Tree datum)  -- Fallback spec
+  -> Tree datum
+conditionalRenderOr cases fallbackSpec =
+  ConditionalRender { cases: cases <> [{ predicate: \_ -> true, spec: fallbackSpec }] }
+
+-- | Create a local coordinate space for embedded visualizations
+-- |
+-- | This enables nesting one visualization inside another with its own
+-- | coordinate system.
+-- |
+-- | Usage:
+-- | ```purescript
+-- | localCoordSpace
+-- |   { scaleX: \d -> d.width   -- Local coordinate width
+-- |   , scaleY: \d -> d.height  -- Local coordinate height
+-- |   }
+-- |   embeddedVizTree
+-- | ```
+localCoordSpace
+  :: forall datum
+   . { scaleX :: datum -> Number, scaleY :: datum -> Number }
+  -> Tree datum
+  -> Tree datum
+localCoordSpace config child =
+  LocalCoordSpace
+    { scaleX: config.scaleX
+    , scaleY: config.scaleY
+    , child
+    }
+
+-- | Simplified version with fixed dimensions
+-- |
+-- | Usage:
+-- | ```purescript
+-- | localCoordSpaceFixed 100.0 100.0 embeddedVizTree
+-- | ```
+localCoordSpaceFixed
+  :: forall datum
+   . Number  -- Width
+  -> Number  -- Height
+  -> Tree datum
+  -> Tree datum
+localCoordSpaceFixed width height child =
+  LocalCoordSpace
+    { scaleX: \_ -> width
+    , scaleY: \_ -> height
+    , child
     }
 
 -- | Operators for Emmet-style syntax

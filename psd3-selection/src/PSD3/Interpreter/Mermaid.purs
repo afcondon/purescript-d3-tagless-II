@@ -16,7 +16,7 @@ module PSD3.Interpreter.Mermaid
 import Prelude
 
 import Control.Monad.State (StateT, get, modify_, runStateT)
-import Data.Array (foldl, length, uncons)
+import Data.Array (foldl, length, uncons, range)
 import Data.Traversable (traverse)
 import Data.Maybe (Maybe(..), isJust)
 import Data.String.Common (replaceAll)
@@ -258,6 +258,39 @@ renderTree tree parentId = case tree of
             pure unit
 
     pure joinId
+
+  ConditionalRender { cases } -> do
+    -- Create conditional render node
+    let condLabel = "CONDITIONAL RENDER [" <> show (length cases) <> " cases]"
+    condId <- addNode condLabel "conditionalNode"
+
+    -- Connect to parent if present
+    case parentId of
+      Just pid -> addEdge pid condId
+      Nothing -> pure unit
+
+    -- Create case nodes
+    _ <- traverse (\i -> do
+      caseLabel <- addNode ("case " <> show (i + 1) <> ": predicate → spec") "caseNode"
+      addEdge condId caseLabel
+      pure caseLabel
+    ) (range 0 (length cases - 1))
+
+    pure condId
+
+  LocalCoordSpace { child } -> do
+    -- Create local coord space node
+    coordId <- addNode "LOCAL COORD SPACE" "coordSpaceNode"
+
+    -- Connect to parent if present
+    case parentId of
+      Just pid -> addEdge pid coordId
+      Nothing -> pure unit
+
+    -- Render child in local space
+    _ <- renderTree child (Just coordId)
+
+    pure coordId
 
   where
     traverseWithParent :: NodeID -> Array (Tree datum) -> MermaidTreeM Unit

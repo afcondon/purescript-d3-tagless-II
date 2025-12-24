@@ -55,6 +55,12 @@ data TreeAST
       , hasExit :: Boolean
       , hasTemplate :: Boolean
       }
+  | ConditionalRenderAST
+      { caseCount :: Int
+      }
+  | LocalCoordSpaceAST
+      { child :: TreeAST
+      }
 
 derive instance Generic TreeAST _
 
@@ -119,6 +125,16 @@ toAST tree = case tree of
       , hasTemplate: true
       }
 
+  ConditionalRender { cases } ->
+    ConditionalRenderAST
+      { caseCount: length cases
+      }
+
+  LocalCoordSpace { child } ->
+    LocalCoordSpaceAST
+      { child: toAST child
+      }
+
 -- | Pretty-print the AST
 prettyPrintAST :: TreeAST -> String
 prettyPrintAST ast = prettyPrint ast 0
@@ -176,6 +192,17 @@ prettyPrintAST ast = prettyPrint ast 0
         <> indent (level + 1) <> ", hasUpdate: " <> show hasUpdate <> "\n"
         <> indent (level + 1) <> ", hasExit: " <> show hasExit <> "\n"
         <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
+        <> indent level <> "}"
+
+      ConditionalRenderAST { caseCount } ->
+        indent level <> "ConditionalRenderAST\n"
+        <> indent (level + 1) <> "{ caseCount: " <> show caseCount <> "\n"
+        <> indent level <> "}"
+
+      LocalCoordSpaceAST { child } ->
+        indent level <> "LocalCoordSpaceAST\n"
+        <> indent (level + 1) <> "{ child:\n"
+        <> prettyPrint child (level + 2) <> "\n"
         <> indent level <> "}"
 
     indent :: Int -> String

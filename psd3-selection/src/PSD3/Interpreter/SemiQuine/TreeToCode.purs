@@ -133,6 +133,22 @@ treeLines maybeSample tree indentLevel = case tree of
       [ indent indentLevel <> "  )"
       ] <> behaviorsCode
 
+  ConditionalRender { cases } ->
+    [ indent indentLevel <> "T.conditionalRender"
+    , indent (indentLevel + 1) <> "[ -- " <> show (Array.length cases) <> " cases with predicates and specs"
+    , indent (indentLevel + 1) <> "  -- (predicates and specs are functions, not shown)"
+    , indent (indentLevel + 1) <> "]"
+    ]
+
+  LocalCoordSpace { scaleX, scaleY, child } ->
+    let childCode = treeLines maybeSample child (indentLevel + 1)
+    in
+      [ indent indentLevel <> "T.localCoordSpace"
+      , indent (indentLevel + 1) <> "{ scaleX: \\d -> -- (scale function)"
+      , indent (indentLevel + 1) <> ", scaleY: \\d -> -- (scale function)"
+      , indent (indentLevel + 1) <> "}"
+      ] <> childCode
+
 -- | Render children with proper comma formatting
 childrenWithCommas :: forall datum. Maybe datum -> Array (Tree datum) -> Int -> Array String
 childrenWithCommas maybeSample children ind =
