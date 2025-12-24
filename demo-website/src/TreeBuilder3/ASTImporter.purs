@@ -120,6 +120,18 @@ astToBuilderTree ast depth = case ast of
 
     pure $ mkCofree treeNode (List.fromFoldable templateChildren)
 
+  AST.ConditionalRender { cases } -> do
+    nodeId <- freshId
+    let treeNode = mkTreeNode nodeId NodeConditionalRender Nothing Nothing depth
+    -- Each case is a function, can't import details
+    pure $ mkCofree treeNode List.Nil
+
+  AST.LocalCoordSpace { child } -> do
+    nodeId <- freshId
+    let treeNode = mkTreeNode nodeId NodeLocalCoordSpace Nothing Nothing depth
+    childTree <- astToBuilderTree child (depth + 1)
+    pure $ mkCofree treeNode (List.singleton childTree)
+
 -- | Add GUP phase nodes (Enter/Update/Exit) as children of a template element
 addGUPPhasesToTemplate :: forall datum. AST.Tree datum -> AST.GUPBehaviors datum -> Int -> State ImportState (DT.Tree TreeNode)
 addGUPPhasesToTemplate templateAst behaviors depth = case templateAst of

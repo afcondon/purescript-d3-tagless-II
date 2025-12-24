@@ -29,6 +29,8 @@ data DslNodeType
   | NodeNestedJoin -- Type-decomposing join
   | NodeUpdateJoin -- GUP join
   | NodeUpdateNestedJoin -- GUP + type decomposition
+  | NodeConditionalRender -- Chimeric viz: conditional rendering
+  | NodeLocalCoordSpace -- Chimeric viz: local coordinate space
   | NodeAttr AttrKind -- Attribute (fully specified)
   | NodeBehavior BehaviorKind -- Behavior (fully specified)
   -- GUP selection phases (auto-created under UpdateJoin templates)
@@ -143,6 +145,8 @@ nodeLabel NodeJoin = "Join"
 nodeLabel NodeNestedJoin = "NestedJoin"
 nodeLabel NodeUpdateJoin = "UpdateJoin"
 nodeLabel NodeUpdateNestedJoin = "UpdateNestedJoin"
+nodeLabel NodeConditionalRender = "ConditionalRender"
+nodeLabel NodeLocalCoordSpace = "LocalCoordSpace"
 nodeLabel (NodeAttr (AttrStatic name _)) = name
 nodeLabel (NodeAttr (AttrField name _)) = name
 nodeLabel (NodeAttr (AttrExpr name _)) = name
@@ -184,6 +188,9 @@ nodeKeyHints NodeJoin = "[e]" -- Joins can only have element template
 nodeKeyHints NodeNestedJoin = "[e]"
 nodeKeyHints NodeUpdateJoin = "[e]"
 nodeKeyHints NodeUpdateNestedJoin = "[e]"
+-- Chimeric viz nodes
+nodeKeyHints NodeConditionalRender = "[]" -- ConditionalRender has no direct children
+nodeKeyHints NodeLocalCoordSpace = "[e]" -- LocalCoordSpace wraps a child element
 -- Attr/Behavior nodes
 nodeKeyHints (NodeAttr _) = "[a]" -- Attrs can add sibling attrs
 nodeKeyHints (NodeBehavior _) = "[b]" -- Behaviors can add sibling behaviors

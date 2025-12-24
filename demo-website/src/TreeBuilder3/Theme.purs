@@ -89,6 +89,10 @@ nodeTypeColor = case _ of
   NodeUpdateJoin -> hex "#4A90E2" -- Blue
   NodeUpdateNestedJoin -> hex "#9B4AE2" -- Purple
 
+  -- Chimeric viz nodes
+  NodeConditionalRender -> hex "#9B59B6" -- Purple (conditional logic)
+  NodeLocalCoordSpace -> hex "#16A085" -- Teal (coordinate space)
+
   -- Attrs and behaviors
   NodeAttr _ -> hex "#68D391" -- Pastel green
   NodeBehavior _ -> hex "#E27A4A" -- Orange

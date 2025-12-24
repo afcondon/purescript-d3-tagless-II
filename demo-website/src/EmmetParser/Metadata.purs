@@ -333,6 +333,25 @@ analyzeCompatibility tree =
                   }
                   templateReport
 
+      ConditionalRender { cases } ->
+        -- Conditional rendering uses predicates - incompatible with Emmet
+        { compatible: false
+        , reasons: [HasConditionals (Array.length cases)]
+        , nodeCount: 1
+        , opaqueCount: Array.length cases
+        }
+
+      LocalCoordSpace { child } ->
+        -- Local coord space - check child compatibility
+        let childReport = analyzeTree (childPath path 0) child
+        in combineReports
+          { compatible: true
+          , reasons: []
+          , nodeCount: 1
+          , opaqueCount: 0
+          }
+          childReport
+
     emptyReport :: CompatibilityReport
     emptyReport =
       { compatible: true
@@ -485,6 +504,22 @@ toEmmetWithMetadata tree =
                   , opaqueFeatures: templateResult.opaqueFeatures
                   , gupBehaviors: Map.union gupMetadata templateResult.gupBehaviors
                   }
+
+      ConditionalRender { cases } ->
+        -- Conditional render - structural node, not an attribute
+        { emmetString: "cond(" <> show (Array.length cases) <> ")"
+        , opaqueFeatures: Map.empty
+        , gupBehaviors: Map.empty
+        }
+
+      LocalCoordSpace { child } ->
+        -- Local coord space - render child with wrapper
+        let childResult = treeToEmmet (childPath path 0) child
+        in
+          { emmetString: "local>" <> childResult.emmetString
+          , opaqueFeatures: childResult.opaqueFeatures
+          , gupBehaviors: childResult.gupBehaviors
+          }
 
 -- | Convert Emmet with metadata back to AST
 -- | Note: Returns Tree Unit because TreeBuilder3 doesn't preserve datum types

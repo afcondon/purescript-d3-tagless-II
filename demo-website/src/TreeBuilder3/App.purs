@@ -802,6 +802,9 @@ handleKeyForNodeType NodeJoin keyName = handleJoinKey keyName
 handleKeyForNodeType NodeNestedJoin keyName = handleJoinKey keyName
 handleKeyForNodeType NodeUpdateJoin keyName = handleJoinKey keyName
 handleKeyForNodeType NodeUpdateNestedJoin keyName = handleJoinKey keyName
+-- Chimeric viz nodes - not yet fully interactive
+handleKeyForNodeType NodeConditionalRender _ = pure unit  -- TODO: implement
+handleKeyForNodeType NodeLocalCoordSpace _ = pure unit  -- TODO: implement
 handleKeyForNodeType (NodeAttr _) keyName = handleAttrKey keyName
 handleKeyForNodeType (NodeBehavior _) keyName = handleBehaviorKey keyName
 -- GUP phase nodes - can add attrs
@@ -2520,6 +2523,8 @@ describeNode node = case node.nodeType of
   NodeNestedJoin -> "Nest data by grouping" <> maybeNamed node.name <> maybeTyped node.datumType
   NodeUpdateJoin -> "Use enter/update/exit pattern" <> maybeNamed node.name
   NodeUpdateNestedJoin -> "Nested update pattern" <> maybeNamed node.name
+  NodeConditionalRender -> "Render based on data conditions"
+  NodeLocalCoordSpace -> "Transform coordinate space"
   NodeEnter -> "For entering elements:"
   NodeUpdate -> "For updating elements:"
   NodeExit -> "For exiting elements:"

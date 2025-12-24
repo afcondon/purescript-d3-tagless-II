@@ -283,7 +283,7 @@ astToTreeVisualization ast =
                 , evalAttrStr "text-anchor" (str "middle")
                 , evalAttrStr "fill" (str "white")
                 ]
-            , astToInterpreterViz (level + 1) child  -- Render child
+            , renderASTNode child xPos (level + 1)  -- Render child
             ]
 
 -- | Get the tree for the selected example

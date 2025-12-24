@@ -154,6 +154,10 @@ computeNodeType node parentType = case node.nodeType of
     TypeUnit -> TypeUnknown
     t -> t
 
+  -- Chimeric viz nodes inherit parent type
+  NodeConditionalRender -> parentType
+  NodeLocalCoordSpace -> parentType
+
   -- GUP phases inherit from parent (the join's type)
   NodeEnter -> parentType
   NodeUpdate -> parentType
@@ -183,6 +187,10 @@ computeChildType node thisType = case node.nodeType of
   -- If the join has TypeArray inner, children get inner
   NodeNestedJoin -> unwrapArray thisType
   NodeUpdateNestedJoin -> unwrapArray thisType
+
+  -- Chimeric viz nodes pass through their type
+  NodeConditionalRender -> thisType
+  NodeLocalCoordSpace -> thisType
 
   -- GUP phases pass their type to attr children
   NodeEnter -> thisType

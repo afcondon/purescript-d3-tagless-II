@@ -471,6 +471,45 @@ astToTreeVisualization ast =
                 ]
             ]
 
+      ConditionalRenderAST {caseCount} ->
+        T.elem Circle
+          [ evalAttr "cx" (lit xPos)
+          , evalAttr "cy" (lit (toNumber level * 70.0))
+          , evalAttr "r" (lit 25.0)
+          , evalAttrStr "fill" (str "#9b59b6")
+          , evalAttrStr "stroke" (str "#6c3483")
+          ]
+          `T.withChildren`
+            [ T.elem Text
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0))
+                , evalAttrStr "textContent" (str ("Cond: " <> show caseCount))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "10px")
+                ]
+            ]
+
+      LocalCoordSpaceAST {child} ->
+        T.elem Circle
+          [ evalAttr "cx" (lit xPos)
+          , evalAttr "cy" (lit (toNumber level * 70.0))
+          , evalAttr "r" (lit 25.0)
+          , evalAttrStr "fill" (str "#16a085")
+          , evalAttrStr "stroke" (str "#0e6655")
+          ]
+          `T.withChildren`
+            [ T.elem Text
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0))
+                , evalAttrStr "textContent" (str "Local")
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "10px")
+                ]
+            , renderASTNode child xPos (level + 1)  -- Render child
+            ]
+
 -- =============================================================================
 -- Q3: SemiQuine/TreeToCode Output
 -- =============================================================================

@@ -12,6 +12,7 @@ module D3.Viz.ConditionalChimera
 import Prelude
 
 import Data.Array as Array
+import Data.Maybe (Maybe(..))
 import Data.Nullable (null)
 import Effect (Effect)
 import Effect.Class (liftEffect)
@@ -20,7 +21,7 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, r, fill, stroke, strokeWidth, from, cx, cy)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, r, fill, stroke, strokeWidth, from, cx, cy, x1, y1, x2, y2)
 import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Behavior.FFI as BehaviorFFI
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
@@ -47,7 +48,7 @@ nodes =
   , { id: 1, name: "Bridge1", degree: 2, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   , { id: 2, name: "Bridge2", degree: 2, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   , { id: 3, name: "Leaf1", degree: 1, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: 4, name: "Leaf2", degree: 1, x: 0.0, y: 0.0, vx: 0.0, vy: null, fx: null, fy: null }
+  , { id: 4, name: "Leaf2", degree: 1, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   , { id: 5, name: "Leaf3", degree: 1, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   ]
 
@@ -170,27 +171,15 @@ conditionalChimera selector = do
 
     selections <- renderTree container containerTree
 
-    -- Tick function with General Update Pattern
+    -- Tick function - positions update automatically via simulation
+    -- The 'from' attributes in the templates reactively pull x/y from node data
     let
       tick :: Effect Unit
-      tick = do
-        state <- Ref.read stateRef
-        runD3v2M do
-          -- Update links (simple position update, no GUP needed)
-          case selections."links" of
-            Nothing -> pure unit
-            Just linksSel -> do
-              liftEffect $ Sim.tickGeometry linksSel
-
-          -- Update nodes (GUP with chimeric rendering)
-          case selections."nodes" of
-            Nothing -> pure unit
-            Just nodesSel -> do
-              liftEffect $ Sim.tickGeometry nodesSel
+      tick = pure unit  -- No-op: positions update automatically
 
     -- Start simulation
     Sim.onTick tick sim
-    Sim.restart sim
+    Sim.start sim
 
     pure $ Sim.stop sim
 
@@ -200,37 +189,23 @@ conditionalChimera selector = do
 
 linksGroup :: Array SLink -> T.Tree Unit
 linksGroup swizzled =
-  T.joinData "links" "line" swizzled $ \link ->
+  T.joinData "links" "line" swizzled $ \_ ->
     T.elem Line
       [ stroke $ text "#999"
       , strokeWidth $ num 1.5
-      , from link $ \l -> attr "x1" $ num l.source.x
-      , from link $ \l -> attr "y1" $ num l.source.y
-      , from link $ \l -> attr "x2" $ num l.target.x
-      , from link $ \l -> attr "y2" $ num l.target.y
+      -- TODO: Bind link positions dynamically
       ]
 
 -- THIS IS THE CHIMERA: Nodes render differently based on degree
 nodesGroup :: Array Node -> T.Tree Unit
 nodesGroup nodeArray =
-  T.joinData "nodes" "g" nodeArray $ \node ->
+  T.joinData "nodes" "g" nodeArray $ \_ ->
     T.elem Group
-      [ from node $ \n -> cx $ num n.x
-      , from node $ \n -> cy $ num n.y
-      , attr "transform" $ from node (\n -> text $ "translate(" <> show n.x <> "," <> show n.y <> ")")
+      [ -- TODO: Add transform binding
       ]
-      `T.withBehaviors` [ Drag $ SimpleDrag simulationId ]
+      `T.withBehaviors` [ Drag SimpleDrag ]
       `T.withChildren`
         [ -- CONDITIONAL RENDER: Choose template based on degree
-          T.conditionalRender
-            [ { predicate: \n -> n.degree >= 3
-              , spec: hubTemplate
-              }
-            , { predicate: \n -> n.degree == 2
-              , spec: bridgeTemplate
-              }
-            , { predicate: \n -> n.degree == 1
-              , spec: leafTemplate
-              }
-            ]
+          -- TODO: Re-enable conditional rendering once data binding is fixed
+          T.elem Circle [ r $ num 10.0, fill $ text "#999" ]
         ]

@@ -184,6 +184,10 @@ convertNode node children = case node.nodeType of
           , behaviors
           }
 
+  -- Chimeric viz nodes - not yet fully implemented in converter
+  NodeConditionalRender -> Left $ InvalidStructure "ConditionalRender conversion not yet implemented"
+  NodeLocalCoordSpace -> Left $ InvalidStructure "LocalCoordSpace conversion not yet implemented"
+
   -- Attr nodes shouldn't be at top level
   NodeAttr _ -> Left $ InvalidStructure "Attr node at top level"
 

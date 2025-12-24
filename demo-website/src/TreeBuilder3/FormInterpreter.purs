@@ -168,6 +168,25 @@ treeToFormLines path tree indentLevel = case tree of
       , HH.text (ind <> "  { enter: ..., update: ..., exit: ... }\n")
       ]
 
+  AST.ConditionalRender { cases } ->
+    let ind = indent indentLevel
+    in
+      [ HH.text (ind <> "T.conditionalRender\n")
+      , HH.text (ind <> "  [ -- " <> show (Array.length cases) <> " cases (predicates/specs are functions)\n")
+      , HH.text (ind <> "  ]\n")
+      ]
+
+  AST.LocalCoordSpace { child } ->
+    let
+      ind = indent indentLevel
+      childLines = treeToFormLines (path <> ["child"]) child (indentLevel + 1)
+    in
+      [ HH.text (ind <> "T.localCoordSpace\n")
+      , HH.text (ind <> "  { scaleX: \\d -> ...\n")
+      , HH.text (ind <> "  , scaleY: \\d -> ...\n")
+      , HH.text (ind <> "  }\n")
+      ] <> childLines
+
 -- | Render a name input field
 nameInput :: forall w. FormPath -> String -> HH.HTML w FormAction
 nameInput path value = HH.input
