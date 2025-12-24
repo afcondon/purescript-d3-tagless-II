@@ -54,24 +54,24 @@ parseExpression state = do
           parseRestSiblings combined
         _ -> Right result
 
--- | Parse: Term ::= Factor (('>' Factor))*
+-- | Parse: Term ::= Factor ('>' Term)?
+-- | Right-associative: a>b>c parses as a>(b>c)
 parseTerm :: ParserState -> Either ParseError ParseResult
 parseTerm state = do
   firstFactor <- parseFactor state
-  parseRestChildren firstFactor
+
+  -- Check for child operator
+  case peekToken firstFactor.state of
+    Just TChild -> do
+      let nextState = advance firstFactor.state
+      -- Recursively parse the rest as a term (right-associative)
+      childTerm <- parseTerm nextState
+      -- Add child to current node
+      let combined = addChild firstFactor.expr childTerm.expr
+      Right { expr: combined, state: childTerm.state }
+    _ -> Right firstFactor
 
   where
-    parseRestChildren :: ParseResult -> Either ParseError ParseResult
-    parseRestChildren result = do
-      case peekToken result.state of
-        Just TChild -> do
-          let nextState = advance result.state
-          nextFactor <- parseFactor nextState
-          -- Add child to current node
-          let combined = addChild result.expr nextFactor.expr
-          parseRestChildren { expr: combined, state: nextFactor.state }
-        _ -> Right result
-
     addChild :: EmmetExpr -> EmmetExpr -> EmmetExpr
     addChild parent child = case parent of
       Single node children ->

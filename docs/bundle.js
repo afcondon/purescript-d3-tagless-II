@@ -84197,23 +84197,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return parent2;
       };
     };
-    var parseRestChildren = function(result) {
-      var v2 = peekToken(result.state);
+    return bind98(parseFactor(state3))(function(firstFactor) {
+      var v2 = peekToken(firstFactor.state);
       if (v2 instanceof Just && v2.value0 instanceof TChild) {
-        var nextState = advance(result.state);
-        return bind98(parseFactor(nextState))(function(nextFactor) {
-          var combined = addChild(result.expr)(nextFactor.expr);
-          return parseRestChildren({
+        var nextState = advance(firstFactor.state);
+        return bind98(parseTerm(nextState))(function(childTerm) {
+          var combined = addChild(firstFactor.expr)(childTerm.expr);
+          return new Right({
             expr: combined,
-            state: nextFactor.state
+            state: childTerm.state
           });
         });
       }
       ;
-      return new Right(result);
-    };
-    return bind98(parseFactor(state3))(function(firstFactor) {
-      return parseRestChildren(firstFactor);
+      return new Right(firstFactor);
     });
   };
   var parseGrouped = function(state3) {
