@@ -3,7 +3,12 @@ module D3.Viz.PatternTree.CombinatorTree
   , drawCombinatorTree
   , exampleCombinatorTree
   , testCombinatorTree
+  , buildCombinatorTreeFromTracks
+  , TrackInfo
+  , module ReExports
   ) where
+
+import D3.Viz.PatternTree.Types (ZoomTransform, identityZoom) as ReExports
 
 import Prelude
 
@@ -20,12 +25,12 @@ import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionCo
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import Effect (Effect)
 import PSD3.AST as T
-import PSD3.Expr.Friendly (attr, cx, cy, fill, fontSize, num, path, r, stroke, strokeWidth, text, textAnchor, textContent, x, y)
+import PSD3.Expr.Friendly (attr, cx, cy, fill, fontSize, num, path, r, stroke, strokeWidth, text, textAnchor, textContent, viewBox, x, y)
+import PSD3.Internal.Behavior.FFI (attachZoomWithCallback_, ZoomTransform)
 import PSD3.Internal.Capabilities.Selection (renderTree, select)
 import PSD3.Internal.Selection.Operations as Ops
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.Interpreter.D3 (runD3v2M)
-import Web.DOM.Element as Element
 import Web.DOM.NonElementParentNode (getElementById)
 import Web.HTML as Web.HTML
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -43,94 +48,108 @@ type LayoutNode = { label :: String, isPattern :: Boolean, pattern :: Maybe Patt
 
 -- | Draw a combinator tree with sunburst leaves
 -- | selector should be a CSS selector (e.g., "#container" or ".viz-area")
-drawCombinatorTree :: String -> Tree CombinatorNode -> Effect Unit
-drawCombinatorTree selector combTree = do
+-- | initialZoom: zoom transform to restore
+-- | onZoomChange: callback when zoom changes
+drawCombinatorTree :: String -> Tree CombinatorNode -> ZoomTransform -> (ZoomTransform -> Effect Unit) -> Effect Unit
+drawCombinatorTree selector combTree initialZoom onZoomChange = do
   -- Layout parameters
-  let width = 800.0
-  let height = 600.0
-  let margin = 60.0
+  let width = 1200.0
+  let height = 800.0
+  let margin = 80.0
 
-  -- Set SVG dimensions (query the element first)
-  doc <- Web.HTML.window >>= Window.document
-  -- Handle both "#id" and "id" formats for getElementById
-  let elementId = if String.take 1 selector == "#" then String.drop 1 selector else selector
-  maybeContainer <- getElementById elementId (HTMLDocument.toNonElementParentNode doc)
-  case maybeContainer of
-    Nothing -> pure unit
-    Just container -> do
-      Element.setAttribute "width" (show width) container
-      Element.setAttribute "height" (show height) container
-      Element.setAttribute "viewBox" ("0 0 " <> show width <> " " <> show height) container
+  -- Convert to layout tree and apply tree layout
+  let layoutTree = mapCombinatorTree combTree
+  let treeConfig = defaultTreeConfig { size = { width: width - margin * 2.0, height: height - margin * 2.0 } }
+  let positioned = tree treeConfig layoutTree
 
-      -- Convert to layout tree and apply tree layout
-      let layoutTree = mapCombinatorTree combTree
-      let treeConfig = defaultTreeConfig { size = { width: width - margin * 2.0, height: height - margin * 2.0 } }
-      let positioned = tree treeConfig layoutTree
+  -- Flatten tree to array of positioned nodes
+  let flattenTree :: Tree LayoutNode -> Array LayoutNode
+      flattenTree t = [head t] <> Array.concatMap flattenTree (Array.fromFoldable (tail t))
+  let nodes = flattenTree positioned
 
-      -- Flatten tree to array of positioned nodes
-      -- Tree layout returns Tree LayoutNode where LayoutNode has x, y fields already
-      let flattenTree :: Tree LayoutNode -> Array LayoutNode
-          flattenTree t = [head t] <> Array.concatMap flattenTree (Array.fromFoldable (tail t))
-      let nodes = flattenTree positioned
+  -- Build the entire visualization tree declaratively with ConditionalRender
+  let links = collectLinks positioned
 
-      -- Build the entire visualization tree declaratively with ConditionalRender
-      let links = collectLinks positioned
-
-      -- CHIMERIC TREE: Uses ConditionalRender to switch between combinator and sunburst templates
-      let vizTree :: T.Tree Unit
-          vizTree =
-            T.named Group "combinator-tree"
-              [ attr "transform" $ text ("translate(" <> show margin <> "," <> show margin <> ")") ]
-              `T.withChildren`
-                ( -- Links first (behind nodes)
-                  [ T.named Group "links" []
+  -- SVG wrapper with zoom group
+  let svgTree :: T.Tree Unit
+      svgTree =
+        T.named SVG "combinator-tree-svg"
+          [ attr "width" $ text "100%"
+          , attr "height" $ text "100%"
+          , viewBox 0.0 0.0 width height
+          , attr "class" $ text "combinator-tree-viz"
+          , attr "id" $ text "combinator-tree-svg"
+          ]
+          `T.withChild`
+            -- Zoom group - all content goes inside here
+            ( T.named Group "combinator-zoom-group"
+                [ attr "id" $ text "combinator-zoom-group"
+                , attr "class" $ text "zoom-group"
+                ]
+                `T.withChild`
+                  ( T.named Group "combinator-tree"
+                      [ attr "transform" $ text ("translate(" <> show margin <> "," <> show margin <> ")") ]
                       `T.withChildren`
-                        map (\link ->
-                          T.elem Path
-                            [ path $ text (verticalLink link.sourceX link.sourceY link.targetX link.targetY)
-                            , fill $ text "none"
-                            , stroke $ text "#9E9E9E"
-                            , strokeWidth $ num 2.0
-                            ]
-                        ) links
-                  -- Nodes group placeholder (will be populated in step 2)
-                  , T.named Group "nodes" [ attr "id" $ text "nodes" ]
-                  ]
-                )
-
-      -- Nodes tree: separate from scaffolding to allow different phantom types
-      let nodesTree :: T.Tree LayoutNode
-          nodesTree =
-            T.named Group "nodes" []
-              `T.withChild`
-                ( T.joinData "chimeric-nodes" "g" nodes $ \node ->
-                    T.elem Group
-                      [ attr "transform" $ text ("translate(" <> show node.x <> "," <> show node.y <> ")") ]
-                      `T.withChildren`
-                        [ -- CHIMERIC RENDERING: ConditionalRender chooses template based on node type
-                          T.conditionalRender
-                            [ { predicate: \n -> n.isPattern
-                              , spec: miniSunburstTemplate
-                              }
-                            , { predicate: \n -> not n.isPattern
-                              , spec: combinatorNodeTemplate
-                              }
-                            ]
+                        [ -- Links first (behind nodes)
+                          T.named Group "links" []
+                            `T.withChildren`
+                              map (\link ->
+                                T.elem Path
+                                  [ path $ text (verticalLink link.sourceX link.sourceY link.targetX link.targetY)
+                                  , fill $ text "none"
+                                  , stroke $ text "#9E9E9E"
+                                  , strokeWidth $ num 2.0
+                                  ]
+                              ) links
+                        -- Nodes group placeholder (will be populated in step 2)
+                        , T.named Group "nodes" [ attr "id" $ text "combinator-nodes" ]
                         ]
-                )
+                  )
+            )
 
-      -- Render using two-step pattern: scaffolding first, then chimeric nodes
-      let cssSelector = if String.take 1 selector == "#" then selector else "#" <> selector
-      runD3v2M do
-        _ <- Ops.clear cssSelector
-        svg <- select cssSelector
-        -- Step 1: Render scaffolding (Tree Unit) with links and placeholder nodes group
-        _ <- renderTree svg vizTree
-        -- Step 2: Select nodes group and render chimeric tree (Tree LayoutNode)
-        -- This is where ConditionalRender chooses between combinator and sunburst templates
-        nodesGroup <- select "#nodes"
-        _ <- renderTree nodesGroup nodesTree
-        pure unit
+  -- Nodes tree: separate from scaffolding to allow different phantom types
+  let nodesTree :: T.Tree LayoutNode
+      nodesTree =
+        T.named Group "nodes-content" []
+          `T.withChild`
+            ( T.joinData "chimeric-nodes" "g" nodes $ \node ->
+                T.elem Group
+                  [ attr "transform" $ text ("translate(" <> show node.x <> "," <> show node.y <> ")") ]
+                  `T.withChildren`
+                    [ -- CHIMERIC RENDERING: ConditionalRender chooses template based on node type
+                      T.conditionalRender
+                        [ { predicate: \n -> n.isPattern
+                          , spec: miniSunburstTemplate
+                          }
+                        , { predicate: \n -> not n.isPattern
+                          , spec: combinatorNodeTemplate
+                          }
+                        ]
+                    ]
+            )
+
+  -- Render using two-step pattern: scaffolding first, then chimeric nodes
+  let cssSelector = if String.take 1 selector == "#" then selector else "#" <> selector
+  runD3v2M do
+    _ <- Ops.clear cssSelector
+    container <- select cssSelector
+    -- Step 1: Render SVG with scaffolding (Tree Unit) - links and placeholder nodes group
+    _ <- renderTree container svgTree
+    -- Step 2: Select nodes group and render chimeric tree (Tree LayoutNode)
+    -- This is where ConditionalRender chooses between combinator and sunburst templates
+    nodesGroup <- select "#combinator-nodes"
+    _ <- renderTree nodesGroup nodesTree
+    pure unit
+
+  -- Attach zoom behavior after rendering
+  doc <- Web.HTML.window >>= Window.document
+  let node = HTMLDocument.toNonElementParentNode doc
+  maybeSvg <- getElementById "combinator-tree-svg" node
+  case maybeSvg of
+    Just svgElem -> do
+      _ <- attachZoomWithCallback_ svgElem 0.1 10.0 "#combinator-zoom-group" initialZoom onZoomChange
+      pure unit
+    Nothing -> pure unit
 
 -- | Map CombinatorNode tree to layout tree
 -- | Initial x, y, depth values don't matter - they'll be overwritten by tree layout
@@ -284,4 +303,49 @@ exampleCombinatorTree =
 -- | Use this from the browser console or from a test button
 -- | Example: testCombinatorTree "combinator-test-svg"
 testCombinatorTree :: String -> Effect Unit
-testCombinatorTree selector = drawCombinatorTree selector exampleCombinatorTree
+testCombinatorTree selector = drawCombinatorTree selector exampleCombinatorTree ReExports.identityZoom (const $ pure unit)
+
+-- | Track info for building combinator trees from AlgoraveViz tracks
+type TrackInfo =
+  { name :: String
+  , pattern :: PatternTree
+  , combinators :: Array String  -- Combinators wrapping this pattern (outermost first)
+  }
+
+-- | Build a combinator tree from an array of tracks
+-- | Each track becomes a chain of combinator nodes ending in a pattern leaf
+-- | All tracks are children of a "Set" root node
+-- | Example input:
+-- |   [ { name: "L4-poly", pattern: ..., combinators: ["jux rev", "chop 4"] }
+-- |   , { name: "L6-tabla", pattern: ..., combinators: ["slow 6"] }
+-- |   ]
+-- | Produces:
+-- |   Set
+-- |   ├── jux rev
+-- |   │   └── chop 4
+-- |   │       └── L4-poly (sunburst)
+-- |   └── slow 6
+-- |       └── L6-tabla (sunburst)
+buildCombinatorTreeFromTracks :: Array TrackInfo -> Tree CombinatorNode
+buildCombinatorTreeFromTracks tracks =
+  mkTree (Combinator "Set") (List.fromFoldable (map trackToTree tracks))
+  where
+    -- Convert a single track to a combinator chain
+    trackToTree :: TrackInfo -> Tree CombinatorNode
+    trackToTree track =
+      case Array.uncons track.combinators of
+        -- No combinators - just the pattern leaf
+        Nothing -> mkTree (PatternLeaf track.name track.pattern) List.Nil
+        -- Has combinators - build the chain
+        Just { head: firstComb, tail: restCombs } ->
+          mkTree (Combinator firstComb) (buildChain restCombs track : List.Nil)
+
+    -- Build the rest of the combinator chain
+    buildChain :: Array String -> TrackInfo -> Tree CombinatorNode
+    buildChain combs track =
+      case Array.uncons combs of
+        -- No more combinators - end with pattern leaf
+        Nothing -> mkTree (PatternLeaf track.name track.pattern) List.Nil
+        -- More combinators in chain
+        Just { head: comb, tail: rest } ->
+          mkTree (Combinator comb) (buildChain rest track : List.Nil)

@@ -3,6 +3,7 @@ module Component.AlgoraveViz where
 import Prelude
 
 import Component.PatternTree (PatternTree(..), parseMiniNotation)
+import D3.Viz.PatternTree.CombinatorTree (buildCombinatorTreeFromTracks, drawCombinatorTree)
 import D3.Viz.PatternTreeViz (TrackLayout(..), ZoomTransform, drawPatternForestMixed, identityZoom)
 import Data.Array as Array
 import Data.Either (Either(..))
@@ -26,6 +27,7 @@ type Track =
   , pattern :: PatternTree
   , active :: Boolean
   , layout :: TrackLayout  -- Per-track layout (click to toggle)
+  , combinators :: Array String  -- Outer combinators wrapping this pattern (e.g., ["jux rev", "slow 2"])
   }
 
 -- | Test set with ascending complexity of mini-notation patterns
@@ -36,70 +38,83 @@ exampleSet =
     , pattern: Sound "bd"
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   , { name: "L1-seq"
     , pattern: Sequence [Sound "bd", Sound "sn", Sound "cp", Sound "hh"]
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   , { name: "L1-rest"
     , pattern: Sequence [Sound "bd", Rest, Sound "sn", Rest]
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   -- Level 2: Modifiers
   , { name: "L2-fast"
     , pattern: Fast 4.0 (Sound "bd")
     , active: true
     , layout: SunburstLayout
+    , combinators: ["rev"]
     }
   , { name: "L2-slow"
     , pattern: Slow 2.0 (Sound "bd")
     , active: true
     , layout: SunburstLayout
+    , combinators: ["hurry 2"]
     }
   , { name: "L2-repeat"
     , pattern: Repeat 3 (Sound "bd")
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   , { name: "L2-prob"
     , pattern: Degrade 0.5 (Sound "bd")
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   -- Level 3: Groups
   , { name: "L3-par"
     , pattern: Parallel [Sound "bd", Sound "sn"]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["striate 4"]
     }
   , { name: "L3-choice"
     , pattern: Choice [Sound "bd", Sound "sn", Sound "cp"]
     , active: true
     , layout: SunburstLayout
+    , combinators: []
     }
   -- Level 4: Combined
   , { name: "L4-mixed"
     , pattern: Sequence [Fast 2.0 (Sound "bd"), Sound "sn", Parallel [Sound "cp", Sound "hh"]]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["every 2 rev"]
     }
   , { name: "L4-sample"
     , pattern: Fast 4.0 (Sound "808bd:05")
     , active: true
     , layout: SunburstLayout
+    , combinators: ["orbit 1", "room 0.5"]
     }
   , { name: "L4-euclid"
     , pattern: Euclidean 3 8 (Sound "bd")
     , active: true
     , layout: SunburstLayout
+    , combinators: ["fast 2"]
     }
   -- Level 4b: Polymetric test (bd*3 sn*5)
   , { name: "L4-poly"
     , pattern: Sequence [Fast 3.0 (Sound "bd"), Fast 5.0 (Sound "sn")]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["jux rev", "chop 4"]
     }
   -- Level 5: Nested
   , { name: "L5-nested"
@@ -109,6 +124,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["sometimesBy 0.4 rev"]
     }
   , { name: "L5-complex"
     , pattern: Sequence
@@ -119,6 +135,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["chunk 4 rev"]
     }
   -- Level 6: Real-world from video
   , { name: "L6-tabla"
@@ -128,6 +145,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["slow 6", "spin 4"]
     }
   , { name: "L6-ardha"
     , pattern: Sequence
@@ -137,8 +155,14 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
+    , combinators: ["layer [ply 4]"]
     }
   ]
+
+-- | View mode for the visualization
+data ViewMode = PatternView | CombinatorTreeView
+
+derive instance Eq ViewMode
 
 -- | Component state
 type State =
@@ -147,6 +171,7 @@ type State =
   , parseError :: Maybe String
   , zoomTransform :: ZoomTransform  -- Preserved zoom state
   , leftPanelOpen :: Boolean        -- Slide-out panel state
+  , viewMode :: ViewMode            -- Pattern sunbursts or combinator tree
   }
 
 -- | Path to a node in the pattern tree (list of child indices)
@@ -168,6 +193,7 @@ data Action
   | AddPresetPattern String String  -- name, pattern
   | ClearTracks
   | ToggleLeftPanel  -- Toggle slide-out panel
+  | ToggleViewMode   -- Switch between pattern view and combinator tree view
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -178,6 +204,7 @@ component = H.mkComponent
       , parseError: Nothing
       , zoomTransform: identityZoom
       , leftPanelOpen: true  -- Start with panel open
+      , viewMode: PatternView  -- Start with pattern sunbursts
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -246,7 +273,7 @@ handleAction = case _ of
         -- Add new track with parsed pattern
         liftEffect $ Console.log $ "Parsed pattern successfully: " <> show pattern
         let trackName = "parsed" <> show (Array.length state.tracks + 1)
-        let newTrack = { name: trackName, pattern, active: true, layout: SunburstLayout }
+        let newTrack = { name: trackName, pattern, active: true, layout: SunburstLayout, combinators: [] }
         H.modify_ \s -> s
           { tracks = Array.snoc s.tracks newTrack
           , miniNotationInput = ""
@@ -261,7 +288,7 @@ handleAction = case _ of
         liftEffect $ Console.log $ "Preset parse error: " <> parseErrorMessage err
       Right pattern -> do
         liftEffect $ Console.log $ "Adding preset: " <> name <> " = " <> show pattern
-        let newTrack = { name, pattern, active: true, layout: SunburstLayout }
+        let newTrack = { name, pattern, active: true, layout: SunburstLayout, combinators: [] }
         H.modify_ \s -> s { tracks = Array.snoc s.tracks newTrack }
         handleAction RenderForest
 
@@ -272,34 +299,50 @@ handleAction = case _ of
   ToggleLeftPanel -> do
     H.modify_ \s -> s { leftPanelOpen = not s.leftPanelOpen }
 
+  ToggleViewMode -> do
+    H.modify_ \s -> s { viewMode = if s.viewMode == PatternView then CombinatorTreeView else PatternView }
+    handleAction RenderForest
+
   RenderForest -> do
     state <- H.get
-    -- Build track data with per-track layout info
-    let allTracksWithLayout = Array.mapWithIndex (\idx t ->
-          { name: t.name
-          , pattern: t.pattern
-          , trackIndex: idx
-          , active: t.active
-          , layout: t.layout
-          }) state.tracks
-    -- Create emitters for all callbacks
-    { emitter: activeEmitter, listener: activeListener } <- liftEffect HS.create
-    { emitter: layoutEmitter, listener: layoutListener } <- liftEffect HS.create
-    { emitter: nodeTypeEmitter, listener: nodeTypeListener } <- liftEffect HS.create
-    { emitter: euclidEmitter, listener: euclidListener } <- liftEffect HS.create
-    { emitter: zoomEmitter, listener: zoomListener } <- liftEffect HS.create
-    _ <- H.subscribe (ToggleTrackFromViz <$> activeEmitter)
-    _ <- H.subscribe (ToggleLayoutFromViz <$> layoutEmitter)
-    _ <- H.subscribe (uncurry ToggleNodeTypeFromViz <$> nodeTypeEmitter)
-    _ <- H.subscribe ((\(Tuple trackIdx (Tuple path (Tuple dn dk))) -> AdjustEuclideanFromViz trackIdx path dn dk) <$> euclidEmitter)
-    _ <- H.subscribe (ZoomChanged <$> zoomEmitter)
-    liftEffect $ drawPatternForestMixed "#pattern-forest-viz" allTracksWithLayout
-      (HS.notify activeListener)
-      (HS.notify layoutListener)
-      (\trackIdx path -> HS.notify nodeTypeListener (Tuple trackIdx path))
-      (\trackIdx path dn dk -> HS.notify euclidListener (Tuple trackIdx (Tuple path (Tuple dn dk))))
-      state.zoomTransform  -- Initial zoom state
-      (HS.notify zoomListener)  -- Zoom change callback
+    case state.viewMode of
+      PatternView -> do
+        -- Build track data with per-track layout info
+        let allTracksWithLayout = Array.mapWithIndex (\idx t ->
+              { name: t.name
+              , pattern: t.pattern
+              , trackIndex: idx
+              , active: t.active
+              , layout: t.layout
+              }) state.tracks
+        -- Create emitters for all callbacks
+        { emitter: activeEmitter, listener: activeListener } <- liftEffect HS.create
+        { emitter: layoutEmitter, listener: layoutListener } <- liftEffect HS.create
+        { emitter: nodeTypeEmitter, listener: nodeTypeListener } <- liftEffect HS.create
+        { emitter: euclidEmitter, listener: euclidListener } <- liftEffect HS.create
+        { emitter: zoomEmitter, listener: zoomListener } <- liftEffect HS.create
+        _ <- H.subscribe (ToggleTrackFromViz <$> activeEmitter)
+        _ <- H.subscribe (ToggleLayoutFromViz <$> layoutEmitter)
+        _ <- H.subscribe (uncurry ToggleNodeTypeFromViz <$> nodeTypeEmitter)
+        _ <- H.subscribe ((\(Tuple trackIdx (Tuple path (Tuple dn dk))) -> AdjustEuclideanFromViz trackIdx path dn dk) <$> euclidEmitter)
+        _ <- H.subscribe (ZoomChanged <$> zoomEmitter)
+        liftEffect $ drawPatternForestMixed "#pattern-forest-viz" allTracksWithLayout
+          (HS.notify activeListener)
+          (HS.notify layoutListener)
+          (\trackIdx path -> HS.notify nodeTypeListener (Tuple trackIdx path))
+          (\trackIdx path dn dk -> HS.notify euclidListener (Tuple trackIdx (Tuple path (Tuple dn dk))))
+          state.zoomTransform  -- Initial zoom state
+          (HS.notify zoomListener)  -- Zoom change callback
+
+      CombinatorTreeView -> do
+        -- Build combinator tree from tracks (only active tracks with combinators)
+        let tracksWithCombinators = Array.filter (\t -> t.active && Array.length t.combinators > 0) state.tracks
+        let trackInfos = map (\t -> { name: t.name, pattern: t.pattern, combinators: t.combinators }) tracksWithCombinators
+        let combTree = buildCombinatorTreeFromTracks trackInfos
+        -- Create zoom emitter for combinator tree
+        { emitter: zoomEmitter, listener: zoomListener } <- H.liftEffect HS.create
+        _ <- H.subscribe (ZoomChanged <$> zoomEmitter)
+        liftEffect $ drawCombinatorTree "#pattern-forest-viz" combTree state.zoomTransform (HS.notify zoomListener)
 
   ZoomChanged transform -> do
     -- Just update state without re-rendering (the viz already shows the change)
@@ -436,6 +479,18 @@ render state =
                         , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--secondary" ]
                         ]
                         [ HH.text "Clear All" ]
+                    ]
+                -- View mode toggle
+                , HH.div
+                    [ HP.classes [ HH.ClassName "button-row" ] ]
+                    [ HH.button
+                        [ HE.onClick \_ -> ToggleViewMode
+                        , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--accent" ]
+                        ]
+                        [ HH.text $ case state.viewMode of
+                            PatternView -> "Switch to Tree View"
+                            CombinatorTreeView -> "Switch to Pattern View"
+                        ]
                     ]
                 -- Parse error display
                 , case state.parseError of

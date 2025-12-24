@@ -141,6 +141,16 @@
   margin-top: var(--spacing-xs, 4px);
 }
 
+.control-button--accent {
+  background-color: #7B1FA2;
+  color: white;
+  margin-top: var(--spacing-xs, 4px);
+}
+
+.control-button--accent:hover {
+  background-color: #9C27B0;
+}
+
 .control-button--link {
   background: none;
   border: none;
