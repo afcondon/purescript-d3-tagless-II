@@ -326,7 +326,18 @@ type RenderNode =
   , label :: String
   , typeLabel :: String
   , isBadge :: Boolean
+  , showAsStack :: Boolean
+  , strokeWidth :: Number
   }
+
+-- | Check if node should be shown with stack effect
+shouldShowAsStack :: DslNodeType -> Boolean
+shouldShowAsStack = case _ of
+  NodeJoin -> true
+  NodeNestedJoin -> true
+  NodeUpdateJoin -> true
+  NodeUpdateNestedJoin -> true
+  _ -> false
 
 -- | Convert TreeNode to RenderNode for visualization
 toRenderNode :: TreeNode -> Int -> RenderNode
@@ -338,6 +349,8 @@ toRenderNode node _badgeIndex =
   , label: nodeLabel node.nodeType
   , typeLabel: datumTypeLabel node.datumType
   , isBadge: isBadgeNodeType node.nodeType
+  , showAsStack: shouldShowAsStack node.nodeType
+  , strokeWidth: 1.5
   }
 
 -- | Render tree visualization with D3
@@ -421,6 +434,36 @@ renderTreeVisualization userTree = do
     linksSelections <- renderTree container linksTree
     mainGroupSel <- liftEffect $ reselectD3v2 "mainGroup" linksSelections
 
+    -- Helper to create a stacked "punch card" rect at a given offset
+    let
+      stackedRect :: Number -> Number -> String -> T.Tree RenderNode
+      stackedRect dx' dy' color =
+        T.elem Rect
+          [ F.x (F.num (-40.0 + dx'))
+          , F.y (F.num (-12.0 + dy'))
+          , F.width (F.num 80.0)
+          , F.height (F.num 24.0)
+          , F.static "rx" 4.0
+          , F.fill (F.text color)
+          , F.stroke (F.color Theme.nodeStroke)
+          , F.strokeWidth (F.num 1.5)
+          ]
+
+    -- Badge rendering helper - smaller pill-shaped nodes
+    let
+      badgeRect :: RenderNode -> T.Tree RenderNode
+      badgeRect node =
+        T.elem Rect
+          [ F.x (F.num (-28.0))
+          , F.y (F.num (-10.0))
+          , F.width (F.num 56.0)
+          , F.height (F.num 20.0)
+          , F.static "rx" 10.0 -- Pill shape
+          , F.fill (F.text node.color)
+          , F.stroke (F.color Theme.nodeStroke)
+          , F.strokeWidth (F.num node.strokeWidth)
+          ]
+
     -- Create nodes
     let
       nodesTree :: T.Tree RenderNode
@@ -428,30 +471,68 @@ renderTreeVisualization userTree = do
         T.named Group "nodesGroup"
           [ F.staticStr "class" "nodes" ]
           `T.withChild`
-            ( T.joinData "treeNodes" "circle" renderNodes $ \node ->
-                T.named Group "nodeGroup"
-                  []
+            ( T.joinData "treeNodes" "g" renderNodes $ \node ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate(" <> show (node.x + offsetX) <> "," <> show (node.y + offsetY) <> ")" ]
                   `T.withChildren`
-                    [ -- Node circle
-                      T.elem Circle
-                        [ F.cx (F.num (node.x + offsetX))
-                        , F.cy (F.num (node.y + offsetY))
-                        , F.r (F.num if node.isBadge then 8.0 else 12.0)
-                        , F.fill (F.text node.color)
-                        , F.stroke (F.text "#333")
-                        , F.strokeWidth (F.num 1.5)
+                    ( if node.isBadge then
+                        -- Badge rendering: smaller pill + smaller label
+                        [ badgeRect node
+                        , T.elem Text
+                            [ F.x (F.num 0.0)
+                            , F.y (F.num 3.0)
+                            , F.textAnchor (F.text "middle")
+                            , F.fill (F.color Theme.nodeLabelDark)
+                            , F.fontSize (F.px 9.0)
+                            , F.staticStr "font-weight" "bold"
+                            , F.textContent (F.text node.label)
+                            ]
                         ]
-                    -- Node label
-                    , T.elem Text
-                        [ F.x (F.num (node.x + offsetX))
-                        , F.y (F.num (node.y + offsetY + 25.0))
-                        , F.textAnchor (F.text "middle")
-                        , F.fontFamily (F.text "monospace")
-                        , F.fontSize (F.px 10.0)
-                        , F.fill (F.text "#333")
-                        , F.textContent (F.text node.label)
-                        ]
-                    ]
+                      else
+                        -- Regular node rendering
+                        ( -- Stacked "punch card" rects for join templates (drawn back-to-front)
+                          ( if node.showAsStack then
+                              [ stackedRect 9.0 9.0 node.color -- Back card
+                              , stackedRect 6.0 6.0 node.color -- Middle card
+                              , stackedRect 3.0 3.0 node.color -- Front-ish card
+                              ]
+                            else []
+                          )
+                            <>
+                              [ -- Main/front rect for the node
+                                T.elem Rect
+                                  [ F.x (F.num (-40.0))
+                                  , F.y (F.num (-12.0))
+                                  , F.width (F.num 80.0)
+                                  , F.height (F.num 24.0)
+                                  , F.static "rx" 4.0
+                                  , F.fill (F.text node.color)
+                                  , F.stroke (F.color Theme.nodeStroke)
+                                  , F.strokeWidth (F.num node.strokeWidth)
+                                  ]
+                              , -- Label text
+                                T.elem Text
+                                  [ F.x (F.num 0.0)
+                                  , F.y (F.num 4.0)
+                                  , F.textAnchor (F.text "middle")
+                                  , F.fill (F.color Theme.nodeLabelLight)
+                                  , F.fontSize (F.px 11.0)
+                                  , F.staticStr "font-weight" "bold"
+                                  , F.textContent (F.text node.label)
+                                  ]
+                              , -- Type annotation (shown below node)
+                                T.elem Text
+                                  [ F.x (F.num 0.0)
+                                  , F.y (F.num 24.0) -- Below the node rect
+                                  , F.textAnchor (F.text "middle")
+                                  , F.fill (F.color Theme.typeLabelColor)
+                                  , F.fontSize (F.px 9.0)
+                                  , F.fontFamily (F.text "monospace")
+                                  , F.textContent (F.text (":: " <> node.typeLabel))
+                                  ]
+                              ]
+                        )
+                    )
             )
 
     _ <- renderTree mainGroupSel nodesTree
