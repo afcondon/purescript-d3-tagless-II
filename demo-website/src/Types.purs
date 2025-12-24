@@ -140,6 +140,7 @@ data Route
   | ForceConfigPOC  -- POC for testing new force configuration system
   | ForceConfigV2Test -- Minimal standalone test of V2 force configuration
   | SimpleForceGraph  -- Simplest force graph with hardcoded data
+  | SimpleChimera     -- Simple chimeric visualization test (ConditionalRender)
   | SankeyDebug     -- Debug testbed for Sankey layout algorithms
   | ForcePlayground -- Force simulation playground with network datasets
   | TreeBuilder    -- Interactive tree builder for Tree API visualization
@@ -213,6 +214,7 @@ instance showRoute :: Show Route where
   show ForceConfigPOC = "Force Config POC"
   show ForceConfigV2Test = "Force Config V2 Test"
   show SimpleForceGraph = "Simple Force Graph"
+  show SimpleChimera = "Simple Chimera"
   show SankeyDebug = "Sankey Debug"
   show ForcePlayground = "Force Playground"
   show TreeBuilder = "Tree Builder"

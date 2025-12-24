@@ -72,6 +72,7 @@ routes =
   <|> forceConfigPOC
   <|> forceConfigV2Test
   <|> simpleForceGraphRoute
+  <|> simpleChimeraRoute
   <|> sankeyDebug
   <|> forcePlayground
   <|> treeBuilder
@@ -311,6 +312,10 @@ forceConfigV2Test = ForceConfigV2Test <$ lit "force-config-v2-test" <* end
 simpleForceGraphRoute :: Match Route
 simpleForceGraphRoute = SimpleForceGraph <$ lit "simple-force-graph" <* end
 
+-- | Match: /simple-chimera
+simpleChimeraRoute :: Match Route
+simpleChimeraRoute = SimpleChimera <$ lit "simple-chimera" <* end
+
 -- | Match: /sankey-debug
 sankeyDebug :: Match Route
 sankeyDebug = SankeyDebug <$ lit "sankey-debug" <* end
@@ -422,6 +427,7 @@ routeToPath UpdateJoinDemo = "/scene-join-demo"
 routeToPath ForceConfigPOC = "/force-config-poc"
 routeToPath ForceConfigV2Test = "/force-config-v2-test"
 routeToPath SimpleForceGraph = "/simple-force-graph"
+routeToPath SimpleChimera = "/simple-chimera"
 routeToPath SankeyDebug = "/sankey-debug"
 routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"

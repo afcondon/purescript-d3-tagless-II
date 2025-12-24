@@ -68,6 +68,7 @@ import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.UpdateJoinDemo as UpdateJoinDemo
 import Component.SimpleForceGraph as SimpleForceGraph
+import Component.SimpleChimera as SimpleChimera
 import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
 import TreeBuilder.App as TreeBuilder
@@ -146,6 +147,7 @@ type Slots =
   , forceConfigPOC :: forall q. H.Slot q Void Unit
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
   , simpleForceGraph :: forall q. H.Slot q Void Unit
+  , simpleChimera :: forall q. H.Slot q Void Unit
   , sankeyDebug :: forall q. H.Slot q Void Unit
   , forcePlayground :: forall q. H.Slot q Void Unit
   , treeBuilder :: forall q. H.Slot q Void Unit
@@ -206,6 +208,7 @@ _updateJoinDemo = Proxy :: Proxy "updateJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
+_simpleChimera = Proxy :: Proxy "simpleChimera"
 _sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _forcePlayground = Proxy :: Proxy "forcePlayground"
 _treeBuilder = Proxy :: Proxy "treeBuilder"
@@ -423,6 +426,9 @@ renderPage route = case spy "Route is" route of
 
   SimpleForceGraph ->
     HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit
+
+  SimpleChimera ->
+    HH.slot_ _simpleChimera unit SimpleChimera.component unit
 
   SankeyDebug ->
     HH.slot_ _sankeyDebug unit SankeyDebug.component unit
