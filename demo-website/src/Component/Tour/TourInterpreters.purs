@@ -249,6 +249,43 @@ astToTreeVisualization ast =
                 ]
             ]
 
+      ConditionalRenderAST {caseCount} ->
+        T.elem Circle
+          [ evalAttr "cx" (lit xPos)
+          , evalAttr "cy" (lit (toNumber level * 80.0))
+          , evalAttr "r" (lit 25.0)
+          , evalAttrStr "fill" (str "#9b59b6")
+          , evalAttrStr "stroke" (str "#6c3483")
+          ]
+          `T.withChildren`
+            [ T.elem Text
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 80.0))
+                , evalAttrStr "text-content" (str ("Conditional: " <> show caseCount <> " cases"))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                ]
+            ]
+
+      LocalCoordSpaceAST {child} ->
+        T.elem Circle
+          [ evalAttr "cx" (lit xPos)
+          , evalAttr "cy" (lit (toNumber level * 80.0))
+          , evalAttr "r" (lit 25.0)
+          , evalAttrStr "fill" (str "#16a085")
+          , evalAttrStr "stroke" (str "#0e6655")
+          ]
+          `T.withChildren`
+            [ T.elem Text
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 80.0))
+                , evalAttrStr "text-content" (str "LocalCoord")
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                ]
+            , astToInterpreterViz (level + 1) child  -- Render child
+            ]
+
 -- | Get the tree for the selected example
 getExampleTree :: ExampleSelection -> T.Tree Unit
 getExampleTree ExThreeLittleCircles = Demo.threeLittleCircles

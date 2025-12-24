@@ -1237,8 +1237,28 @@ renderNodeHelperWithDatum parentSel tree@(Join _) _ = renderNodeHelper parentSel
 renderNodeHelperWithDatum parentSel tree@(NestedJoin _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(UpdateJoin _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(UpdateNestedJoin _) _ = renderNodeHelper parentSel tree
-renderNodeHelperWithDatum parentSel tree@(ConditionalRender _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(LocalCoordSpace _) _ = renderNodeHelper parentSel tree
+
+-- ConditionalRender needs the datum to evaluate predicates
+renderNodeHelperWithDatum parentSel (ConditionalRender { cases }) (Just datum) = do
+  -- Find the first matching case
+  case Array.find (\c -> c.predicate datum) cases of
+    Just matchingCase -> do
+      -- Render the matching spec with the datum
+      let chosenTree = matchingCase.spec datum
+      renderNodeHelperWithDatum parentSel chosenTree (Just datum)
+    Nothing -> do
+      -- No matching case - render nothing (could also render a default/fallback)
+      let Selection impl = parentSel
+      let doc = case impl of
+            EmptySelection rec -> rec.document
+            _ -> unsafePartial (case impl of EmptySelection rec -> rec.document)
+      dummyElement <- createElementWithNS Group doc
+      pure $ Tuple dummyElement Map.empty
+
+-- ConditionalRender without datum context - can't evaluate predicates
+renderNodeHelperWithDatum parentSel (ConditionalRender _) Nothing =
+  renderNodeHelper parentSel (ConditionalRender { cases: [] })  -- Delegate to stub
 
 -- | Helper: Render a single node and its children (no explicit datum)
 -- | Returns the created element and accumulated selections map
