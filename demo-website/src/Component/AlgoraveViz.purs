@@ -3,7 +3,7 @@ module Component.AlgoraveViz where
 import Prelude
 
 import Component.PatternTree (PatternTree(..), parseMiniNotation)
-import D3.Viz.PatternTree.CombinatorTree (buildCombinatorTreeFromTracks, drawCombinatorTree)
+import D3.Viz.PatternTree.CombinatorTree (Combinator, TreeMetadata, buildCombinatorTreesFromTracks, drawCombinatorForest)
 import D3.Viz.PatternTreeViz (TrackLayout(..), ZoomTransform, drawPatternForestMixed, identityZoom)
 import Data.Array as Array
 import Data.Either (Either(..))
@@ -27,8 +27,12 @@ type Track =
   , pattern :: PatternTree
   , active :: Boolean
   , layout :: TrackLayout  -- Per-track layout (click to toggle)
-  , combinators :: Array String  -- Outer combinators wrapping this pattern (e.g., ["jux rev", "slow 2"])
+  , combinators :: Array Combinator  -- Outer combinators wrapping this pattern (e.g., ["jux rev", "slow 2"])
   }
+
+-- | Helper to create enabled combinators from strings
+comb :: String -> Combinator
+comb label = { label, enabled: true }
 
 -- | Test set with ascending complexity of mini-notation patterns
 exampleSet :: Array Track
@@ -57,13 +61,13 @@ exampleSet =
     , pattern: Fast 4.0 (Sound "bd")
     , active: true
     , layout: SunburstLayout
-    , combinators: ["rev"]
+    , combinators: [comb "rev"]
     }
   , { name: "L2-slow"
     , pattern: Slow 2.0 (Sound "bd")
     , active: true
     , layout: SunburstLayout
-    , combinators: ["hurry 2"]
+    , combinators: [comb "hurry 2"]
     }
   , { name: "L2-repeat"
     , pattern: Repeat 3 (Sound "bd")
@@ -82,7 +86,7 @@ exampleSet =
     , pattern: Parallel [Sound "bd", Sound "sn"]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["striate 4"]
+    , combinators: [comb "striate 4"]
     }
   , { name: "L3-choice"
     , pattern: Choice [Sound "bd", Sound "sn", Sound "cp"]
@@ -95,26 +99,26 @@ exampleSet =
     , pattern: Sequence [Fast 2.0 (Sound "bd"), Sound "sn", Parallel [Sound "cp", Sound "hh"]]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["every 2 rev"]
+    , combinators: [comb "every 2 rev"]
     }
   , { name: "L4-sample"
     , pattern: Fast 4.0 (Sound "808bd:05")
     , active: true
     , layout: SunburstLayout
-    , combinators: ["orbit 1", "room 0.5"]
+    , combinators: [comb "orbit 1", comb "room 0.5"]
     }
   , { name: "L4-euclid"
     , pattern: Euclidean 3 8 (Sound "bd")
     , active: true
     , layout: SunburstLayout
-    , combinators: ["fast 2"]
+    , combinators: [comb "fast 2"]
     }
   -- Level 4b: Polymetric test (bd*3 sn*5)
   , { name: "L4-poly"
     , pattern: Sequence [Fast 3.0 (Sound "bd"), Fast 5.0 (Sound "sn")]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["jux rev", "chop 4"]
+    , combinators: [comb "jux rev", comb "chop 4"]
     }
   -- Level 5: Nested
   , { name: "L5-nested"
@@ -124,7 +128,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["sometimesBy 0.4 rev"]
+    , combinators: [comb "sometimesBy 0.4 rev"]
     }
   , { name: "L5-complex"
     , pattern: Sequence
@@ -135,7 +139,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["chunk 4 rev"]
+    , combinators: [comb "chunk 4 rev"]
     }
   -- Level 6: Real-world from video
   , { name: "L6-tabla"
@@ -145,7 +149,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["slow 6", "spin 4"]
+    , combinators: [comb "slow 6", comb "spin 4"]
     }
   , { name: "L6-ardha"
     , pattern: Sequence
@@ -155,7 +159,7 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
-    , combinators: ["layer [ply 4]"]
+    , combinators: [comb "layer [ply 4]"]
     }
   ]
 
@@ -187,6 +191,7 @@ data Action
   | ToggleLayoutFromViz Int -- Called from D3 viz click handler (toggles layout)
   | ToggleNodeTypeFromViz Int NodePath  -- Toggle seq↔par at path in track
   | AdjustEuclideanFromViz Int NodePath Int Int  -- trackIdx, path, deltaN, deltaK
+  | ToggleCombinatorFromViz Int Int  -- Toggle combinator enabled (trackIdx, combinatorIdx)
   | ZoomChanged ZoomTransform  -- Called when user zooms/pans
   | UpdateMiniNotation String
   | ParseAndAddTrack
@@ -256,6 +261,14 @@ handleAction = case _ of
     liftEffect $ Console.log $ "Adjust euclidean at track " <> show trackIdx <> " path " <> show nodePath <> " deltaN=" <> show deltaN <> " deltaK=" <> show deltaK
     H.modify_ \s -> s
       { tracks = updateAt trackIdx (\t -> t { pattern = adjustEuclidean nodePath deltaN deltaK t.pattern }) s.tracks
+      }
+    handleAction RenderForest
+
+  ToggleCombinatorFromViz trackIdx combIdx -> do
+    -- Toggle combinator enabled state at the given index in the track's combinators array
+    liftEffect $ Console.log $ "Toggle combinator at track " <> show trackIdx <> " combinator " <> show combIdx
+    H.modify_ \s -> s
+      { tracks = updateAt trackIdx (\t -> t { combinators = toggleCombinator combIdx t.combinators }) s.tracks
       }
     handleAction RenderForest
 
@@ -335,14 +348,29 @@ handleAction = case _ of
           (HS.notify zoomListener)  -- Zoom change callback
 
       CombinatorTreeView -> do
-        -- Build combinator tree from tracks (only active tracks with combinators)
-        let tracksWithCombinators = Array.filter (\t -> t.active && Array.length t.combinators > 0) state.tracks
-        let trackInfos = map (\t -> { name: t.name, pattern: t.pattern, combinators: t.combinators }) tracksWithCombinators
-        let combTree = buildCombinatorTreeFromTracks trackInfos
-        -- Create zoom emitter for combinator tree
+        -- Build combinator trees from tracks (only tracks with combinators)
+        -- Keep original indices for mute toggle callback
+        let indexedTracks = Array.mapWithIndex (\i t -> { idx: i, track: t }) state.tracks
+        let tracksWithCombinators = Array.filter (\t -> Array.length t.track.combinators > 0) indexedTracks
+        let trackInfos = map (\t -> { name: t.track.name, pattern: t.track.pattern, combinators: t.track.combinators }) tracksWithCombinators
+        let combTrees = buildCombinatorTreesFromTracks trackInfos
+        -- Build metadata array with original track indices and active states
+        let metadata :: Array TreeMetadata
+            metadata = map (\t -> { trackIndex: t.idx, active: t.track.active }) tracksWithCombinators
+        -- Create emitter for mute toggle (uses ToggleTrackFromViz to trigger re-render)
+        { emitter: muteEmitter, listener: muteListener } <- H.liftEffect HS.create
+        _ <- H.subscribe (ToggleTrackFromViz <$> muteEmitter)
+        -- Create emitter for combinator toggle
+        { emitter: combEmitter, listener: combListener } <- H.liftEffect HS.create
+        _ <- H.subscribe (uncurry ToggleCombinatorFromViz <$> combEmitter)
+        -- Create zoom emitter for combinator forest
         { emitter: zoomEmitter, listener: zoomListener } <- H.liftEffect HS.create
         _ <- H.subscribe (ZoomChanged <$> zoomEmitter)
-        liftEffect $ drawCombinatorTree "#pattern-forest-viz" combTree state.zoomTransform (HS.notify zoomListener)
+        liftEffect $ drawCombinatorForest "#pattern-forest-viz" combTrees metadata
+          (HS.notify muteListener)
+          (\trackIdx combIdx -> HS.notify combListener (Tuple trackIdx combIdx))
+          state.zoomTransform
+          (HS.notify zoomListener)
 
   ZoomChanged transform -> do
     -- Just update state without re-rendering (the viz already shows the change)
@@ -359,6 +387,10 @@ updateAt idx f arr =
   case Array.index arr idx of
     Nothing -> arr
     Just elem -> fromMaybe arr $ Array.updateAt idx (f elem) arr
+
+-- | Toggle combinator enabled state at the given index
+toggleCombinator :: Int -> Array Combinator -> Array Combinator
+toggleCombinator idx combs = updateAt idx (\c -> c { enabled = not c.enabled }) combs
 
 -- | Toggle node type (Sequence↔Parallel) at a path in the pattern tree
 -- | Path is a list of child indices: [0, 2] means "first child, then third child"
@@ -600,8 +632,18 @@ generateTidalCode :: Array Track -> String
 generateTidalCode tracks =
   String.joinWith "\n" $
     Array.mapMaybe (\t ->
-      if t.active
-        then Just $ t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
-        else Just $ "-- " <> t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
+      let basePattern = "sound \"" <> patternToMiniNotation t.pattern <> "\""
+          -- Apply enabled combinators from outermost to innermost
+          enabledCombs = Array.filter _.enabled t.combinators
+          withCombs = Array.foldr (\c pat -> c.label <> " $ " <> pat) basePattern enabledCombs
+          -- Show disabled combinators as comments
+          disabledCombs = Array.filter (not <<< _.enabled) t.combinators
+          disabledComment = if Array.null disabledCombs
+            then ""
+            else "  -- disabled: " <> String.joinWith ", " (map _.label disabledCombs)
+          fullLine = t.name <> " $ " <> withCombs <> disabledComment
+      in if t.active
+        then Just fullLine
+        else Just $ "-- " <> fullLine
     ) tracks
 
