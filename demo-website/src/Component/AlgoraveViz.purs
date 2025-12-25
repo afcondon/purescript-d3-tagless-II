@@ -11,6 +11,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Int as Int
 import Data.Number as Number
 import Data.String as String
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), uncurry)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -22,9 +23,9 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Parsing (parseErrorMessage)
 import PSD3.Shared.SiteNav as SiteNav
-import Tangle.Core (TangleDoc)
+import Tangle.DragEvents (dragEventSource)
 import Tangle.Halogen (ControlAction(..), renderDoc)
-import Tangle.TidalTangle (tracksToTangleDoc)
+import Tangle.TidalTangle (tracksToTangleDoc, parseCombinatorLabel)
 
 -- | Named pattern (a track in the set)
 type Track =
@@ -173,6 +174,17 @@ data ViewMode = PatternView | CombinatorTreeView
 
 derive instance Eq ViewMode
 
+-- | Drag state for adjustable Tangle controls
+type DragInfo =
+  { id :: String
+  , startValue :: Number
+  , startX :: Number
+  , step :: Number
+  , min :: Number
+  , max :: Number
+  , subscriptionId :: H.SubscriptionId
+  }
+
 -- | Component state
 type State =
   { tracks :: Array Track
@@ -181,6 +193,7 @@ type State =
   , zoomTransform :: ZoomTransform  -- Preserved zoom state
   , leftPanelOpen :: Boolean        -- Slide-out panel state
   , viewMode :: ViewMode            -- Pattern sunbursts or combinator tree
+  , adjustDrag :: Maybe DragInfo    -- Active drag state for Tangle adjust
   }
 
 -- | Path to a node in the pattern tree (list of child indices)
@@ -198,6 +211,8 @@ data Action
   | AdjustEuclideanFromViz Int NodePath Int Int  -- trackIdx, path, deltaN, deltaK
   | ToggleCombinatorFromViz Int Int  -- Toggle combinator enabled (trackIdx, combinatorIdx)
   | TangleControl ControlAction  -- Actions from Tangle output panel
+  | DragMove Int                 -- Mouse X during drag (from document mousemove)
+  | DragEnd                      -- Drag ended (from document mouseup)
   | ZoomChanged ZoomTransform  -- Called when user zooms/pans
   | UpdateMiniNotation String
   | ParseAndAddTrack
@@ -216,6 +231,7 @@ component = H.mkComponent
       , zoomTransform: identityZoom
       , leftPanelOpen: true  -- Start with panel open
       , viewMode: PatternView  -- Start with pattern sunbursts
+      , adjustDrag: Nothing   -- No active drag
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -293,15 +309,23 @@ handleAction = case _ of
 
       AdjustChanged id newValue -> do
         -- Parse the ID to determine what to adjust
-        -- Format: "comb-param-{trackIdx}-{combIdx}"
         liftEffect $ Console.log $ "Tangle adjust: " <> id <> " -> " <> show newValue
+        -- Try combinator param first: "comb-param-{trackIdx}-{combIdx}"
         case parseCombParamId id of
           Just { trackIdx, combIdx } -> do
             H.modify_ \s -> s
               { tracks = updateAt trackIdx (\t -> t { combinators = adjustCombinatorParam combIdx newValue t.combinators }) s.tracks
               }
             handleAction RenderForest
-          Nothing -> pure unit
+          Nothing ->
+            -- Try pattern param: "pattern-{trackIdx}-{path}-{paramType}"
+            case parsePatternParamId id of
+              Just { trackIdx, path, paramType } -> do
+                H.modify_ \s -> s
+                  { tracks = updateAt trackIdx (\t -> t { pattern = updatePatternParam path paramType newValue t.pattern }) s.tracks
+                  }
+                handleAction RenderForest
+              Nothing -> pure unit
 
       CycleClicked id newValue -> do
         liftEffect $ Console.log $ "Tangle cycle: " <> id <> " -> " <> newValue
@@ -311,6 +335,60 @@ handleAction = case _ of
       ActionClicked id actionValue -> do
         liftEffect $ Console.log $ "Tangle action: " <> id <> " -> " <> actionValue
         pure unit
+
+      AdjustDragStart dragInfo -> do
+        -- Start drag tracking - subscribe to document mouse events
+        liftEffect $ Console.log $ "Tangle drag start: " <> dragInfo.id
+        subscriptionId <- H.subscribe (dragEventSource DragMove DragEnd)
+        H.modify_ \s -> s
+          { adjustDrag = Just
+              { id: dragInfo.id
+              , startValue: dragInfo.startValue
+              , startX: dragInfo.startX
+              , step: dragInfo.step
+              , min: dragInfo.min
+              , max: dragInfo.max
+              , subscriptionId
+              }
+          }
+
+  DragMove clientX -> do
+    -- Calculate new value based on drag delta
+    state <- H.get
+    case state.adjustDrag of
+      Nothing -> pure unit
+      Just dragInfo -> do
+        let
+          deltaX = Int.toNumber clientX - dragInfo.startX
+          -- 50 pixels = 1 step unit worth of change
+          deltaValue = deltaX * dragInfo.step / 50.0
+          newValue = max dragInfo.min (min dragInfo.max (dragInfo.startValue + deltaValue))
+        -- Try combinator param first
+        case parseCombParamId dragInfo.id of
+          Just { trackIdx, combIdx } -> do
+            H.modify_ \s -> s
+              { tracks = updateAt trackIdx (\t -> t { combinators = adjustCombinatorParam combIdx newValue t.combinators }) s.tracks
+              }
+            handleAction RenderForest
+          Nothing ->
+            -- Try pattern param
+            case parsePatternParamId dragInfo.id of
+              Just { trackIdx, path, paramType } -> do
+                H.modify_ \s -> s
+                  { tracks = updateAt trackIdx (\t -> t { pattern = updatePatternParam path paramType newValue t.pattern }) s.tracks
+                  }
+                handleAction RenderForest
+              Nothing -> pure unit
+
+  DragEnd -> do
+    -- Clean up drag state and unsubscribe
+    state <- H.get
+    case state.adjustDrag of
+      Nothing -> pure unit
+      Just dragInfo -> do
+        liftEffect $ Console.log "Tangle drag end"
+        H.unsubscribe dragInfo.subscriptionId
+        H.modify_ \s -> s { adjustDrag = Nothing }
 
   UpdateMiniNotation input -> do
     H.modify_ \s -> s { miniNotationInput = input, parseError = Nothing }
@@ -437,24 +515,11 @@ adjustCombinatorParam :: Int -> Number -> Array Combinator -> Array Combinator
 adjustCombinatorParam idx newValue combs = updateAt idx (updateCombLabel newValue) combs
   where
     updateCombLabel :: Number -> Combinator -> Combinator
-    updateCombLabel val comb =
-      let parsed = parseCombinatorLabel comb.label
+    updateCombLabel val c =
+      let parsed = parseCombinatorLabel c.label
       in case parsed.number of
-        Nothing -> comb
-        Just _ -> comb { label = parsed.prefix <> formatCombNumber val <> parsed.suffix }
-
-    parseCombinatorLabel :: String -> { prefix :: String, number :: Maybe Number, suffix :: String }
-    parseCombinatorLabel label =
-      let words = String.split (String.Pattern " ") label
-      in case Array.uncons words of
-        Nothing -> { prefix: label, number: Nothing, suffix: "" }
-        Just { head: first, tail: rest } ->
-          case Array.uncons rest of
-            Nothing -> { prefix: label, number: Nothing, suffix: "" }
-            Just { head: second, tail: remaining } ->
-              case Number.fromString second of
-                Just n -> { prefix: first <> " ", number: Just n, suffix: if Array.null remaining then "" else " " <> String.joinWith " " remaining }
-                Nothing -> { prefix: label, number: Nothing, suffix: "" }
+        Nothing -> c
+        Just _ -> c { label = parsed.prefix <> formatCombNumber val <> parsed.suffix }
 
     formatCombNumber :: Number -> String
     formatCombNumber n =
@@ -486,6 +551,62 @@ parseCombParamId id =
           Just { trackIdx, combIdx }
         _ -> Nothing
     else Nothing
+
+-- | Parse pattern parameter ID: "pattern-{trackIdx}-{path...}-{paramType}"
+-- | path is a sequence of indices like "0-1-2", paramType is "fast", "slow", etc.
+parsePatternParamId :: String -> Maybe { trackIdx :: Int, path :: Array Int, paramType :: String }
+parsePatternParamId id =
+  let prefix = "pattern-"
+  in if String.take (String.length prefix) id == prefix
+    then
+      let rest = String.drop (String.length prefix) id
+          parts = String.split (String.Pattern "-") rest
+      in case Array.uncons parts of
+        Just { head: trackStr, tail: pathAndType } ->
+          -- Last element is paramType, rest is path
+          case Array.unsnoc pathAndType of
+            Just { init: pathParts, last: paramType } -> do
+              trackIdx <- Int.fromString trackStr
+              path <- traverse Int.fromString pathParts
+              Just { trackIdx, path, paramType }
+            Nothing -> Nothing
+        Nothing -> Nothing
+    else Nothing
+
+-- | Update a numeric parameter in the pattern tree at a given path
+updatePatternParam :: Array Int -> String -> Number -> PatternTree -> PatternTree
+updatePatternParam path paramType newValue tree = case Array.uncons path of
+  -- Empty path: we're at the target node, update it based on paramType
+  Nothing -> case tree of
+    Fast _ child | paramType == "fast" -> Fast newValue child
+    Slow _ child | paramType == "slow" -> Slow newValue child
+    Degrade _ child | paramType == "degrade" -> Degrade newValue child
+    Elongate _ child | paramType == "elongate" -> Elongate newValue child
+    Euclidean _ k child | paramType == "euclidean-n" -> Euclidean (Int.round newValue) k child
+    Euclidean n _ child | paramType == "euclidean-k" -> Euclidean n (Int.round newValue) child
+    Repeat _ child | paramType == "repeat" -> Repeat (Int.round newValue) child
+    other -> other  -- No match, return unchanged
+  -- Non-empty path: recurse into children
+  Just { head: idx, tail: rest } -> case tree of
+    Sequence children ->
+      Sequence $ updateAt idx (updatePatternParam rest paramType newValue) children
+    Parallel children ->
+      Parallel $ updateAt idx (updatePatternParam rest paramType newValue) children
+    Choice children ->
+      Choice $ updateAt idx (updatePatternParam rest paramType newValue) children
+    Fast n child ->
+      Fast n (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    Slow n child ->
+      Slow n (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    Euclidean n k child ->
+      Euclidean n k (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    Degrade p child ->
+      Degrade p (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    Repeat n child ->
+      Repeat n (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    Elongate n child ->
+      Elongate n (if idx == 0 then updatePatternParam rest paramType newValue child else child)
+    other -> other
 
 -- | Toggle node type (Sequence↔Parallel) at a path in the pattern tree
 -- | Path is a list of child indices: [0, 2] means "first child, then third child"

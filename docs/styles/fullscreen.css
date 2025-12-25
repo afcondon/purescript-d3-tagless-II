@@ -832,10 +832,15 @@
   color: #1565C0;
   background-color: rgba(21, 101, 192, 0.1);
   border-bottom: 1px dashed rgba(21, 101, 192, 0.5);
+  cursor: ew-resize;  /* Horizontal drag cursor */
 }
 
 .tangle-adjust:hover {
   background-color: rgba(21, 101, 192, 0.2);
+}
+
+.tangle-adjust:active {
+  background-color: rgba(21, 101, 192, 0.3);
 }
 
 /* Non-interactive display values */

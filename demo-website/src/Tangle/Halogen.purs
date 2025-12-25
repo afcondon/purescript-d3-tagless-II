@@ -19,11 +19,12 @@ module Tangle.Halogen
 
 import Prelude
 
+import Data.Int as Int
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Tangle.Core (TangleDoc(..), TangleSegment(..), Control(..), cycleNext)
-import Web.UIEvent.MouseEvent (MouseEvent, shiftKey)
+import Web.UIEvent.MouseEvent (MouseEvent, shiftKey, clientX)
 import Web.UIEvent.WheelEvent (WheelEvent, deltaY)
 
 -- =============================================================================
@@ -35,11 +36,20 @@ import Web.UIEvent.WheelEvent (WheelEvent, deltaY)
 -- | - ToggleClicked: Boolean toggled (id, new value)
 -- | - CycleClicked: Advance to next option (id, new value)
 -- | - AdjustChanged: Numeric value changed (id, new value)
+-- | - AdjustDragStart: Drag started (id, current value, start X position, step, min, max)
 -- | - ActionClicked: One-way action triggered (id, action value)
 data ControlAction
   = ToggleClicked String Boolean      -- id, new value
   | CycleClicked String String        -- id, new value
   | AdjustChanged String Number       -- id, new value
+  | AdjustDragStart                   -- id, startValue, startX, step, min, max
+      { id :: String
+      , startValue :: Number
+      , startX :: Number
+      , step :: Number
+      , min :: Number
+      , max :: Number
+      }
   | ActionClicked String String       -- id, action value
 
 -- | Style configuration for controls
@@ -130,7 +140,8 @@ renderControl style toAction (Cycle { id, current, options }) =
       ]
       [ HH.text current ]
 
--- Adjust: click to step up/down, wheel to adjust
+-- Adjust: drag to change, click to step, wheel to adjust
+-- Drag left/right = continuous adjust (primary interaction)
 -- Click = step up, Shift+Click = step down, Wheel = continuous adjust
 renderControl style toAction (Adjust { id, current, min: minVal, max: maxVal, step, format }) =
   let
@@ -149,10 +160,16 @@ renderControl style toAction (Adjust { id, current, min: minVal, max: maxVal, st
           -- Wheel down (positive delta) = decrease, wheel up = increase
           newVal = clamp (current - delta * step * 0.01)
       in toAction (AdjustChanged id newVal)
+
+    handleMouseDown :: MouseEvent -> action
+    handleMouseDown evt =
+      let startX = Int.toNumber (clientX evt)
+      in toAction (AdjustDragStart { id, startValue: current, startX, step, min: minVal, max: maxVal })
   in
     HH.span
       [ HP.classes [ HH.ClassName style.controlClass, HH.ClassName style.adjustClass ]
-      , HP.attr (HH.AttrName "title") "Click to step, Shift+Click to step down, or scroll"
+      , HP.attr (HH.AttrName "title") "Drag to adjust, click to step, or scroll"
+      , HE.onMouseDown handleMouseDown
       , HE.onClick handleClick
       , HE.onWheel handleWheel
       ]
