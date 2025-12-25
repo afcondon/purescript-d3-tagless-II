@@ -13,14 +13,19 @@ module DataViz.Layout.Hierarchy.Partition
   , partition
   , HierarchyData(..)
   , hierarchy
+  -- Sunburst utilities
+  , sunburstArcPath
+  , flattenPartition
+  , fixParallelLayout
   ) where
 
 import Prelude
 
 import Data.Array as Array
+import Data.Int as Int
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Number (ceil, floor)
+import Data.Number (ceil, floor, pi, cos, sin)
 
 -- | Partition node with rectangular coordinates
 data PartitionNode a = PartNode
@@ -251,3 +256,181 @@ roundNode (PartNode node) =
     , y1 = ceil node.y1
     , children = map roundNode node.children
     }
+
+-- =============================================================================
+-- SUNBURST UTILITIES
+-- =============================================================================
+
+-- | Convert partition coordinates to sunburst arc path (SVG path string)
+-- |
+-- | Parameters:
+-- | - x0, x1: Normalized angles [0,1] representing angular extent around the circle
+-- | - y0, y1: Normalized radii [0,1] representing distance from center
+-- | - radius: Total radius of the sunburst in pixels
+-- |
+-- | The function handles the special case where the arc spans nearly a full circle
+-- | (>99%), which SVG cannot render as a single arc, by splitting it into two
+-- | semicircular arcs.
+-- |
+-- | Based on D3's arc generator: https://github.com/d3/d3-shape#arc
+sunburstArcPath :: Number -> Number -> Number -> Number -> Number -> String
+sunburstArcPath x0_ y0_ x1_ y1_ radius =
+  let
+    -- Convert normalized y to radius
+    innerRadius = y0_ * radius
+    outerRadius = y1_ * radius
+
+    -- Check if arc spans nearly full circle (>99%) - SVG can't handle this with single arc
+    arcSpan = x1_ - x0_
+  in
+    if arcSpan > 0.99 then
+      -- Full ring: use two semicircular arcs
+      let
+        -- Top point (angle = -π/2)
+        topOuterX = 0.0
+        topOuterY = -outerRadius
+        topInnerX = 0.0
+        topInnerY = -innerRadius
+        -- Bottom point (angle = π/2)
+        bottomOuterX = 0.0
+        bottomOuterY = outerRadius
+        bottomInnerX = 0.0
+        bottomInnerY = innerRadius
+      in
+        -- Draw full ring as two semicircles
+        "M" <> show topOuterX <> "," <> show topOuterY
+          -- Outer arc: top to bottom (right side)
+          <> "A" <> show outerRadius <> "," <> show outerRadius <> " 0 0 1 "
+          <> show bottomOuterX <> "," <> show bottomOuterY
+          -- Outer arc: bottom to top (left side)
+          <> "A" <> show outerRadius <> "," <> show outerRadius <> " 0 0 1 "
+          <> show topOuterX <> "," <> show topOuterY
+          -- Line to inner top
+          <> "M" <> show topInnerX <> "," <> show topInnerY
+          -- Inner arc: top to bottom (right side, counterclockwise)
+          <> "A" <> show innerRadius <> "," <> show innerRadius <> " 0 0 0 "
+          <> show bottomInnerX <> "," <> show bottomInnerY
+          -- Inner arc: bottom to top (left side)
+          <> "A" <> show innerRadius <> "," <> show innerRadius <> " 0 0 0 "
+          <> show topInnerX <> "," <> show topInnerY
+          <> "Z"
+    else
+      -- Normal arc path
+      let
+        -- Convert normalized x to angles (0 to 2π), starting at top
+        startAngle = x0_ * 2.0 * pi - (pi / 2.0)
+        endAngle = x1_ * 2.0 * pi - (pi / 2.0)
+
+        -- Calculate arc points
+        x00 = cos startAngle * innerRadius
+        y00 = sin startAngle * innerRadius
+        x01 = cos endAngle * innerRadius
+        y01 = sin endAngle * innerRadius
+        x10 = cos startAngle * outerRadius
+        y10 = sin startAngle * outerRadius
+        x11 = cos endAngle * outerRadius
+        y11 = sin endAngle * outerRadius
+
+        -- Large arc flag: 1 if angle > π, 0 otherwise
+        largeArc = if (endAngle - startAngle) > pi then 1 else 0
+      in
+        -- SVG path for arc segment
+        "M" <> show x10 <> "," <> show y10
+          <> "A" <> show outerRadius <> "," <> show outerRadius
+          <> " 0 " <> show largeArc <> " 1 "
+          <> show x11 <> "," <> show y11
+          <> "L" <> show x01 <> "," <> show y01
+          <> "A" <> show innerRadius <> "," <> show innerRadius
+          <> " 0 " <> show largeArc <> " 0 "
+          <> show x00 <> "," <> show y00
+          <> "Z"
+
+-- | Flatten PartitionNode tree to array (pre-order traversal)
+-- |
+-- | Returns all nodes in the tree as a flat array, with the root first followed
+-- | by all descendants in pre-order traversal order.
+flattenPartition :: forall a. PartitionNode a -> Array (PartitionNode a)
+flattenPartition node@(PartNode n) =
+  if Array.null n.children then [ node ]
+  else [ node ] <> (n.children >>= flattenPartition)
+
+-- | Fix parallel layout for sunburst diagrams
+-- |
+-- | Makes children of "parallel" nodes share the parent's angular extent and stack
+-- | radially (same angle, different radius) instead of dividing angular space.
+-- | This is useful for visualizing simultaneous/overlapping elements.
+-- |
+-- | The predicate function determines which nodes should be treated as "parallel".
+-- | For example: `\nodeData -> nodeData.nodeType == "parallel"`
+fixParallelLayout :: forall a. (a -> Boolean) -> PartitionNode a -> PartitionNode a
+fixParallelLayout isParallel (PartNode node) =
+  let
+    -- Recursively fix children first
+    fixedChildren = map (fixParallelLayout isParallel) node.children
+
+    -- If this node is a parallel node, adjust children to stack radially
+    adjustedChildren =
+      if isParallel node.data_ then
+        stackRadially node.x0 node.x1 node.y1 fixedChildren
+      else
+        fixedChildren
+  in
+    PartNode (node { children = adjustedChildren })
+  where
+  -- Stack children radially: same angular extent, divided radial space
+  stackRadially :: Number -> Number -> Number -> Array (PartitionNode a) -> Array (PartitionNode a)
+  stackRadially parentX0 parentX1 _parentY1 children =
+    let
+      numChildren = Array.length children
+      -- Get the y0 and y1 from first child (they all have same y range from partition)
+      -- Children extend OUTWARD from parent, so use their actual y range
+      baseY0 = case Array.head children of
+        Just (PartNode c) -> c.y0
+        Nothing -> 0.0
+      maxY1 = case Array.head children of
+        Just (PartNode c) -> c.y1
+        Nothing -> 1.0
+      -- Total radial space available for children (their outer ring)
+      totalRadialSpace = maxY1 - baseY0
+      -- Divide radial space equally among children
+      radialSlice = if numChildren > 0 then totalRadialSpace / Int.toNumber numChildren else 0.0
+    in
+      Array.mapWithIndex (stackChild parentX0 parentX1 baseY0 radialSlice) children
+
+  -- Stack a single child at its radial position
+  stackChild :: Number -> Number -> Number -> Number -> Int -> PartitionNode a -> PartitionNode a
+  stackChild parentX0 parentX1 baseY0 radialSlice idx (PartNode child) =
+    let
+      -- Calculate this child's radial band
+      newY0 = baseY0 + Int.toNumber idx * radialSlice
+      newY1 = newY0 + radialSlice
+      -- Recursively adjust all descendants
+      adjustedDescendants = map (adjustDescendant parentX0 parentX1 newY0 newY1 child.x0 child.x1 child.y0 child.y1) child.children
+    in
+      -- Set angular extent to parent's and radial extent to this slice
+      PartNode (child { x0 = parentX0, x1 = parentX1, y0 = newY0, y1 = newY1, children = adjustedDescendants })
+
+  -- Adjust descendants: remap their coordinates relative to the new parent extent
+  adjustDescendant :: Number -> Number -> Number -> Number -> Number -> Number -> Number -> Number -> PartitionNode a -> PartitionNode a
+  adjustDescendant newParentX0 newParentX1 newParentY0 newParentY1 oldParentX0 oldParentX1 oldParentY0 oldParentY1 (PartNode desc) =
+    let
+      -- Remap angular coordinates proportionally
+      oldXWidth = oldParentX1 - oldParentX0
+      newXWidth = newParentX1 - newParentX0
+      relativeX0 = if oldXWidth > 0.0 then (desc.x0 - oldParentX0) / oldXWidth else 0.0
+      relativeX1 = if oldXWidth > 0.0 then (desc.x1 - oldParentX0) / oldXWidth else 1.0
+      newX0 = newParentX0 + relativeX0 * newXWidth
+      newX1 = newParentX0 + relativeX1 * newXWidth
+
+      -- Remap radial coordinates proportionally
+      oldYHeight = oldParentY1 - oldParentY0
+      newYHeight = newParentY1 - newParentY0
+      relativeY0 = if oldYHeight > 0.0 then (desc.y0 - oldParentY0) / oldYHeight else 0.0
+      relativeY1 = if oldYHeight > 0.0 then (desc.y1 - oldParentY0) / oldYHeight else 1.0
+      newY0 = newParentY0 + relativeY0 * newYHeight
+      newY1 = newParentY0 + relativeY1 * newYHeight
+
+      -- Recursively adjust this descendant's children
+      adjustedChildren = map (adjustDescendant newX0 newX1 newY0 newY1 desc.x0 desc.x1 desc.y0 desc.y1) desc.children
+    in
+      PartNode (desc { x0 = newX0, x1 = newX1, y0 = newY0, y1 = newY1, children = adjustedChildren })

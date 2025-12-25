@@ -17,7 +17,7 @@ import Prelude
 
 import Component.PatternTree (PatternTree(..), PatternMetrics, analyzePattern)
 import Control.Comonad.Cofree (head, tail)
-import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstArcPath, flattenPartition, fixParallelLayout)
+import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Int as Int
@@ -27,7 +27,7 @@ import Data.String as String
 import Data.List ((:))
 import Data.List as List
 import Data.Tree (Tree, mkTree)
-import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
+import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionConfig, hierarchy, partition, sunburstArcPath, flattenPartition, fixParallelLayout)
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import Effect (Effect)
 import PSD3.AST as T
@@ -436,7 +436,7 @@ miniSunburstTemplate node =
           partRoot = hierarchy hierData
           config = defaultPartitionConfig { size = { width: 1.0, height: 1.0 }, padding = 0.01 }
           partitioned = partition config partRoot
-          fixed = fixParallelLayout partitioned
+          fixed = fixParallelLayout (\d -> d.nodeType == "parallel") partitioned
           allNodes = flattenPartition fixed
           nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
 

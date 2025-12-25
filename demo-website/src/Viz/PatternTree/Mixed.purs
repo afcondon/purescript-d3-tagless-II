@@ -11,7 +11,7 @@ import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (pi, cos, sin, sqrt)
 import Data.Tuple (Tuple(..))
-import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
+import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionConfig, hierarchy, partition, sunburstArcPath, flattenPartition, fixParallelLayout)
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import Effect (Effect)
 import Effect.Class (liftEffect)
@@ -32,7 +32,7 @@ import Control.Monad (when)
 import D3.Viz.PatternTree.Types (PatternNode, LinkDatum, TrackLayout(..), TrackWithLayout, ZoomTransform)
 import D3.Viz.PatternTree.Layout (patternTreeToTree, makeLinks, nodeColor)
 import D3.Viz.PatternTree.Euclidean (parseEuclideanLabel, euclideanPattern)
-import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstFill, sunburstStroke, sunburstArcPath, flattenPartition, fixParallelLayout, combinatorBadge, isCombinator, HierarchyNodeData)
+import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstFill, sunburstStroke, combinatorBadge, isCombinator, HierarchyNodeData)
 
 -- | Draw patterns with per-track layout (tree or sunburst)
 -- | onToggleActive: called when center is clicked (toggle mute)
@@ -182,7 +182,7 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
   let config = defaultPartitionConfig { size = { width: 1.0, height: 1.0 }, padding = 0.002 }
   let partitioned = partition config partRoot
   -- Fix parallel layout: make parallel children share angular extent
-  let fixedPartitioned = fixParallelLayout partitioned
+  let fixedPartitioned = fixParallelLayout (\d -> d.nodeType == "parallel") partitioned
   let allNodes = flattenPartition fixedPartitioned
   let nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
 
