@@ -604,6 +604,36 @@
   margin-bottom: var(--spacing-xs);
 }
 
+/* Control buttons in panels */
+.control-button {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-light);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.control-button:hover {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.control-button--secondary {
+  background-color: #e8e8e8;
+  border-color: #ccc;
+}
+
+.control-button--secondary:hover {
+  background-color: #6c63ff;
+  color: white;
+  border-color: #6c63ff;
+}
+
 /* Preset pattern grid */
 .preset-grid {
   display: grid;
@@ -849,4 +879,31 @@
   background-color: rgba(66, 66, 66, 0.05);
   padding: 0 4px;
   border-radius: 3px;
+}
+
+/* ========================================
+   TRACK CONTROL BUTTONS
+   ======================================== */
+
+/* Mute and Layout toggle buttons below each track */
+.mute-toggle-btn,
+.layout-toggle-btn {
+  opacity: 0.8;
+}
+
+.mute-toggle-btn circle,
+.layout-toggle-btn circle {
+  transition: fill 0.15s ease, stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+.mute-toggle-btn:hover circle {
+  fill: #c8e6c9;
+  stroke: #2e7d32;
+  stroke-width: 3;
+}
+
+.layout-toggle-btn:hover circle {
+  fill: #bbdefb;
+  stroke: #1565c0;
+  stroke-width: 3;
 }

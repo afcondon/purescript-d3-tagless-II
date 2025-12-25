@@ -14,6 +14,8 @@ module PSD3.Internal.Behavior.FFI
   , attachMouseEnter_
   , attachMouseLeave_
   , attachHighlight_
+  , attachMouseDown_
+  , attachMouseDownWithEvent_
   -- Simulation registry
   , registerSimulation_
   , unregisterSimulation_
@@ -218,6 +220,25 @@ foreign import attachMouseEnterWithEvent_
 
 -- | Attach mouseleave handler with event info (pure web-events version)
 foreign import attachMouseLeaveWithEvent_
+  :: forall datum
+   . Element
+  -> EffectFn2 datum MouseEvent Unit
+  -> Effect Element
+
+-- | Attach mousedown handler without datum access
+-- |
+-- | Attaches a handler that fires when mouse button is pressed.
+-- | Useful for starting drag operations.
+foreign import attachMouseDown_
+  :: Element
+  -> Effect Unit
+  -> Effect Element
+
+-- | Attach mousedown handler with event info (pure web-events version)
+-- |
+-- | Like attachMouseDown_ but provides datum and raw MouseEvent.
+-- | Use for drag-to-adjust controls where you need the start position.
+foreign import attachMouseDownWithEvent_
   :: forall datum
    . Element
   -> EffectFn2 datum MouseEvent Unit

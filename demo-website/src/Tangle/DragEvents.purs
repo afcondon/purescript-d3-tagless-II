@@ -4,6 +4,7 @@
 -- | These create Halogen subscriptions that fire while dragging.
 module Tangle.DragEvents
   ( dragEventSource
+  , clickEndDragEventSource
   ) where
 
 import Prelude
@@ -16,6 +17,9 @@ foreign import documentMouseMoveImpl :: (Int -> Effect Unit) -> Effect (Effect U
 
 -- | FFI for document mouseup listener
 foreign import documentMouseUpImpl :: Effect Unit -> Effect (Effect Unit)
+
+-- | FFI for document click listener (for click-to-end drag mode)
+foreign import documentClickImpl :: Effect Unit -> Effect (Effect Unit)
 
 -- | Action type for drag events
 data DragEvent
@@ -40,3 +44,23 @@ dragEventSource onMove onEnd = HS.makeEmitter \emitter -> do
   pure do
     removeMoveListener
     removeUpListener
+
+-- | Create an event source for click-to-end drag mode
+-- |
+-- | Like dragEventSource but uses click instead of mouseup to end the drag.
+-- | This is useful in SVG contexts where D3 zoom/pan captures mouseup events.
+-- | User clicks on number to start drag, moves mouse, clicks anywhere to end.
+clickEndDragEventSource :: forall action. (Int -> action) -> action -> HS.Emitter action
+clickEndDragEventSource onMove onEnd = HS.makeEmitter \emitter -> do
+  -- Set up mousemove listener
+  removeMoveListener <- documentMouseMoveImpl \clientX -> do
+    emitter (onMove clientX)
+
+  -- Set up click listener (with small delay to avoid initial click)
+  removeClickListener <- documentClickImpl do
+    emitter onEnd
+
+  -- Return finalizer that removes both listeners
+  pure do
+    removeMoveListener
+    removeClickListener

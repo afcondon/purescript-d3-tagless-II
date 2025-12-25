@@ -40,57 +40,133 @@ type Track r =
 -- Track -> TangleDoc
 -- =============================================================================
 
+-- | Effect type (matches AlgoraveViz.Effect - uses open row for compatibility)
+type Effect r =
+  { name :: String
+  , value :: String
+  , enabled :: Boolean
+  | r
+  }
+
 -- | Convert a single track to a TangleDoc
--- | Format: name $ [comb1] $ [comb2] $ sound "pattern"
-trackToTangleDoc :: forall r. Int -> Track r -> TangleDoc
+-- | Format: Multiline output for proper commenting of disabled combinators
+-- |   name
+-- |     $ comb1
+-- |     -- $ comb2   (disabled combinator)
+-- |     $ sound "pattern"
+-- |     # effect1 val # effect2 val
+-- |
+-- | When track is muted, ALL lines are commented:
+-- |   -- name
+-- |   --   $ comb1
+-- |   --   -- $ comb2   (nested: combinator was also disabled)
+-- |   --   $ sound "pattern"
+trackToTangleDoc :: forall r. Int ->
+  { name :: String
+  , pattern :: PatternTree
+  , active :: Boolean
+  , combinators :: Array Combinator
+  , effects :: Array { name :: String, value :: String, enabled :: Boolean }
+  | r
+  } -> TangleDoc
 trackToTangleDoc trackIdx track =
   let
-    -- Track name as toggle for mute
-    nameDoc = toggle ("mute-" <> show trackIdx) track.active track.name ("--" <> track.name)
+    -- Comment prefix for muted tracks (applied to all lines)
+    mutePrefix = if track.active then "" else "-- "
+
+    -- Track name as toggle for mute (on its own line)
+    nameDoc = toggle ("mute-" <> show trackIdx) track.active track.name ("-- " <> track.name)
 
     -- Pattern as interactive TangleDoc (numbers are adjustable)
-    patternDoc = text "sound \"" <+> patternToTangleDoc trackIdx track.pattern <+> text "\""
+    patternDoc = text (mutePrefix <> "  $ sound \"") <+> patternToTangleDoc trackIdx track.pattern <+> text "\""
 
-    -- Combinators as toggleable elements
-    combDocs = Array.mapWithIndex (combinatorToTangle trackIdx) track.combinators
+    -- Combinators as toggleable elements (each on its own line)
+    -- Pass mute state so disabled combinators show nested comments when track is muted
+    combDocs = Array.mapWithIndex (combinatorToTangle trackIdx track.active) track.combinators
 
-    -- Build the full line: name $ comb1 $ comb2 $ ... $ pattern
-    dollarSign = text " $ "
+    -- Newline for each line (indent is in the combinator/pattern docs)
+    newline = text "\n"
 
-    -- Join combinators with " $ "
-    withCombs = if Array.null combDocs
-      then patternDoc
-      else Array.foldr (\c acc -> c <+> dollarSign <+> acc) patternDoc combDocs
+    -- Build multiline: each combinator on its own line
+    combLines = map (\c -> newline <+> c) combDocs
+
+    -- Pattern line
+    patternLine = newline <+> patternDoc
+
+    -- Effects as # chain (each on its own line for proper commenting)
+    effectDocs = Array.mapWithIndex (effectToTangle trackIdx track.active) track.effects
+    effectLines = map (\e -> newline <+> e) effectDocs
   in
-    nameDoc <+> dollarSign <+> withCombs <+> text "\n"
+    nameDoc <+>
+    Array.foldl (<+>) mempty combLines <+>
+    patternLine <+>
+    Array.foldl (<+>) mempty effectLines <+>
+    text "\n"
+
+-- | Convert an effect to a TangleDoc segment
+-- | Format:   # name value (with value being adjustable if numeric)
+-- | When track is muted, adds "-- " prefix to all lines
+-- | When effect is disabled, adds "-- " prefix (nested if track also muted)
+effectToTangle :: Int -> Boolean -> Int -> { name :: String, value :: String, enabled :: Boolean } -> TangleDoc
+effectToTangle trackIdx trackActive fxIdx effect =
+  let
+    -- Mute prefix for the track level
+    mutePrefix = if trackActive then "" else "-- "
+
+    -- Parse the value to see if it's a simple number
+    parsed = parseCombinatorLabel (effect.name <> " " <> effect.value)
+
+    -- Create the content doc (enabled effect)
+    enabledDoc = case parsed of
+      { prefix: _, number: Just n, suffix } ->
+        text (mutePrefix <> "  # " <> effect.name <> " ") <+>
+        adjust ("fx-" <> show trackIdx <> "-" <> show fxIdx)
+          n
+          { min: 0.0, max: 1.0, step: 0.05, format: formatNumber } <+>
+        text suffix
+      { prefix: _, number: Nothing, suffix: _ } ->
+        -- Non-numeric or pattern value - just show as text for now
+        text (mutePrefix <> "  # " <> effect.name <> " " <> effect.value)
+
+    -- Disabled effect (nested comment if track is also muted)
+    disabledDoc = text (mutePrefix <> "  -- # " <> effect.name <> " " <> effect.value)
+  in
+    if effect.enabled
+      then enabledDoc
+      else disabledDoc
 
 -- | Convert a combinator to a TangleDoc segment
 -- | Parses combinator label to extract adjustable numeric parameters
-combinatorToTangle :: Int -> Int -> Combinator -> TangleDoc
-combinatorToTangle trackIdx combIdx comb =
+-- | Format:   $ combinator (enabled) or   -- $ combinator (disabled)
+-- | When track is muted, adds "-- " prefix (nested if combinator also disabled)
+combinatorToTangle :: Int -> Boolean -> Int -> Combinator -> TangleDoc
+combinatorToTangle trackIdx trackActive combIdx comb =
   let
+    -- Mute prefix for the track level
+    mutePrefix = if trackActive then "" else "-- "
+
     -- Parse the combinator label to find numeric parts
     -- e.g., "slow 2" -> ("slow ", adjustable 2)
     -- e.g., "jux rev" -> just toggle, no adjustable
     parsed = parseCombinatorLabel comb.label
 
-    -- Create the content doc (with adjustable number if present)
-    contentDoc = case parsed of
+    -- Create the enabled content doc (with adjustable number if present)
+    enabledDoc = case parsed of
       { prefix, number: Just n, suffix } ->
-        text prefix <+>
+        text (mutePrefix <> "  $ " <> prefix) <+>
         adjust ("comb-param-" <> show trackIdx <> "-" <> show combIdx)
           n
           { min: 0.1, max: 16.0, step: 0.5, format: formatNumber } <+>
         text suffix
       { prefix, number: Nothing, suffix } ->
-        text (prefix <> suffix)
+        text (mutePrefix <> "  $ " <> prefix <> suffix)
 
-    -- Toggle ID for enable/disable (used by action handler)
-    _toggleId = "comb-" <> show trackIdx <> "-" <> show combIdx
+    -- Disabled combinator (nested comment if track is also muted)
+    disabledDoc = text (mutePrefix <> "  -- $ " <> comb.label)
   in
     if comb.enabled
-      then contentDoc  -- Show normally
-      else text ("--" <> comb.label)  -- Show as comment when disabled
+      then enabledDoc
+      else disabledDoc
 
 -- | Parse a combinator label to extract the first numeric parameter
 -- | Finds numbers anywhere in the string, including nested structures
@@ -181,7 +257,14 @@ formatNumber n =
       else show rounded
 
 -- | Convert multiple tracks to a TangleDoc
-tracksToTangleDoc :: forall r. Array (Track r) -> TangleDoc
+tracksToTangleDoc :: forall r. Array
+  { name :: String
+  , pattern :: PatternTree
+  , active :: Boolean
+  , combinators :: Array Combinator
+  , effects :: Array { name :: String, value :: String, enabled :: Boolean }
+  | r
+  } -> TangleDoc
 tracksToTangleDoc tracks =
   Array.foldl (<+>) mempty $
     Array.mapWithIndex trackToTangleDoc tracks

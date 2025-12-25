@@ -15,6 +15,7 @@ import DataViz.Layout.Hierarchy.Partition (PartitionNode(..), defaultPartitionCo
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import Effect (Effect)
 import Effect.Class (liftEffect)
+import Effect.Console as Console
 import PSD3.AST as T
 import PSD3.Expr.Friendly (attr, cx, cy, fill, fontSize, height, num, path, r, stroke, strokeWidth, text, textAnchor, textContent, viewBox, width, x, y)
 import PSD3.Internal.Behavior.FFI (attachZoomWithCallback_)
@@ -41,6 +42,7 @@ import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor, sunburstF
 -- | onZoomChange: called when zoom changes (to save state for next render)
 drawPatternForestMixed :: String -> Array TrackWithLayout -> (Int -> Effect Unit) -> (Int -> Effect Unit) -> (Int -> Array Int -> Effect Unit) -> (Int -> Array Int -> Int -> Int -> Effect Unit) -> ZoomTransform -> (ZoomTransform -> Effect Unit) -> Effect Unit
 drawPatternForestMixed selector tracksWithLayout onToggleActive onToggleLayout onToggleNodeType onAdjustEuclidean initialZoom onZoomChange = do
+  Console.log "[Mixed.purs v2] drawPatternForestMixed called - buttons should be visible below tracks"
   let numPatterns = Array.length tracksWithLayout
   let chartWidth = 1400.0
   let chartHeight = 1200.0
@@ -298,7 +300,7 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
       _ <- renderTree zoomGroupSel euclidVizTree
       pure unit
 
-  -- Render center circle with track name (no click behavior - use buttons instead)
+  -- Render center circle with track name (click to mute/unmute)
   -- Color the center based on root node type (layer 0 = center circle)
   let innerRadius = r' * 0.35
   let rootNode = Array.find (\(PartNode n) -> n.depth == 0) allNodes
@@ -313,7 +315,9 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
         T.named Group ("center-" <> show idx)
           [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")")
           , attr "class" $ text "sunburst-center"
+          , attr "style" $ text "cursor: pointer;"
           ]
+          `T.withBehaviors` [ onClick (onToggleActive track.trackIndex) ]
           `T.withChildren`
             [ T.elem Circle
                 [ cx $ num 0.0, cy $ num 0.0, r $ num innerRadius
@@ -402,8 +406,8 @@ renderSunburstTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleAct
 
   -- Render control buttons below sunburst (mute on left, layout on right)
   let buttonY = centerY + r' + 25.0
-  _ <- renderMuteButton zoomGroupSel (centerX - 15.0) buttonY track.trackIndex track.active onToggleActive
-  _ <- renderToggleButton zoomGroupSel (centerX + 15.0) buttonY track.trackIndex onToggleLayout "tree"
+  _ <- renderMuteButton zoomGroupSel (centerX - 20.0) buttonY track.trackIndex track.active onToggleActive
+  _ <- renderToggleButton zoomGroupSel (centerX + 20.0) buttonY track.trackIndex onToggleLayout "tree"
 
   -- Render metrics below buttons
   let metrics = analyzePattern track.pattern
@@ -503,11 +507,14 @@ renderTreeTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleActive 
     _ <- renderTree zoomGroupSel badgesTree
     pure unit
 
-  -- Render track name label at top (no click behavior - use buttons instead)
+  -- Render track name label at top (click to mute/unmute)
   let labelTree :: T.Tree Unit
       labelTree =
         T.named Group ("tree-label-" <> show idx)
-          [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show (centerY - r' - 5.0) <> ")") ]
+          [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show (centerY - r' - 5.0) <> ")")
+          , attr "style" $ text "cursor: pointer;"
+          ]
+          `T.withBehaviors` [ onClick (onToggleActive track.trackIndex) ]
           `T.withChild`
             ( T.elem Text
                 [ x $ num 0.0, y $ num 0.0
@@ -521,8 +528,8 @@ renderTreeTrack zoomGroupSel track centerX centerY r' arcOpacity onToggleActive 
 
   -- Render control buttons below tree (mute on left, layout on right)
   let buttonY = centerY + r' + 15.0
-  _ <- renderMuteButton zoomGroupSel (centerX - 15.0) buttonY track.trackIndex track.active onToggleActive
-  _ <- renderToggleButton zoomGroupSel (centerX + 15.0) buttonY track.trackIndex onToggleLayout "sunburst"
+  _ <- renderMuteButton zoomGroupSel (centerX - 20.0) buttonY track.trackIndex track.active onToggleActive
+  _ <- renderToggleButton zoomGroupSel (centerX + 20.0) buttonY track.trackIndex onToggleLayout "sunburst"
 
   -- Render metrics below buttons
   let metrics = analyzePattern track.pattern
@@ -538,7 +545,7 @@ verticalLinkPath sx sy tx ty =
      <> " " <> show tx <> "," <> show midY
      <> " " <> show tx <> "," <> show ty
 
--- | Render a small toggle button for layout
+-- | Render a toggle button for layout switching
 renderToggleButton :: D3v2Selection_ SEmpty Element Unit -> Number -> Number -> Int -> (Int -> Effect Unit) -> String -> D3v2M Unit
 renderToggleButton zoomGroupSel btnX btnY trackIdx onToggle targetLayout = do
   let buttonTree :: T.Tree Unit
@@ -551,16 +558,17 @@ renderToggleButton zoomGroupSel btnX btnY trackIdx onToggle targetLayout = do
           `T.withBehaviors` [ onClick (onToggle trackIdx) ]
           `T.withChildren`
             [ T.elem Circle
-                [ cx $ num 0.0, cy $ num 0.0, r $ num 10.0
-                , fill $ text "#f5f5f5"
-                , stroke $ text "#999"
-                , strokeWidth $ num 1.5
+                [ cx $ num 0.0, cy $ num 0.0, r $ num 14.0
+                , fill $ text "#e3f2fd"
+                , stroke $ text "#2196f3"
+                , strokeWidth $ num 2.0
                 ]
             , T.elem Text
-                [ x $ num 0.0, y $ num 4.0
+                [ x $ num 0.0, y $ num 5.0
                 , textContent $ text (if targetLayout == "sunburst" then "◉" else "⬡")
-                , fontSize $ num 12.0, textAnchor $ text "middle"
-                , fill $ text "#666"
+                , fontSize $ num 14.0, textAnchor $ text "middle"
+                , fill $ text "#1565c0"
+                , attr "font-weight" $ text "bold"
                 ]
             ]
   _ <- renderTree zoomGroupSel buttonTree
@@ -584,16 +592,16 @@ renderMuteButton zoomGroupSel btnX btnY trackIdx isActive onToggle = do
           `T.withBehaviors` [ onClick (onToggle trackIdx) ]
           `T.withChildren`
             [ T.elem Circle
-                [ cx $ num 0.0, cy $ num 0.0, r $ num 10.0
+                [ cx $ num 0.0, cy $ num 0.0, r $ num 14.0
                 , fill $ text (if isActive then "#e8f5e9" else "#ffebee")
                 , stroke $ text (if isActive then "#4CAF50" else "#f44336")
-                , strokeWidth $ num 1.5
+                , strokeWidth $ num 2.0
                 ]
             , T.elem Text
-                [ x $ num 0.0, y $ num 4.0
+                [ x $ num 0.0, y $ num 5.0
                 , textContent $ text speakerIcon
-                , fontSize $ num 10.0, textAnchor $ text "middle"
-                , fill $ text (if isActive then "#4CAF50" else "#f44336")
+                , fontSize $ num 12.0, textAnchor $ text "middle"
+                , fill $ text (if isActive then "#2e7d32" else "#c62828")
                 ]
             ]
   _ <- renderTree zoomGroupSel buttonTree

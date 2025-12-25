@@ -8,6 +8,9 @@ module D3.Viz.PatternTree.CombinatorTree
   , buildCombinatorTreesFromTracks
   , TrackInfo
   , TreeMetadata
+  , LabelPart(..)
+  , parseLabelParts
+  , labelPartsToString
   , module ReExports
   ) where
 
@@ -21,9 +24,11 @@ import D3.Viz.PatternTree.Sunburst (patternToHierarchy, sunburstColor)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Int as Int
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Data.Number (sqrt)
+import Data.Number as Number
 import Data.String as String
+import Data.String.CodeUnits as CU
 import Data.List ((:))
 import Data.List as List
 import Data.Tree (Tree, mkTree)
@@ -48,11 +53,127 @@ import Web.HTML.Window as Window
 data CombinatorNode
   = Combinator String Boolean  -- label and enabled state, e.g., ("slow 6", true)
   | PatternLeaf String PatternTree  -- name and the pattern to render as sunburst
+  | PatternNode String String  -- expanded pattern node: label, nodeType (for coloring in full tree mode)
 
 -- | Convert CombinatorNode to tree data for layout
 -- | Includes x, y, depth fields required by tree layout algorithm
 -- | enabled: whether combinator is active (always true for pattern leaves)
-type LayoutNode = { label :: String, isPattern :: Boolean, enabled :: Boolean, pattern :: Maybe PatternTree, x :: Number, y :: Number, depth :: Int }
+-- | trackIndex, combIndex: set after layout for callback identification
+type LayoutNode =
+  { label :: String
+  , isPattern :: Boolean      -- true for PatternLeaf nodes (render as sunburst)
+  , isPatternNode :: Boolean  -- true for expanded PatternNode nodes (render as tree node)
+  , nodeType :: String        -- for coloring: "sound", "sequence", "parallel", etc.
+  , enabled :: Boolean
+  , pattern :: Maybe PatternTree
+  , x :: Number
+  , y :: Number
+  , depth :: Int
+  , trackIndex :: Int   -- Set after layout, -1 initially
+  , combIndex :: Int    -- Set after layout, -1 initially
+  }
+
+-- =============================================================================
+-- Label Parsing for Interactive Parts
+-- =============================================================================
+
+-- | A part of a combinator label
+-- | Either a word (toggleable) or a number (draggable)
+data LabelPart
+  = WordPart String        -- e.g., "slow", "jux", "rev"
+  | NumberPart Number      -- e.g., 2.0, 4.0, 0.5
+  | PunctuationPart String -- e.g., "[", "]", ","
+
+-- | Parse a combinator label into interactive parts
+-- | "slow 2" -> [WordPart "slow", NumberPart 2.0]
+-- | "jux rev" -> [WordPart "jux", WordPart "rev"]
+-- | "layer [ply 4]" -> [WordPart "layer", PunctuationPart "[", WordPart "ply", NumberPart 4.0, PunctuationPart "]"]
+parseLabelParts :: String -> Array LabelPart
+parseLabelParts label = go 0 []
+  where
+  len = CU.length label
+
+  go :: Int -> Array LabelPart -> Array LabelPart
+  go i acc
+    | i >= len = acc
+    | otherwise =
+        case CU.charAt i label of
+          Nothing -> acc
+          Just c
+            | isWhitespace c -> go (i + 1) acc
+            | isDigit c || (c == '.' && i + 1 < len && maybe false isDigit (CU.charAt (i + 1) label)) ->
+                -- Number
+                let { numStr, endIdx } = extractNumber i
+                in case Number.fromString numStr of
+                  Just n -> go endIdx (acc <> [NumberPart n])
+                  Nothing -> go endIdx acc  -- Skip invalid numbers
+            | isPunctuation c ->
+                -- Punctuation (brackets, commas, etc.)
+                go (i + 1) (acc <> [PunctuationPart (CU.singleton c)])
+            | otherwise ->
+                -- Word (letters and other characters)
+                let { word, endIdx } = extractWord i
+                in go endIdx (acc <> [WordPart word])
+
+  isWhitespace :: Char -> Boolean
+  isWhitespace c = c == ' ' || c == '\t' || c == '\n'
+
+  isDigit :: Char -> Boolean
+  isDigit c = c >= '0' && c <= '9'
+
+  isPunctuation :: Char -> Boolean
+  isPunctuation c = c == '[' || c == ']' || c == '(' || c == ')' || c == ',' || c == ';'
+
+  isWordChar :: Char -> Boolean
+  isWordChar c = not (isWhitespace c) && not (isDigit c) && not (isPunctuation c) && c /= '.'
+
+  extractNumber :: Int -> { numStr :: String, endIdx :: Int }
+  extractNumber start = goNum start false
+    where
+    goNum :: Int -> Boolean -> { numStr :: String, endIdx :: Int }
+    goNum idx hasDot
+      | idx >= len = { numStr: CU.slice start idx label, endIdx: idx }
+      | otherwise =
+          case CU.charAt idx label of
+            Nothing -> { numStr: CU.slice start idx label, endIdx: idx }
+            Just c
+              | isDigit c -> goNum (idx + 1) hasDot
+              | c == '.' && not hasDot -> goNum (idx + 1) true
+              | otherwise -> { numStr: CU.slice start idx label, endIdx: idx }
+
+  extractWord :: Int -> { word :: String, endIdx :: Int }
+  extractWord start = goWord start
+    where
+    goWord :: Int -> { word :: String, endIdx :: Int }
+    goWord idx
+      | idx >= len = { word: CU.slice start idx label, endIdx: idx }
+      | otherwise =
+          case CU.charAt idx label of
+            Nothing -> { word: CU.slice start idx label, endIdx: idx }
+            Just c
+              | isWordChar c -> goWord (idx + 1)
+              | otherwise -> { word: CU.slice start idx label, endIdx: idx }
+
+-- | Format a number for display (show 1 decimal place, drop .0)
+formatLabelNumber :: Number -> String
+formatLabelNumber n =
+  let
+    rounded = Number.round (n * 10.0) / 10.0
+    intPart = Int.floor rounded
+  in
+    if rounded == Int.toNumber intPart
+      then show intPart
+      else show rounded
+
+-- | Render label parts back to a string
+labelPartsToString :: Array LabelPart -> String
+labelPartsToString parts = String.joinWith " " $ Array.mapMaybe partToStr parts
+  where
+  partToStr (WordPart w) = Just w
+  partToStr (NumberPart n) = Just (formatLabelNumber n)
+  partToStr (PunctuationPart p) = Just p
+
+-- =============================================================================
 
 -- | Draw a combinator tree with sunburst leaves
 -- | selector should be a CSS selector (e.g., "#container" or ".viz-area")
@@ -161,16 +282,19 @@ drawCombinatorTree selector combTree initialZoom onZoomChange = do
 
 -- | Metadata for each tree in the forest
 type TreeMetadata =
-  { trackIndex :: Int  -- Original track index in AlgoraveViz
-  , active :: Boolean  -- Whether track is muted
+  { trackIndex :: Int    -- Original track index in AlgoraveViz
+  , active :: Boolean    -- Whether track is muted
+  , useTreeLayout :: Boolean  -- true = full tree, false = chimera (sunburst)
   }
 
 -- | Draw a forest of combinator trees in a grid layout
 -- | Each tree is laid out independently and positioned in a grid cell
 -- | onMuteToggle is called with the original track index when mute button is clicked
+-- | onLayoutToggle is called with the original track index when layout button is clicked
 -- | onCombinatorToggle is called with (trackIndex, combinatorIndex) when a combinator is clicked
-drawCombinatorForest :: String -> Array (Tree CombinatorNode) -> Array TreeMetadata -> (Int -> Effect Unit) -> (Int -> Int -> Effect Unit) -> ZoomTransform -> (ZoomTransform -> Effect Unit) -> Effect Unit
-drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle initialZoom onZoomChange = do
+-- | Tree structure determines rendering: PatternLeaf nodes render as sunbursts, PatternNode nodes as tree nodes
+drawCombinatorForest :: String -> Array (Tree CombinatorNode) -> Array TreeMetadata -> (Int -> Effect Unit) -> (Int -> Effect Unit) -> (Int -> Int -> Effect Unit) -> ZoomTransform -> (ZoomTransform -> Effect Unit) -> Effect Unit
+drawCombinatorForest selector trees metadata onMuteToggle onLayoutToggle onCombinatorToggle initialZoom onZoomChange = do
   let numTrees = Array.length trees
   when (numTrees == 0) $ pure unit
 
@@ -200,25 +324,49 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
             row = idx / cols
             centerX = startX + Int.toNumber col * cellWidth
             centerY = startY + Int.toNumber row * cellHeight
-            -- Layout this tree - height is 50% of width for tighter vertical spacing
+            -- Layout this tree
             layoutTree = mapCombinatorTree combTree
             margin = 20.0
             treeWidth = treeSize - margin * 2.0
-            treeHeight = treeWidth * 0.5  -- 50% less vertical spacing
+            -- Full tree mode needs more vertical space for expanded nodes
+            treeHeight = if meta.useTreeLayout
+                         then treeWidth * 0.8  -- More vertical space for full tree
+                         else treeWidth * 0.5  -- Compact for chimera
             treeConfig = defaultTreeConfig { size = { width: treeWidth, height: treeHeight } }
             positioned = tree treeConfig layoutTree
             -- Flatten to nodes and links
             flattenTree :: Tree LayoutNode -> Array LayoutNode
-            flattenTree t = [head t] <> Array.concatMap flattenTree (Array.fromFoldable (tail t))
-            nodes = flattenTree positioned
+            flattenTree treee = [head treee] <> Array.concatMap flattenTree (Array.fromFoldable (tail treee))
+            rawNodes = flattenTree positioned
             links = collectLinks positioned
+
+            -- Enrich combinator nodes with trackIndex and combIndex
+            -- Count combinator nodes to assign indices
+            enrichNodes :: List.List LayoutNode -> Int -> List.List LayoutNode
+            enrichNodes List.Nil _ = List.Nil
+            enrichNodes (n : rest) combIdx =
+              if n.isPattern then
+                n : enrichNodes rest combIdx
+              else if n.isPatternNode then
+                n : enrichNodes rest combIdx  -- Pattern nodes don't get combIndex
+              else
+                n { trackIndex = meta.trackIndex, combIndex = combIdx }
+                  : enrichNodes rest (combIdx + 1)
+            nodes = Array.fromFoldable $ enrichNodes (List.fromFoldable rawNodes) 0
+
             -- Find the sunburst node (pattern leaf) for button positioning
             sunburstNode = Array.find (\n -> n.isPattern) nodes
             -- Collect combinator nodes with their indices (for click handling)
             -- Index corresponds to position in the combinator chain
             combinatorNodes = Array.mapWithIndex (\i n -> { combIndex: i, node: n })
-                              $ Array.filter (\n -> not n.isPattern) nodes
-        in { idx, centerX, centerY, nodes, links, treeSize, trackIndex: meta.trackIndex, active: meta.active, sunburstNode, combinatorNodes }
+                              $ Array.filter (\n -> not n.isPattern && not n.isPatternNode) nodes
+            -- Find the root node (first node) for centering
+            rootNode = Array.head nodes
+            -- Calculate root offset for centering: we want root.x to be at center
+            rootOffsetX = maybe 0.0 (\r -> treeWidth / 2.0 - r.x) rootNode
+            -- Find bottom-most node for toggle button positioning
+            bottomNode = Array.last $ Array.sortBy (\a b -> compare a.y b.y) nodes
+        in { idx, centerX, centerY, nodes, links, treeSize, trackIndex: meta.trackIndex, active: meta.active, useTreeLayout: meta.useTreeLayout, sunburstNode, combinatorNodes, rootNode, rootOffsetX, bottomNode }
       ) treesWithMeta
 
   -- Build SVG with all trees
@@ -241,7 +389,8 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
                   -- Create a group for each tree with links
                   ( Array.concatMap (\t ->
                       [ T.named Group ("tree-" <> show t.idx)
-                          [ attr "transform" $ text ("translate(" <> show (t.centerX - t.treeSize / 2.0) <> "," <> show (t.centerY - t.treeSize / 2.0) <> ")") ]
+                          -- Apply rootOffsetX to center tree on root node (not tree bounds)
+                          [ attr "transform" $ text ("translate(" <> show (t.centerX - t.treeSize / 2.0 + t.rootOffsetX) <> "," <> show (t.centerY - t.treeSize / 2.0) <> ")") ]
                           `T.withChildren`
                             [ -- Links for this tree
                               T.named Group ("links-" <> show t.idx) []
@@ -282,10 +431,13 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
                     `T.withChildren`
                       [ T.conditionalRender
                           [ { predicate: \n -> n.isPattern
-                            , spec: miniSunburstTemplate
+                            , spec: miniSunburstTemplate  -- Chimera mode: render as sunburst
                             }
-                          , { predicate: \n -> not n.isPattern
-                            , spec: combinatorNodeTemplate
+                          , { predicate: \n -> n.isPatternNode
+                            , spec: patternNodeTemplate  -- Full tree mode: render as colored node
+                            }
+                          , { predicate: \n -> not n.isPattern && not n.isPatternNode
+                            , spec: combinatorNodeTemplate  -- Combinator nodes
                             }
                           ]
                       ]
@@ -338,6 +490,54 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
           pure unit
       Nothing -> pure unit
 
+  -- Render layout toggle buttons for each tree (step 3.5)
+  -- Position: centered horizontally below the tree/sunburst
+  for_ processedTrees \t -> do
+    case { root: t.rootNode, bottom: t.bottomNode } of
+      { root: Just root, bottom: Just bottom } -> do
+        -- Center horizontally on root (applying same offset as tree)
+        let btnX = t.centerX - t.treeSize / 2.0 + t.rootOffsetX + root.x
+        -- Below the bottom node: for chimera add extra space for sunburst+metrics, for tree less
+        let bottomOffset = if t.useTreeLayout then 35.0 else 115.0  -- Sunburst is ~60 + metrics ~40
+        let btnY = t.centerY - t.treeSize / 2.0 + bottom.y + bottomOffset
+        let btnRadius = 10.0
+        -- Blue for chimera (sunburst), purple for full tree
+        let btnColor = if t.useTreeLayout then "#7B68EE" else "#2196F3"
+        -- Icon: sunburst symbol for chimera, tree symbol for tree mode
+        let btnIcon = if t.useTreeLayout then "◉" else "⬡"  -- What clicking will switch TO
+        let layoutBtn :: T.Tree Unit
+            layoutBtn =
+              T.named Group ("layout-btn-" <> show t.trackIndex)
+                [ attr "transform" $ text ("translate(" <> show btnX <> "," <> show btnY <> ")")
+                , attr "class" $ text "layout-toggle-btn"
+                , attr "style" $ text "cursor: pointer;"
+                ]
+                `T.withChildren`
+                  [ T.elem Circle
+                      [ cx $ num 0.0
+                      , cy $ num 0.0
+                      , r $ num btnRadius
+                      , fill $ text btnColor
+                      , stroke $ text "white"
+                      , strokeWidth $ num 1.5
+                      ]
+                  , T.elem Text
+                      [ x $ num 0.0
+                      , y $ num 3.5
+                      , textContent $ text btnIcon
+                      , fontSize $ num 10.0
+                      , fill $ text "white"
+                      , textAnchor $ text "middle"
+                      ]
+                  ]
+                `T.withBehaviors`
+                  [ onClick (onLayoutToggle t.trackIndex) ]
+        runD3v2M do
+          zoomGroup <- select "#forest-zoom-group"
+          _ <- renderTree zoomGroup layoutBtn
+          pure unit
+      _ -> pure unit
+
   -- Render combinator click overlays (step 4)
   for_ processedTrees \t -> do
     for_ t.combinatorNodes \cNode -> do
@@ -366,6 +566,10 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
         _ <- renderTree zoomGroup clickOverlay
         pure unit
 
+  -- NOTE: SVG Tangle number overlays removed for now - D3 zoom captures mouse events
+  -- Use the Tangle output panel for adjusting numeric parameters instead.
+  -- Future: could use physical MIDI controllers mapped to parameters
+
   -- Attach zoom behavior
   doc <- Web.HTML.window >>= Window.document
   let node = HTMLDocument.toNonElementParentNode doc
@@ -381,8 +585,24 @@ drawCombinatorForest selector trees metadata onMuteToggle onCombinatorToggle ini
 mapCombinatorTree :: Tree CombinatorNode -> Tree LayoutNode
 mapCombinatorTree t =
   let val = case head t of
-        Combinator label enabled -> { label, isPattern: false, enabled, pattern: Nothing, x: 0.0, y: 0.0, depth: 0 }
-        PatternLeaf name pat -> { label: name, isPattern: true, enabled: true, pattern: Just pat, x: 0.0, y: 0.0, depth: 0 }
+        Combinator label enabled ->
+          { label, isPattern: false, isPatternNode: false, nodeType: "combinator"
+          , enabled, pattern: Nothing
+          , x: 0.0, y: 0.0, depth: 0
+          , trackIndex: -1, combIndex: -1  -- Set after layout
+          }
+        PatternLeaf name pat ->
+          { label: name, isPattern: true, isPatternNode: false, nodeType: "pattern"
+          , enabled: true, pattern: Just pat
+          , x: 0.0, y: 0.0, depth: 0
+          , trackIndex: -1, combIndex: -1  -- Set after layout
+          }
+        PatternNode label nodeType ->
+          { label, isPattern: false, isPatternNode: true, nodeType
+          , enabled: true, pattern: Nothing
+          , x: 0.0, y: 0.0, depth: 0
+          , trackIndex: -1, combIndex: -1  -- Set after layout
+          }
       children = map mapCombinatorTree (tail t)
   in mkTree val children
 
@@ -505,6 +725,37 @@ miniSunburstTemplate node =
               ]
             )
 
+-- | Template for expanded pattern nodes in full tree mode
+-- | Each node is a colored circle with label based on its nodeType
+-- | Used when patterns are expanded into tree nodes (not rendered as sunburst)
+patternNodeTemplate :: LayoutNode -> T.Tree LayoutNode
+patternNodeTemplate node =
+  let fillColor = sunburstColor node.nodeType
+      radius = 12.0  -- Smaller than sunburst for compact tree layout
+  in
+    T.named Group ("pattern-node-" <> node.label)
+      []
+      `T.withChildren`
+        [ T.elem Circle
+            [ cx $ num 0.0
+            , cy $ num 0.0
+            , r $ num radius
+            , fill $ text fillColor
+            , stroke $ text "#fff"
+            , strokeWidth $ num 1.5
+            ]
+        -- Label below circle
+        , T.elem Text
+            [ x $ num 0.0
+            , y $ num (radius + 10.0)
+            , textContent $ text node.label
+            , fontSize $ num 9.0
+            , textAnchor $ text "middle"
+            , fill $ text "#333"
+            , attr "font-weight" $ text "500"
+            ]
+        ]
+
 -- | Format pattern metrics as a compact string
 formatMetrics :: PatternMetrics -> String
 formatMetrics m =
@@ -579,17 +830,48 @@ type TrackInfo =
   { name :: String
   , pattern :: PatternTree
   , combinators :: Array Combinator  -- Combinators wrapping this pattern (outermost first)
+  , expandPattern :: Boolean  -- true = full tree, false = chimera (sunburst leaf)
   }
 
+-- | Convert a PatternTree to a tree of PatternNode for full tree rendering
+-- | This expands the pattern structure into tree nodes instead of rendering as sunburst
+patternToTree :: PatternTree -> Tree CombinatorNode
+patternToTree pattern = case pattern of
+  Sound name ->
+    mkTree (PatternNode name "sound") List.Nil
+  Rest ->
+    mkTree (PatternNode "~" "rest") List.Nil
+  Sequence children ->
+    mkTree (PatternNode "seq" "sequence") (List.fromFoldable (map patternToTree children))
+  Parallel children ->
+    mkTree (PatternNode "par" "parallel") (List.fromFoldable (map patternToTree children))
+  Choice children ->
+    mkTree (PatternNode "?" "choice") (List.fromFoldable (map patternToTree children))
+  Fast n child ->
+    mkTree (PatternNode ("*" <> show (Int.round n)) "fast") (patternToTree child : List.Nil)
+  Slow n child ->
+    mkTree (PatternNode ("/" <> show (Int.round n)) "slow") (patternToTree child : List.Nil)
+  Euclidean n k child ->
+    mkTree (PatternNode ("(" <> show n <> "," <> show k <> ")") "euclidean") (patternToTree child : List.Nil)
+  Degrade prob child ->
+    mkTree (PatternNode ("?" <> show prob) "degrade") (patternToTree child : List.Nil)
+  Repeat n child ->
+    mkTree (PatternNode ("!" <> show n) "repeat") (patternToTree child : List.Nil)
+  Elongate n child ->
+    mkTree (PatternNode ("@" <> show n) "elongate") (patternToTree child : List.Nil)
+
 -- | Build an array of combinator trees from tracks
--- | Each track becomes its own tree (a chain of combinator nodes ending in a pattern leaf)
+-- | Each track becomes its own tree (a chain of combinator nodes ending in a pattern)
+-- | Per-track expandPattern field controls rendering:
+-- |   expandPattern = false (chimera): pattern is a single PatternLeaf (renders as sunburst)
+-- |   expandPattern = true (tree): pattern is expanded into PatternNode tree
 -- | Example input:
--- |   [ { name: "L4-poly", pattern: ..., combinators: ["jux rev", "chop 4"] }
--- |   , { name: "L6-tabla", pattern: ..., combinators: ["slow 6"] }
+-- |   [ { name: "L4-poly", pattern: ..., combinators: ["jux rev", "chop 4"], expandPattern: false }
+-- |   , { name: "L6-tabla", pattern: ..., combinators: ["slow 6"], expandPattern: true }
 -- |   ]
--- | Produces array of trees:
--- |   [ jux rev → chop 4 → L4-poly (sunburst)
--- |   , slow 6 → L6-tabla (sunburst)
+-- | Produces:
+-- |   [ jux rev → chop 4 → L4-poly (sunburst)  -- chimera
+-- |   , slow 6 → par → [bd, hh, ...]            -- full tree
 -- |   ]
 buildCombinatorTreesFromTracks :: Array TrackInfo -> Array (Tree CombinatorNode)
 buildCombinatorTreesFromTracks = map trackToTree
@@ -598,8 +880,8 @@ buildCombinatorTreesFromTracks = map trackToTree
     trackToTree :: TrackInfo -> Tree CombinatorNode
     trackToTree track =
       case Array.uncons track.combinators of
-        -- No combinators - just the pattern leaf
-        Nothing -> mkTree (PatternLeaf track.name track.pattern) List.Nil
+        -- No combinators - just the pattern
+        Nothing -> makePatternEnd track
         -- Has combinators - build the chain
         Just { head: firstComb, tail: restCombs } ->
           mkTree (Combinator firstComb.label firstComb.enabled) (buildChain restCombs track : List.Nil)
@@ -608,8 +890,16 @@ buildCombinatorTreesFromTracks = map trackToTree
     buildChain :: Array Combinator -> TrackInfo -> Tree CombinatorNode
     buildChain combs track =
       case Array.uncons combs of
-        -- No more combinators - end with pattern leaf
-        Nothing -> mkTree (PatternLeaf track.name track.pattern) List.Nil
+        -- No more combinators - end with pattern
+        Nothing -> makePatternEnd track
         -- More combinators in chain
         Just { head: c, tail: rest } ->
           mkTree (Combinator c.label c.enabled) (buildChain rest track : List.Nil)
+
+    -- Create the pattern end: either a PatternLeaf (chimera) or expanded tree (full tree)
+    -- Uses per-track expandPattern field
+    makePatternEnd :: TrackInfo -> Tree CombinatorNode
+    makePatternEnd track =
+      if track.expandPattern
+        then patternToTree track.pattern  -- Expand into tree nodes
+        else mkTree (PatternLeaf track.name track.pattern) List.Nil  -- Single sunburst leaf

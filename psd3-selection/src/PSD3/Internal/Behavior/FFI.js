@@ -603,6 +603,41 @@ export function attachMouseLeaveWithInfo_(element) {
 }
 
 /**
+ * Attach mousedown handler without datum access
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript Effect Unit handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseDown_(element) {
+  return handler => () => {
+    const selection = select(element);
+
+    selection.on('mousedown', function(event) {
+      // Call PureScript handler
+      handler();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach mousedown handler with event info (using web-events)
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript EffectFn2 datum MouseEvent Unit handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseDownWithEvent_(element) {
+  return handler => () => {
+    element.addEventListener('mousedown', function(event) {
+      const datum = this.__data__;
+      handler(datum, event);
+    });
+    return element;
+  };
+}
+
+/**
  * Attach line chart tooltip behavior
  * Shows series name and interpolated value at mouse position
  */

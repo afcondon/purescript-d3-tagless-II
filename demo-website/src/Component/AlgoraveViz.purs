@@ -27,6 +27,14 @@ import Tangle.DragEvents (dragEventSource)
 import Tangle.Halogen (ControlAction(..), renderDoc)
 import Tangle.TidalTangle (tracksToTangleDoc, parseCombinatorLabel)
 
+-- | Effect/control pattern (the # operator in Tidal)
+-- | e.g., # room 0.2, # gain 0.85, # speed "<0.75>"
+type Effect =
+  { name :: String      -- "room", "gain", "speed", etc.
+  , value :: String     -- "0.2" or "<0.75>" or complex pattern
+  , enabled :: Boolean  -- Can be toggled (commented out with --)
+  }
+
 -- | Named pattern (a track in the set)
 type Track =
   { name :: String
@@ -34,11 +42,20 @@ type Track =
   , active :: Boolean
   , layout :: TrackLayout  -- Per-track layout (click to toggle)
   , combinators :: Array Combinator  -- Outer combinators wrapping this pattern (e.g., ["jux rev", "slow 2"])
+  , effects :: Array Effect  -- The # chain (room, gain, speed, etc.)
   }
 
 -- | Helper to create enabled combinators from strings
 comb :: String -> Combinator
 comb label = { label, enabled: true }
+
+-- | Helper to create enabled effects
+fx :: String -> String -> Effect
+fx name value = { name, value, enabled: true }
+
+-- | Helper to create disabled (commented) effects
+fxOff :: String -> String -> Effect
+fxOff name value = { name, value, enabled: false }
 
 -- | Test set with ascending complexity of mini-notation patterns
 exampleSet :: Array Track
@@ -49,18 +66,21 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   , { name: "L1-seq"
     , pattern: Sequence [Sound "bd", Sound "sn", Sound "cp", Sound "hh"]
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   , { name: "L1-rest"
     , pattern: Sequence [Sound "bd", Rest, Sound "sn", Rest]
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   -- Level 2: Modifiers
   , { name: "L2-fast"
@@ -68,24 +88,28 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "rev"]
+    , effects: []
     }
   , { name: "L2-slow"
     , pattern: Slow 2.0 (Sound "bd")
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "hurry 2"]
+    , effects: []
     }
   , { name: "L2-repeat"
     , pattern: Repeat 3 (Sound "bd")
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   , { name: "L2-prob"
     , pattern: Degrade 0.5 (Sound "bd")
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   -- Level 3: Groups
   , { name: "L3-par"
@@ -93,12 +117,14 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "striate 4"]
+    , effects: []
     }
   , { name: "L3-choice"
     , pattern: Choice [Sound "bd", Sound "sn", Sound "cp"]
     , active: true
     , layout: SunburstLayout
     , combinators: []
+    , effects: []
     }
   -- Level 4: Combined
   , { name: "L4-mixed"
@@ -106,18 +132,21 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "every 2 rev"]
+    , effects: [fx "room" "0.3", fx "gain" "0.8"]
     }
   , { name: "L4-sample"
     , pattern: Fast 4.0 (Sound "808bd:05")
     , active: true
     , layout: SunburstLayout
-    , combinators: [comb "orbit 1", comb "room 0.5"]
+    , combinators: [comb "orbit 1"]
+    , effects: [fx "room" "0.2", fx "size" "0.5", fx "cut" "1"]
     }
   , { name: "L4-euclid"
     , pattern: Euclidean 3 8 (Sound "bd")
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "fast 2"]
+    , effects: [fx "gain" "0.9"]
     }
   -- Level 4b: Polymetric test (bd*3 sn*5)
   , { name: "L4-poly"
@@ -125,6 +154,7 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "jux rev", comb "chop 4"]
+    , effects: [fx "speed" "<0.75>", fx "gain" "0.575"]
     }
   -- Level 5: Nested
   , { name: "L5-nested"
@@ -135,6 +165,7 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "sometimesBy 0.4 rev"]
+    , effects: [fx "room" "0.2", fx "size" "0.5", fx "squiz" "<0 0.0 1.4 0>"]
     }
   , { name: "L5-complex"
     , pattern: Sequence
@@ -146,8 +177,9 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "chunk 4 rev"]
+    , effects: [fx "gain" "0.85", fxOff "distort" "0.1"]
     }
-  -- Level 6: Real-world from video
+  -- Level 6: Real-world from video (Pondskater style)
   , { name: "L6-tabla"
     , pattern: Sequence
         [ Fast 2.0 (Sound "al_perc:00")
@@ -155,7 +187,8 @@ exampleSet =
         ]
     , active: true
     , layout: SunburstLayout
-    , combinators: [comb "slow 6", comb "spin 4"]
+    , combinators: [comb "slow 6", comb "spin 4", comb "layer [ply 4, jux (iter 5)]"]
+    , effects: [fx "room" "0.3", fx "size" "0.6", fx "gain" "0.675", fx "cut" "1"]
     }
   , { name: "L6-ardha"
     , pattern: Sequence
@@ -166,6 +199,7 @@ exampleSet =
     , active: true
     , layout: SunburstLayout
     , combinators: [comb "layer [ply 4]"]
+    , effects: [fx "room" "0.3", fx "size" "0.6", fx "gain" "0.725", fx "irand" "16", fx "cut" "1"]
     }
   ]
 
@@ -193,6 +227,7 @@ type State =
   , zoomTransform :: ZoomTransform  -- Preserved zoom state
   , leftPanelOpen :: Boolean        -- Slide-out panel state
   , viewMode :: ViewMode            -- Pattern sunbursts or combinator tree
+  , showSunburstLeaves :: Boolean   -- In tree mode: true=chimera, false=plain tree
   , adjustDrag :: Maybe DragInfo    -- Active drag state for Tangle adjust
   }
 
@@ -220,6 +255,7 @@ data Action
   | ClearTracks
   | ToggleLeftPanel  -- Toggle slide-out panel
   | ToggleViewMode   -- Switch between pattern view and combinator tree view
+  | ToggleSunburstLeaves  -- Toggle between chimera (sunburst leaves) and plain tree
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -230,7 +266,8 @@ component = H.mkComponent
       , parseError: Nothing
       , zoomTransform: identityZoom
       , leftPanelOpen: true  -- Start with panel open
-      , viewMode: PatternView  -- Start with pattern sunbursts
+      , viewMode: CombinatorTreeView  -- Start with combinator trees
+      , showSunburstLeaves: true  -- Start with chimera (sunburst leaves)
       , adjustDrag: Nothing   -- No active drag
       }
   , render
@@ -325,7 +362,15 @@ handleAction = case _ of
                   { tracks = updateAt trackIdx (\t -> t { pattern = updatePatternParam path paramType newValue t.pattern }) s.tracks
                   }
                 handleAction RenderForest
-              Nothing -> pure unit
+              Nothing ->
+                -- Try effect param: "fx-{trackIdx}-{fxIdx}"
+                case parseEffectParamId id of
+                  Just { trackIdx, fxIdx } -> do
+                    H.modify_ \s -> s
+                      { tracks = updateAt trackIdx (\t -> t { effects = updateEffectValue fxIdx newValue t.effects }) s.tracks
+                      }
+                    handleAction RenderForest
+                  Nothing -> pure unit
 
       CycleClicked id newValue -> do
         liftEffect $ Console.log $ "Tangle cycle: " <> id <> " -> " <> newValue
@@ -363,6 +408,7 @@ handleAction = case _ of
           -- 50 pixels = 1 step unit worth of change
           deltaValue = deltaX * dragInfo.step / 50.0
           newValue = max dragInfo.min (min dragInfo.max (dragInfo.startValue + deltaValue))
+
         -- Try combinator param first
         case parseCombParamId dragInfo.id of
           Just { trackIdx, combIdx } -> do
@@ -378,7 +424,15 @@ handleAction = case _ of
                   { tracks = updateAt trackIdx (\t -> t { pattern = updatePatternParam path paramType newValue t.pattern }) s.tracks
                   }
                 handleAction RenderForest
-              Nothing -> pure unit
+              Nothing ->
+                -- Try effect param
+                case parseEffectParamId dragInfo.id of
+                  Just { trackIdx, fxIdx } -> do
+                    H.modify_ \s -> s
+                      { tracks = updateAt trackIdx (\t -> t { effects = updateEffectValue fxIdx newValue t.effects }) s.tracks
+                      }
+                    handleAction RenderForest
+                  Nothing -> pure unit
 
   DragEnd -> do
     -- Clean up drag state and unsubscribe
@@ -404,7 +458,7 @@ handleAction = case _ of
         -- Add new track with parsed pattern
         liftEffect $ Console.log $ "Parsed pattern successfully: " <> show pattern
         let trackName = "parsed" <> show (Array.length state.tracks + 1)
-        let newTrack = { name: trackName, pattern, active: true, layout: SunburstLayout, combinators: [] }
+        let newTrack = { name: trackName, pattern, active: true, layout: SunburstLayout, combinators: [], effects: [] }
         H.modify_ \s -> s
           { tracks = Array.snoc s.tracks newTrack
           , miniNotationInput = ""
@@ -419,7 +473,7 @@ handleAction = case _ of
         liftEffect $ Console.log $ "Preset parse error: " <> parseErrorMessage err
       Right pattern -> do
         liftEffect $ Console.log $ "Adding preset: " <> name <> " = " <> show pattern
-        let newTrack = { name, pattern, active: true, layout: SunburstLayout, combinators: [] }
+        let newTrack = { name, pattern, active: true, layout: SunburstLayout, combinators: [], effects: [] }
         H.modify_ \s -> s { tracks = Array.snoc s.tracks newTrack }
         handleAction RenderForest
 
@@ -432,6 +486,10 @@ handleAction = case _ of
 
   ToggleViewMode -> do
     H.modify_ \s -> s { viewMode = if s.viewMode == PatternView then CombinatorTreeView else PatternView }
+    handleAction RenderForest
+
+  ToggleSunburstLeaves -> do
+    H.modify_ \s -> s { showSunburstLeaves = not s.showSunburstLeaves }
     handleAction RenderForest
 
   RenderForest -> do
@@ -470,14 +528,27 @@ handleAction = case _ of
         -- Keep original indices for mute toggle callback
         let indexedTracks = Array.mapWithIndex (\i t -> { idx: i, track: t }) state.tracks
         let tracksWithCombinators = Array.filter (\t -> Array.length t.track.combinators > 0) indexedTracks
-        let trackInfos = map (\t -> { name: t.track.name, pattern: t.track.pattern, combinators: t.track.combinators }) tracksWithCombinators
+        -- Per-track expandPattern based on layout: TreeLayout = expand, SunburstLayout = chimera
+        let trackInfos = map (\t ->
+              { name: t.track.name
+              , pattern: t.track.pattern
+              , combinators: t.track.combinators
+              , expandPattern: t.track.layout == TreeLayout
+              }) tracksWithCombinators
         let combTrees = buildCombinatorTreesFromTracks trackInfos
-        -- Build metadata array with original track indices and active states
+        -- Build metadata array with original track indices, active states, and layout mode
         let metadata :: Array TreeMetadata
-            metadata = map (\t -> { trackIndex: t.idx, active: t.track.active }) tracksWithCombinators
+            metadata = map (\t ->
+              { trackIndex: t.idx
+              , active: t.track.active
+              , useTreeLayout: t.track.layout == TreeLayout
+              }) tracksWithCombinators
         -- Create emitter for mute toggle (uses ToggleTrackFromViz to trigger re-render)
         { emitter: muteEmitter, listener: muteListener } <- H.liftEffect HS.create
         _ <- H.subscribe (ToggleTrackFromViz <$> muteEmitter)
+        -- Create emitter for layout toggle
+        { emitter: layoutEmitter, listener: layoutListener } <- H.liftEffect HS.create
+        _ <- H.subscribe (ToggleLayoutFromViz <$> layoutEmitter)
         -- Create emitter for combinator toggle
         { emitter: combEmitter, listener: combListener } <- H.liftEffect HS.create
         _ <- H.subscribe (uncurry ToggleCombinatorFromViz <$> combEmitter)
@@ -486,6 +557,7 @@ handleAction = case _ of
         _ <- H.subscribe (ZoomChanged <$> zoomEmitter)
         liftEffect $ drawCombinatorForest "#pattern-forest-viz" combTrees metadata
           (HS.notify muteListener)
+          (HS.notify layoutListener)
           (\trackIdx combIdx -> HS.notify combListener (Tuple trackIdx combIdx))
           state.zoomTransform
           (HS.notify zoomListener)
@@ -572,6 +644,36 @@ parsePatternParamId id =
             Nothing -> Nothing
         Nothing -> Nothing
     else Nothing
+
+-- | Parse effect parameter ID: "fx-{trackIdx}-{fxIdx}"
+parseEffectParamId :: String -> Maybe { trackIdx :: Int, fxIdx :: Int }
+parseEffectParamId id =
+  let prefix = "fx-"
+  in if String.take (String.length prefix) id == prefix
+    then
+      let rest = String.drop (String.length prefix) id
+          parts = String.split (String.Pattern "-") rest
+      in case parts of
+        [trackStr, fxStr] -> do
+          trackIdx <- Int.fromString trackStr
+          fxIdx <- Int.fromString fxStr
+          Just { trackIdx, fxIdx }
+        _ -> Nothing
+    else Nothing
+
+-- | Update effect value at the given index
+updateEffectValue :: Int -> Number -> Array Effect -> Array Effect
+updateEffectValue idx newValue effects = updateAt idx updateVal effects
+  where
+  updateVal eff = eff { value = formatEffectNumber newValue }
+
+  formatEffectNumber :: Number -> String
+  formatEffectNumber n =
+    let rounded = Number.round (n * 100.0) / 100.0
+        intPart = Int.floor rounded
+    in if rounded == Int.toNumber intPart
+      then show intPart
+      else show rounded
 
 -- | Update a numeric parameter in the pattern tree at a given path
 updatePatternParam :: Array Int -> String -> Number -> PatternTree -> PatternTree

@@ -939,6 +939,19 @@ applyBehaviorToElement (MouseLeaveWithInfo handler) element =
       , offsetX: offsetX evt
       , offsetY: offsetY evt
       }
+applyBehaviorToElement (MouseDown handler) element =
+  void $ BehaviorFFI.attachMouseDown_ element handler
+applyBehaviorToElement (MouseDownWithInfo handler) element =
+  void $ BehaviorFFI.attachMouseDownWithEvent_ element $ mkEffectFn2 \d evt ->
+    handler
+      { datum: d
+      , clientX: toNumber $ clientX evt
+      , clientY: toNumber $ clientY evt
+      , pageX: toNumber $ pageX evt
+      , pageY: toNumber $ pageY evt
+      , offsetX: offsetX evt
+      , offsetY: offsetY evt
+      }
 
 -- | Attach a behavior (zoom, drag, etc.) to a selection
 -- |

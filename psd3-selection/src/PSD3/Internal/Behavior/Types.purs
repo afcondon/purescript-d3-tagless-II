@@ -17,6 +17,8 @@ module PSD3.Internal.Behavior.Types
   , onMouseMoveWithInfo
   , onMouseEnterWithInfo
   , onMouseLeaveWithInfo
+  , onMouseDown
+  , onMouseDownWithInfo
   ) where
 
 import Prelude
@@ -134,6 +136,8 @@ data Behavior datum
   | MouseMoveWithInfo (MouseEventInfo datum -> Effect Unit)
   | MouseEnterWithInfo (MouseEventInfo datum -> Effect Unit)
   | MouseLeaveWithInfo (MouseEventInfo datum -> Effect Unit)
+  | MouseDown (Effect Unit)  -- Mouse down without datum
+  | MouseDownWithInfo (MouseEventInfo datum -> Effect Unit)  -- Mouse down with position info
 
 -- Note: Can't derive Eq/Ord for function types
 -- We only show structure, not function contents
@@ -148,6 +152,8 @@ instance Show (Behavior datum) where
   show (MouseMoveWithInfo _) = "MouseMoveWithInfo <handler>"
   show (MouseEnterWithInfo _) = "MouseEnterWithInfo <handler>"
   show (MouseLeaveWithInfo _) = "MouseLeaveWithInfo <handler>"
+  show (MouseDown _) = "MouseDown <handler>"
+  show (MouseDownWithInfo _) = "MouseDownWithInfo <handler>"
 
 -- | Default drag configuration
 -- |
@@ -293,3 +299,24 @@ onMouseEnterWithInfo = MouseEnterWithInfo
 -- | Like onMouseLeave but also provides mouse coordinates.
 onMouseLeaveWithInfo :: forall datum. (MouseEventInfo datum -> Effect Unit) -> Behavior datum
 onMouseLeaveWithInfo = MouseLeaveWithInfo
+
+-- | Mouse down handler without datum access
+-- |
+-- | Fires when mouse button is pressed on the element.
+-- | Useful for starting drag operations.
+onMouseDown :: forall datum. Effect Unit -> Behavior datum
+onMouseDown = MouseDown
+
+-- | Mouse down handler with full event info
+-- |
+-- | Fires when mouse button is pressed on the element.
+-- | Provides datum and mouse coordinates for drag operations.
+-- |
+-- | Example:
+-- | ```purescript
+-- | _ <- on (onMouseDownWithInfo \info -> do
+-- |   startDrag info.datum info.clientX
+-- | ) element
+-- | ```
+onMouseDownWithInfo :: forall datum. (MouseEventInfo datum -> Effect Unit) -> Behavior datum
+onMouseDownWithInfo = MouseDownWithInfo

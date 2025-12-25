@@ -18,6 +18,8 @@ import Control.Monad (void, when)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Set as Set
+import Foreign.Object as Object
 import Effect.Aff (Milliseconds(..))
 import Effect.Aff as Aff
 import Effect.Aff.Class (class MonadAff)
@@ -26,7 +28,7 @@ import Effect.Class.Console (log)
 import CE2.Data.Loader as Loader
 import CE2.Data.TreeLayout as TreeLayout
 import CE2.Data.TreeLayout (findRootModule)
-import CE2.ViewState (ViewState(..), OverviewView(..), viewDescription)
+import CE2.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewDescription)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -36,11 +38,14 @@ import CE2.Types (SimNode)
 import CE2.Viz.Treemap as Treemap
 import CE2.Viz.TreeView as TreeView
 import CE2.Viz.ForceGraph as ForceGraph
+import CE2.Viz.NeighborhoodView as NeighborhoodView
 import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
 import PSD3.Transition.Tick as Tick
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
 import PSD3.ForceEngine.Halogen (subscribeToSimulation)
+import PSD3.Internal.Behavior.FFI as BehaviorFFI
+import Unsafe.Coerce (unsafeCoerce)
 
 -- =============================================================================
 -- Types
@@ -65,6 +70,12 @@ data HighlightState
   | HoverHighlight Int    -- Hovering over a node (by ID)
 
 derive instance eqHighlightState :: Eq HighlightState
+
+-- | Neighborhood view state
+type NeighborhoodState =
+  { focusedModuleId :: Int
+  , neighborhoodNodes :: Array SimNode
+  }
 
 -- | Application state - ALL state lives here
 type State =
@@ -97,6 +108,10 @@ type State =
   , forceLayout :: Maybe TreeLayout.TreeLayoutResult  -- Computed once, reused
   , simulation :: Maybe ForceGraph.ForceSimulation    -- Opaque handle to D3 simulation
   , forceShowProjectOnly :: Boolean         -- Toggle: show only "my-project" modules
+
+    -- Neighborhood view state (Halogen-owned)
+  , neighborhoodState :: Maybe NeighborhoodState  -- Current neighborhood focus
+  , declarations :: Maybe Loader.DeclarationsMap  -- Fetched declaration data for neighborhood
 
     -- Callback ref for D3 event -> Halogen action bridge
   , clickEmitter :: Maybe (HS.Listener Action)
@@ -132,6 +147,9 @@ data Action
   | ForceAnimationTick        -- Force phases 1-2 animation tick (Halogen-driven)
   | ForceSimTick              -- Force phase 3 tick (D3 simulation-driven)
   | ToggleForceProjectOnly    -- Toggle between all modules and project-only
+  | ShowNeighborhood Int      -- Show neighborhood view for a module (by ID)
+  | NeighborhoodSimTick       -- Neighborhood simulation tick
+  | ExitNeighborhood          -- Exit neighborhood view, return to overview
 
 -- =============================================================================
 -- Component
@@ -166,6 +184,8 @@ initialState _ =
   , forceLayout: Nothing
   , simulation: Nothing
   , forceShowProjectOnly: false
+  , neighborhoodState: Nothing
+  , declarations: Nothing
   , clickEmitter: Nothing
   , packageCount: 0
   , projectId: 1
@@ -582,6 +602,85 @@ handleAction = case _ of
             H.modify_ _ { highlightState = NoHighlight }
             liftEffect $ Treemap.clearHighlight "#viz"
 
+  ShowNeighborhood moduleId -> do
+    log $ "[App] ShowNeighborhood: " <> show moduleId
+    state <- H.get
+
+    -- Clean up any existing simulation
+    cleanupAnySimulation
+
+    case state.modelData of
+      Nothing -> pure unit
+      Just model -> do
+        -- Find focus module
+        case Array.find (\n -> n.id == moduleId) model.nodes of
+          Nothing -> pure unit
+          Just focus -> do
+            -- Build neighborhood: focus + direct dependencies
+            let depIds = Set.fromFoldable focus.targets
+                neighborhood = Array.filter (\n -> n.id == moduleId || Set.member n.id depIds) model.nodes
+
+            log $ "[App] Neighborhood: " <> show (Array.length neighborhood) <> " modules"
+
+            -- Fetch declarations (batch API)
+            void $ H.fork do
+              let moduleNames = map _.name neighborhood
+              result <- H.liftAff $ Loader.fetchBatchDeclarations moduleNames
+
+              case result of
+                Left err -> log $ "[App] Fetch error: " <> err
+                Right declarations -> do
+                  liftEffect $ log $ "[App] Fetched " <> show (Object.size declarations) <> " modules"
+
+                  -- Create simulation
+                  callbacks <- liftEffect defaultCallbacks
+                  sim <- liftEffect $ NeighborhoodView.createSimulationWithCallbacks
+                    callbacks neighborhood declarations
+
+                  -- Subscribe to ticks
+                  emitter <- liftEffect $ subscribeToSimulation sim
+                  void $ H.subscribe $ emitter <#> \_ -> NeighborhoodSimTick
+
+                  -- Start simulation
+                  liftEffect $ Sim.start sim
+
+                  -- Update state
+                  H.modify_ _
+                    { viewState = Detail (NeighborhoodDetail focus.name BubblePackView)
+                    , neighborhoodState = Just
+                        { focusedModuleId: moduleId
+                        , neighborhoodNodes: neighborhood
+                        }
+                    , declarations = Just declarations
+                    , simulation = Just (unsafeCoerce sim)  -- Neighborhood sim has different node type
+                    }
+
+  NeighborhoodSimTick -> do
+    state <- H.get
+    case state.simulation, state.declarations, state.modelData of
+      Just sim, Just declarations, Just model -> do
+        -- Get live nodes from simulation (unsafeCoerce to neighborhood sim type)
+        let neighborhoodSim :: NeighborhoodView.ForceSimulation
+            neighborhoodSim = unsafeCoerce sim
+        currentNodes <- liftEffect $ Sim.getNodes neighborhoodSim
+
+        -- Rebuild scene data (pure function)
+        let sceneData = NeighborhoodView.buildSceneData currentNodes model.links declarations
+
+        -- Re-render
+        liftEffect $ NeighborhoodView.renderScene "#viz" sceneData
+      _, _, _ -> pure unit
+
+  ExitNeighborhood -> do
+    cleanupAnySimulation
+    H.modify_ _
+      { viewState = Overview TreemapView
+      , neighborhoodState = Nothing
+      , declarations = Nothing
+      }
+    -- Re-render treemap
+    handleAction SwitchToTreemap
+
 -- =============================================================================
 -- Force Simulation Helpers
 -- =============================================================================
@@ -632,6 +731,25 @@ cleanupForceSimulation = do
       log "[App] Force simulation cleaned up"
     Nothing -> pure unit
 
+-- | Clean up any existing simulation (force or neighborhood)
+-- | Checks view state to determine which cleanup method to use
+cleanupAnySimulation
+  :: forall output m. MonadAff m
+  => H.HalogenM State Action () output m Unit
+cleanupAnySimulation = do
+  state <- H.get
+  case state.simulation of
+    Just sim -> liftEffect do
+      -- Stop simulation and unregister behaviors
+      Sim.stop sim
+      -- Unregister drag behaviors based on view state
+      case state.viewState of
+        Overview ForceView -> BehaviorFFI.unregisterSimulation_ ForceGraph.simulationId
+        Detail (NeighborhoodDetail _ _) -> BehaviorFFI.unregisterSimulation_ NeighborhoodView.simulationId
+        _ -> pure unit
+      log "[App] Simulation cleaned up"
+    Nothing -> pure unit
+
 -- =============================================================================
 -- Animation Helpers
 -- =============================================================================
@@ -663,7 +781,7 @@ startForceAnimationLoop = do
 makeTreemapCallbacks :: Maybe (HS.Listener Action) -> Treemap.Callbacks
 makeTreemapCallbacks mListener =
   { onNodeClick: \node -> case mListener of
-      Just listener -> HS.notify listener (FocusSubtree node.id)
+      Just listener -> HS.notify listener (ShowNeighborhood node.id)
       Nothing -> pure unit
   , onNodeHover: \mNode -> case mListener of
       Just listener -> HS.notify listener (HandleHover mNode)
