@@ -779,3 +779,69 @@
     height: auto;
   }
 }
+
+/* ========================================
+   TANGLE INTERACTIVE OUTPUT
+   ======================================== */
+
+/* Tangle output container */
+.tangle-output {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* Base control style - all interactive elements */
+.tangle-control {
+  color: #5E35B1;
+  background-color: rgba(94, 53, 177, 0.08);
+  padding: 0 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tangle-control:hover {
+  background-color: rgba(94, 53, 177, 0.2);
+}
+
+/* Active toggle (enabled) */
+.tangle-active {
+  color: #2E7D32;
+  background-color: rgba(46, 125, 50, 0.1);
+}
+
+.tangle-active:hover {
+  background-color: rgba(46, 125, 50, 0.2);
+}
+
+/* Inactive toggle (disabled) */
+.tangle-inactive {
+  color: #9E9E9E;
+  background-color: rgba(158, 158, 158, 0.1);
+  text-decoration: line-through;
+}
+
+.tangle-inactive:hover {
+  background-color: rgba(158, 158, 158, 0.2);
+}
+
+/* Adjustable values - distinct look */
+.tangle-adjust {
+  color: #1565C0;
+  background-color: rgba(21, 101, 192, 0.1);
+  border-bottom: 1px dashed rgba(21, 101, 192, 0.5);
+}
+
+.tangle-adjust:hover {
+  background-color: rgba(21, 101, 192, 0.2);
+}
+
+/* Non-interactive display values */
+.tangle-value {
+  color: #424242;
+  background-color: rgba(66, 66, 66, 0.05);
+  padding: 0 4px;
+  border-radius: 3px;
+}

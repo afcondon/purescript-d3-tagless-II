@@ -8,6 +8,8 @@ import D3.Viz.PatternTreeViz (TrackLayout(..), ZoomTransform, drawPatternForestM
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Int as Int
+import Data.Number as Number
 import Data.String as String
 import Data.Tuple (Tuple(..), uncurry)
 import Effect.Aff.Class (class MonadAff)
@@ -20,6 +22,9 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Parsing (parseErrorMessage)
 import PSD3.Shared.SiteNav as SiteNav
+import Tangle.Core (TangleDoc)
+import Tangle.Halogen (ControlAction(..), renderDoc)
+import Tangle.TidalTangle (tracksToTangleDoc)
 
 -- | Named pattern (a track in the set)
 type Track =
@@ -192,6 +197,7 @@ data Action
   | ToggleNodeTypeFromViz Int NodePath  -- Toggle seq↔par at path in track
   | AdjustEuclideanFromViz Int NodePath Int Int  -- trackIdx, path, deltaN, deltaK
   | ToggleCombinatorFromViz Int Int  -- Toggle combinator enabled (trackIdx, combinatorIdx)
+  | TangleControl ControlAction  -- Actions from Tangle output panel
   | ZoomChanged ZoomTransform  -- Called when user zooms/pans
   | UpdateMiniNotation String
   | ParseAndAddTrack
@@ -271,6 +277,40 @@ handleAction = case _ of
       { tracks = updateAt trackIdx (\t -> t { combinators = toggleCombinator combIdx t.combinators }) s.tracks
       }
     handleAction RenderForest
+
+  TangleControl ctrlAction -> do
+    -- Handle actions from the Tangle output panel
+    case ctrlAction of
+      ToggleClicked id newValue -> do
+        -- Parse the ID to determine what to toggle
+        -- Format: "mute-{trackIdx}" for track mute
+        liftEffect $ Console.log $ "Tangle toggle: " <> id <> " -> " <> show newValue
+        case parseTangleId "mute-" id of
+          Just trackIdx -> do
+            H.modify_ \s -> s { tracks = updateAt trackIdx (\t -> t { active = newValue }) s.tracks }
+            handleAction RenderForest
+          Nothing -> pure unit
+
+      AdjustChanged id newValue -> do
+        -- Parse the ID to determine what to adjust
+        -- Format: "comb-param-{trackIdx}-{combIdx}"
+        liftEffect $ Console.log $ "Tangle adjust: " <> id <> " -> " <> show newValue
+        case parseCombParamId id of
+          Just { trackIdx, combIdx } -> do
+            H.modify_ \s -> s
+              { tracks = updateAt trackIdx (\t -> t { combinators = adjustCombinatorParam combIdx newValue t.combinators }) s.tracks
+              }
+            handleAction RenderForest
+          Nothing -> pure unit
+
+      CycleClicked id newValue -> do
+        liftEffect $ Console.log $ "Tangle cycle: " <> id <> " -> " <> newValue
+        -- Future: handle output destination cycling (d1, d2, etc.)
+        pure unit
+
+      ActionClicked id actionValue -> do
+        liftEffect $ Console.log $ "Tangle action: " <> id <> " -> " <> actionValue
+        pure unit
 
   UpdateMiniNotation input -> do
     H.modify_ \s -> s { miniNotationInput = input, parseError = Nothing }
@@ -391,6 +431,61 @@ updateAt idx f arr =
 -- | Toggle combinator enabled state at the given index
 toggleCombinator :: Int -> Array Combinator -> Array Combinator
 toggleCombinator idx combs = updateAt idx (\c -> c { enabled = not c.enabled }) combs
+
+-- | Adjust combinator numeric parameter at the given index
+adjustCombinatorParam :: Int -> Number -> Array Combinator -> Array Combinator
+adjustCombinatorParam idx newValue combs = updateAt idx (updateCombLabel newValue) combs
+  where
+    updateCombLabel :: Number -> Combinator -> Combinator
+    updateCombLabel val comb =
+      let parsed = parseCombinatorLabel comb.label
+      in case parsed.number of
+        Nothing -> comb
+        Just _ -> comb { label = parsed.prefix <> formatCombNumber val <> parsed.suffix }
+
+    parseCombinatorLabel :: String -> { prefix :: String, number :: Maybe Number, suffix :: String }
+    parseCombinatorLabel label =
+      let words = String.split (String.Pattern " ") label
+      in case Array.uncons words of
+        Nothing -> { prefix: label, number: Nothing, suffix: "" }
+        Just { head: first, tail: rest } ->
+          case Array.uncons rest of
+            Nothing -> { prefix: label, number: Nothing, suffix: "" }
+            Just { head: second, tail: remaining } ->
+              case Number.fromString second of
+                Just n -> { prefix: first <> " ", number: Just n, suffix: if Array.null remaining then "" else " " <> String.joinWith " " remaining }
+                Nothing -> { prefix: label, number: Nothing, suffix: "" }
+
+    formatCombNumber :: Number -> String
+    formatCombNumber n =
+      let rounded = Number.round (n * 10.0) / 10.0
+          intPart = Int.floor rounded
+      in if rounded == Int.toNumber intPart
+        then show intPart
+        else show rounded
+
+-- | Parse a Tangle ID with a prefix (e.g., "mute-2" -> Just 2)
+parseTangleId :: String -> String -> Maybe Int
+parseTangleId prefix id =
+  if String.take (String.length prefix) id == prefix
+    then Int.fromString (String.drop (String.length prefix) id)
+    else Nothing
+
+-- | Parse a combinator param ID (e.g., "comb-param-1-2" -> { trackIdx: 1, combIdx: 2 })
+parseCombParamId :: String -> Maybe { trackIdx :: Int, combIdx :: Int }
+parseCombParamId id =
+  let prefix = "comb-param-"
+  in if String.take (String.length prefix) id == prefix
+    then
+      let rest = String.drop (String.length prefix) id
+          parts = String.split (String.Pattern "-") rest
+      in case parts of
+        [trackStr, combStr] -> do
+          trackIdx <- Int.fromString trackStr
+          combIdx <- Int.fromString combStr
+          Just { trackIdx, combIdx }
+        _ -> Nothing
+    else Nothing
 
 -- | Toggle node type (Sequence↔Parallel) at a path in the pattern tree
 -- | Path is a list of child indices: [0, 2] means "first child, then third child"
@@ -577,10 +672,10 @@ render state =
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                [ HH.text "Round-trip Output" ]
+                [ HH.text "Interactive Output" ]
             , HH.pre
-                [ HP.classes [ HH.ClassName "code-display" ] ]
-                [ HH.code_ [ HH.text $ generateTidalCode state.tracks ] ]
+                [ HP.classes [ HH.ClassName "code-display", HH.ClassName "tangle-output" ] ]
+                [ HH.code_ [ renderDoc TangleControl (tracksToTangleDoc state.tracks) ] ]
             ]
         ]
     ]
